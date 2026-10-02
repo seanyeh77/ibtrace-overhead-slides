@@ -18,3 +18,5 @@
 .tb-main td:first-child { white-space: nowrap; }
 .tb-main .deflist.wide-term > div { grid-template-columns: 300px 1fr; }
 .deflist.wide-term b { line-height: 1.35; }
+/* Code in a definition's example box */
+.def-ex pre { background: none; margin: 8px 0 0; padding: 0; font-family: var(--tb-mono); font-size: 24px; line-height: 1.6; white-space: pre; color: var(--tb-ink); }

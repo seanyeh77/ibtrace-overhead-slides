@@ -1,5 +1,6 @@
 <script setup>
-defineProps({ chapter: String, term: String, kind: String })
+// size: font size for a long term, e.g. '52px'
+defineProps({ chapter: String, term: String, kind: String, size: String })
 </script>
 
 <template>
@@ -8,7 +9,7 @@ defineProps({ chapter: String, term: String, kind: String })
     <div class="def-grid">
       <div class="def-term">
         <div class="def-kind">{{ kind }}</div>
-        <div class="def-word">{{ term }}</div>
+        <div class="def-word" :style="size ? { fontSize: size } : null">{{ term }}</div>
       </div>
       <div class="def-body">
         <slot />

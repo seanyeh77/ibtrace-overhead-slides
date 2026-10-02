@@ -1,0 +1,17 @@
+/* ---------- Charts (inline SVG, Miro palette, English labels) ---------- */
+.chart { display: block; max-width: 100%; height: auto; font-family: var(--tb-sans); }
+.chart text { fill: #1a1a1a; }
+.chart .c-lg, .chart .c-cat, .chart .c-hlab { font-size: 24px; }
+.chart .c-cat { font-family: var(--tb-mono); }
+.chart .c-cat2 { font-size: 22px; fill: var(--tb-mut); }
+.chart .c-tick, .chart .c-unit { font-size: 22px; fill: var(--tb-mut); }
+.chart .c-val { font-size: 22px; font-family: var(--tb-mono); }
+.chart .c-ptitle { font-family: var(--tb-serif); font-size: 28px; font-weight: 600; }
+.chart .c-hlab { font-family: var(--tb-mono); }
+.chart .c-bar { transition: opacity 0.35s; }
+
+/* Plain tables inside a textbook main area */
+.tb-main table { border-collapse: collapse; font-size: 32px; line-height: 1.4; }
+.tb-main th { text-align: left; font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tb-mut); border-bottom: 2px solid var(--tb-ink); padding: 10px 22px; font-weight: 600; }
+.tb-main td { border-bottom: 1.5px solid var(--tb-rule); padding: 14px 22px; }
+.tb-main td.num, .tb-main th.num { text-align: right; font-variant-numeric: tabular-nums; }

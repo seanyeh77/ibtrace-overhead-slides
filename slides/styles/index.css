@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Iansui&family=Literata:opsz,wght@7..72,600&family=Noto+Sans+TC:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&display=swap');
+@import './textbook.css';
+@import './charts.css';
+
+/* ---------- Textbook content page: title top-left, content centered below ---------- */
+.slidev-layout.textbook {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-auto-rows: unset;
+  align-content: stretch;
+  row-gap: 26px;
+}
+.slidev-layout.textbook.has-note { grid-template-columns: minmax(0, 1fr) 330px; column-gap: 56px; }
+.slidev-layout.textbook.near { grid-template-rows: minmax(0, 1fr); }
+.slidev-layout.textbook.near .tb-note { grid-row: 1 / span 30; }
+.tb-head { grid-column: 1 / -1; }
+.tb-head > h1, .tb-figure > h1, .tb-title > h1 {
+  font-family: var(--tb-serif); font-size: 54px !important; font-weight: 600; line-height: 1.25; margin: 0;
+}
+.tb-main {
+  grid-column: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 28px;
+}
+.tb-main > *, .tb-group > * { max-width: 100%; margin: 0; }
+.tb-main > p, .tb-main > ul, .tb-main > ol, .tb-group > p, .tb-group > ul { font-size: 35px; line-height: 1.6; }
+.tb-main ul, .tb-group ul { display: grid; gap: 12px; padding-left: 32px; }
+.tb-main li::marker, .tb-group li::marker { color: var(--tb-teal); }
+.tb-main code, .tb-group code, .col-text code, .cmp-v code, .step-text code, .fig-take code {
+  font-family: var(--tb-mono); background: var(--tb-code); padding: 0 8px; font-size: 0.86em;
+}
+.tb-main pre code, .tb-group pre code { background: none; padding: 0; font-size: inherit; }
+.tb-main > .slidev-code-wrapper, .tb-group > .slidev-code-wrapper { min-width: 900px; }
+.slidev-layout .slidev-code-wrapper { margin: 0; }
+.tb-main .slidev-code .line.highlighted { background: #e3f2ef; }
+.tb-main .slidev-code .line.dishonored, .tb-main .slidev-code .slidev-code-dishonored { opacity: 0.32; }
+
+/* ---------- Figure: optional takeaway under the picture ---------- */
+.fig-body { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.fig-body > * { max-width: 100%; margin: 0; }
+.fig-body > p { font-size: 35px; line-height: 1.6; }
+.fig-take { width: 100%; box-sizing: border-box; }
+
+/* ---------- Quiz: five options, Slido code ---------- */
+.qz-opts.five .qz-opt:last-child { grid-column: 1 / -1; }
+.qz-opt { min-width: 620px; }
+.qz-slido { display: flex; align-items: baseline; gap: 16px; font-size: 24px; color: var(--tb-mut); }
+.qz-slido b { font-family: var(--tb-mono); font-weight: 500; font-size: 30px; color: var(--tb-teal); }
+
+/* ---------- Cards and compare rows that reveal on click ---------- */
+.col-card.off, .cmp-k.off, .cmp-v.off, .step.off { opacity: 0.18; }
+
+/* ---------- Terminal: larger variant for break screens ---------- */
+.term { width: 1400px; max-width: 100%; box-sizing: border-box; }
+.term-body { min-height: 0; }
+.term.big .term-body { font-size: 40px; padding: 30px 36px; }
+
+/* ---------- Dockerfile line -> image layer ---------- */
+.lyr { grid-template-columns: 1fr 1fr; width: 1640px; max-width: 100%; }
+.lyr-image { background: var(--tb-outer); border: 2px solid #1a1a1a; padding: 16px 18px 18px; }
+.lyr-name { font-size: 24px; margin-bottom: 14px; font-family: var(--tb-mono); }
+.lyr-stack { display: flex; flex-direction: column-reverse; gap: 10px; }
+.lyr-layer {
+  display: flex; justify-content: space-between; align-items: center; height: 56px; padding: 0 18px;
+  background: var(--tb-svc); border: 2px solid #1a1a1a; font-family: var(--tb-mono); font-size: 22px;
+  transition: opacity 0.35s, background-color 0.35s;
+}
+.lyr-layer.base { background: var(--tb-green); }
+.lyr-layer.off { opacity: 0; }
+.lyr-layer.cur { outline: 4px solid var(--tb-teal); outline-offset: 2px; }
+.lyr-size { color: #1a1a1a; font-size: 20px; }
+
+/* ---------- Deflist inside a centered main area ---------- */
+.tb-main .deflist { width: 1400px; }
+
+/* ---------- Big mono command on statement slides ---------- */
+.st-body code { font-family: var(--tb-mono); background: var(--tb-code); padding: 0 10px; font-size: 0.85em; }
+
+/* The default theme fades the paragraph right after a title; keep it readable. */
+.slidev-layout h1 + p { opacity: 1; margin-top: 0; }
+
+/* Two terminals side by side */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 1760px; }
+.pair .term { width: auto; }
+
+/* Break screen */
+.break-note { font-size: 28px; color: var(--tb-mut); margin: 0; }
+.tb-figure .count { margin-top: 8px; }
+
+/* Pin the textbook rows so the note column never pushes content under the title. */
+.slidev-layout.textbook > .tb-head { grid-row: 1; }
+.slidev-layout.textbook > .tb-main { grid-row: 2; }
+.slidev-layout.textbook > .tb-note { grid-row: 2; align-self: start; }
+.slidev-layout.textbook.near > .tb-main,
+.slidev-layout.textbook.near > .tb-note { grid-row: 1; }
+.slidev-layout.textbook.near > .tb-note { align-self: center; }
+.tb-note p, .tb-note-text { line-height: 1.65; }
+
+/* Steps: slightly larger code and text */
+
+/* Syntax colors for Terminal, diff, annotated command and layer diagram */
+.t-sheb, .t-eq, .t-cmt { color: #8a939c; }
+.t-dir { color: #0f766e; font-weight: 500; }
+.t-opt, .t-key { color: #9a4d00; }
+.t-val { color: #1f5fa8; }
+.t-cmd { color: #20262e; font-weight: 500; }
+.t-arg { color: #20262e; }
+
+/* ---------- Larger body text ---------- */
+.tb-main > p, .tb-main > ul, .tb-main > ol,
+.tb-group > p, .tb-group > ul, .fig-body > p { font-size: 40px; }
+.tb-note { font-size: 30px; }
+.tb-note-label { font-size: 20px; }
+.deflist > div { grid-template-columns: 270px 1fr; font-size: 38px; }
+.deflist b { font-size: 35px; }
+.slidev-layout pre.slidev-code, .slidev-layout .slidev-code { font-size: 31px !important; }
+.diff, .cd-code { font-size: 30px; }
+.tb-obj ol li { font-size: 40px; }
+.tb-obj ol li code, .sec-body ul { font-size: 35px; }
+.cmp > div { font-size: 34px; }
+.cmp-k { font-size: 26px !important; }
+.cmp-v code { font-size: 30px; }
+.col-text { font-size: 33px; line-height: 1.55; color: var(--tb-ink); }
+.col-text code { font-size: 29px; }
+.tb-cols .col-card { max-width: 520px; }
+.fig-take { font-size: 35px; }
+.step-title { font-size: 38px; }
+.step-code { font-size: 26px; }
+.step-text { font-size: 30px; color: var(--tb-mut); }
+.def-body p { font-size: 40px; }
+.def-body code { font-size: 35px; }
+.qz-opt, .qz-why p { font-size: 35px; }
+.qz-opt code, .qz-why code { font-size: 31px; }
+.tb-ref table { font-size: 29px; }
+.tb-ref td code { font-size: 27px; }
+.tile-desc { font-size: 26px; }
+.tile-desc code { font-size: 24px; }
+.end-body li { font-size: 32px; }
+.end-body li code { font-size: 30px; }
+.ann-lab span { font-size: 28px; }
+.slidev-layout .st-body p { font-size: 36px; }
+.break-note { font-size: 32px; }
+.tb-group .step-code { font-size: 24px; padding: 6px 12px; white-space: nowrap; }
+.def-ex p { font-size: 33px !important; }
+.def-ex p code { font-size: 29px; }
+.def-ex-label { font-size: 18px; }
+.tb-steps .steps-row { width: 1700px; max-width: 1760px; }

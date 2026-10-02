@@ -15,24 +15,21 @@ chapter: Part 3 · Correctness
 term: MADV_WIPEONFORK
 kind: madvise 旗標（Linux 4.14 起）
 size: 50px
+clicks: 2
 ---
 
-<code>madvise</code> 是讓程式告訴 kernel 某段記憶體該如何處理的系統呼叫。標記 MADV_WIPEONFORK 的記憶體頁，在 fork 出的子行程中會變成全為 0 的新頁，父行程的內容不受影響。
+<DgWipe />
 
-tracer 把 pid 快取在這樣一頁裡：子行程讀到 0，就知道自己是新的行程，重新呼叫 getpid。不論 fork 以何種方式發生都成立，pthread_atfork 則可能被繞過。
-
-::example::
-
-<pre>p = mmap(NULL, page, PROT_READ | PROT_WRITE,
-         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-madvise(p, page, MADV_WIPEONFORK);</pre>
-<p>madvise 失敗時（kernel 早於 4.14），退回每筆記錄都呼叫 getpid，較慢但不會錯。</p>
+kernel 在 fork 時清零這一頁，子行程便重新取得 pid。
 
 <!--
 問題的根源：fork 出的子行程會複製父行程的記憶體，包括 thread-local 的快取，所以子行程會拿到父行程的 pid。
 pthread_atfork 是在 fork 時呼叫的 handler，但 _Fork()、直接 clone()，或刻意跳過 handler 的函式庫都會繞過它。
 MADV_WIPEONFORK 由 kernel 在 fork 時處理，不依賴使用者程式的配合。
 tid 也一樣：每條執行緒記下取得 tid 時的 pid，pid 一變就重讀 tid。
+madvise 是讓程式告訴 kernel 某段記憶體如何處理的系統呼叫，MADV_WIPEONFORK 從 Linux 4.14 起提供。
+一般記憶體在 fork 時被複製，子行程會沿用父行程快取的 pid，這就是 stale。pthread_atfork 可能被 _Fork 或直接 clone 繞過，MADV_WIPEONFORK 由 kernel 處理，不會被繞過。
+madvise 失敗時退回每筆記錄都呼叫 getpid，較慢但不會錯。
 -->
 
 ---
@@ -68,19 +65,18 @@ layout: definition
 chapter: Part 3 · Correctness
 term: golden
 kind: 回歸測試方法
+clicks: 1
 ---
 
-用一組固定輸入跑出、確認無誤後存下的參考輸出。之後每次修改程式，都用同一組輸入重跑，並與 golden 逐位元組比對：相同代表輸出沒變；不同時，要先確認差異是刻意的，才更新 golden。
+<DgGolden />
 
-ibtrace 以兩次量測的資料，為兩個分析工具產生 12 個 golden 檔，在重構時確保數字沒有被改壞。
-
-::example::
-
-<p><code>tests/golden_check.sh</code> 全部相符時結束碼為 0，有差異為 1，找不到輸入資料為 2，避免「根本沒比對到」卻顯示通過。</p>
+只有確認是刻意的差異，才更新 golden。
 
 <!--
 golden 也叫 golden file 或 golden master。它的好處是能看到 diff：數字變了還是只有標籤變了，一眼就能分辨。
 限制是只保護分析工具；tracer 與 ibmon 每次執行的時間都不同，輸出無法逐位元組比對，要靠其他測試。
+golden 是以固定輸入產生、確認無誤後存下的參考輸出。ibtrace 以兩次量測的資料為兩個分析工具產生 12 個 golden 檔。
+golden_check.sh 全部相符時結束碼為 0，有差異為 1，找不到輸入為 2，避免根本沒比對到卻顯示通過。
 -->
 
 ---
@@ -88,19 +84,18 @@ layout: definition
 chapter: Part 3 · Correctness
 term: manifest
 kind: 量測紀錄檔
+clicks: 2
 ---
 
-叢集量測腳本在一個 job 內依隨機順序跑完所有條件，每跑一次就在 <code>manifest.csv</code> 寫一行，記錄這次執行的條件、transport、訊息大小、重複序號、起訖時間、結束碼與輸出檔路徑。
+<DgManifest />
 
-分析程式依 manifest 找到每次執行的資料；哪一格失敗、哪一格逾時，也都從這裡查。
-
-::example::
-
-<p>第 228 次執行（C4、rc_mlx5、8 B、第 7 次重複）的結束碼不為 0：srun 連不上 Slurm 控制器，被測程式沒有啟動，所以這一格只剩 9 次可分析。</p>
+分析程式依 manifest 找資料，也從這裡查失敗的執行。
 
 <!--
 manifest 是這批量測的目錄：一行對應一次執行。
 下一頁的第二個問題就出在這裡：分析程式依 manifest 裡相對於 repo 的路徑找檔案，不論指向哪個目錄，讀到的都是原始資料。
+manifest.csv 每次執行寫一行：順序、條件、transport、訊息大小、重複序號、起訖時間、結束碼、輸出檔路徑。
+例如第 228 次執行的 srun 連不上 Slurm 控制器，被測程式沒有啟動，所以 C4、rc_mlx5、8 B 那一格只剩 9 次可分析。
 -->
 
 ---

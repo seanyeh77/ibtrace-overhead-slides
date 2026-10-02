@@ -49,24 +49,19 @@ layout: definition
 chapter: Part 1 · Findings
 term: snprintf
 kind: C 標準函式庫
+clicks: 2
 ---
 
-依照格式字串把資料寫進固定大小的緩衝區，並保證結尾有一個 NUL。功能完整，但每次呼叫都要先解析格式字串。
+<DgSnprintf />
 
-tracer 原本用它把函式名稱寫進每筆記錄的 28 B 名稱欄，每筆約花 61 ns；但這裡其實只需要複製一段字串。
-
-::example::
-
-<p>優化後改成先量長度、再直接複製，寫出的位元組與 snprintf 完全相同：</p>
-<pre>snprintf(rec->name, 28, "%s", api);      // 原本
-n = strnlen(api, 27);                    // 優化後
-memcpy(rec->name, api, n);
-rec->name[n] = '\0';</pre>
+兩種寫法寫出的位元組完全相同，只省掉格式解析。
 
 <!--
 snprintf 是通用的格式化輸出函式，要處理 %d、%x 等各種格式，所以即使格式只有 %s，也得先走一遍格式解析。
 tracer 寫名稱時只需要「最多 27 個字元再補一個 NUL」，用 strnlen 加 memcpy 就能做到。
 細節：snprintf 只寫到 NUL 為止，之後的位元組保留上一筆記錄的內容；新寫法也刻意不補零，讓輸出逐位元組相同。
+tracer 原本用 snprintf(rec->name, 28, "%s", api) 把函式名稱寫進每筆記錄的 28 B 名稱欄，每筆約 61 ns。
+改成 strnlen 量長度、memcpy 複製、補一個 NUL。snprintf 只寫到 NUL 為止，之後保留上一筆記錄的位元組；新寫法刻意不補零，輸出逐位元組相同。
 -->
 
 ---
@@ -75,20 +70,19 @@ chapter: Part 1 · Findings
 term: CLOCK_MONOTONIC
 kind: Linux 時鐘
 size: 46px
+clicks: 1
 ---
 
-從開機後某個固定點起算的 ns，只會往前走，不受使用者修改系統時間影響；但 NTP 服務（如 chrony）仍會微調它前進的速率。
+<DgClock />
 
-以 <code>clock_gettime(CLOCK_MONOTONIC)</code> 讀取，經由 vDSO 不需進入 kernel，一次約 17 ns。ibmon 取樣網卡計數器也用這個時鐘，所以 tracer 的時間戳必須同樣是 CLOCK_MONOTONIC 的 ns，兩者才能放在同一條時間軸上。
-
-::example::
-
-<p>每個 span 進入與離開時各讀一次，t1 − t0 就是這次呼叫的時長；兩次讀取合計約 31 ns，是 span 成本的大宗。</p>
+trace 與計數器讀同一個時鐘，兩者才能對齊。
 
 <!--
 另一個常見的時鐘是 CLOCK_REALTIME，也就是牆上時間，可能被手動調整或跳動，不適合量時長。
 vDSO 是 kernel 映射到每個行程的一小段程式碼，讓 clock_gettime 不必真的發出系統呼叫；即使如此，一次仍要約 17 ns。
 「仍會被 chrony 微調速率」這點，在後面改用 TSC 時會變得重要。
+CLOCK_MONOTONIC 從開機後某個固定點起算，只會往前走，不受修改系統時間影響；但 chrony 仍會微調它的速率，這點在改用 TSC 時很重要。
+以 clock_gettime 讀取，經由 vDSO 不需進入 kernel，一次仍約 17 ns；每個 span 進出各讀一次，合計約 31 ns。
 -->
 
 ---

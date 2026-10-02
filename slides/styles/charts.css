@@ -20,3 +20,12 @@
 .deflist.wide-term b { line-height: 1.35; }
 /* Code in a definition's example box */
 .def-ex pre { background: none; margin: 8px 0 0; padding: 0; font-family: var(--tb-mono); font-size: 24px; line-height: 1.6; white-space: pre; color: var(--tb-ink); }
+/* Definition diagrams */
+.dg { display: block; max-width: 100%; height: auto; }
+.dg text { fill: #1a1a1a; }
+.dg .t { font-family: var(--tb-mono); font-size: 24px; }
+.dg .s { font-family: var(--tb-mono); font-size: 21px; }
+.dg .l { font-family: var(--tb-sans); font-size: 22px; font-weight: 600; }
+.dg .m { fill: var(--tb-mut); }
+.dg .step { transition: opacity 0.35s; }
+.def-body .dg + p { margin-top: 26px; }

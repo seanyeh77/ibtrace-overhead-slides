@@ -7,7 +7,7 @@ chapter: Part 3 · Correctness
 # 正確性
 
 - **3.1** 優化必須保持輸出不變
-- **3.2** 三次誤判為通過的驗證
+- **3.2** 回歸測試與量測紀錄
 
 ---
 layout: definition
@@ -93,38 +93,6 @@ clicks: 2
 
 <!--
 manifest 是這批量測的目錄：一行對應一次執行。
-下一頁的第二個問題就出在這裡：分析程式依 manifest 裡相對於 repo 的路徑找檔案，不論指向哪個目錄，讀到的都是原始資料。
 manifest.csv 每次執行寫一行：順序、條件、transport、訊息大小、重複序號、起訖時間、結束碼、輸出檔路徑。
 例如第 228 次執行的 srun 連不上 Slurm 控制器，被測程式沒有啟動，所以 C4、rc_mlx5、8 B 那一格只剩 9 次可分析。
--->
-
----
-layout: textbook
-chapter: Part 3 · Correctness
-clicks: 3
----
-
-# 三次誤判為通過的驗證
-
-<table>
-  <thead><tr><th>驗證</th><th>問題</th><th>處理</th></tr></thead>
-  <tbody>
-    <tr v-click="1"><td>golden 比對</td><td>比對結果隨 build 目錄是否存在而改變</td><td>符號解析改為比對 build-id</td></tr>
-    <tr v-click="2"><td>overhead 分析</td><td>不論指向哪個目錄，讀取的都是原始資料</td><td>改為在 manifest 所在目錄尋找檔案</td></tr>
-    <tr v-click="3"><td>呼叫位置</td><td>對應到重新建置後的 binary，靜默給出錯誤結果</td><td>build-id 不符時不解析，並標示原因</td></tr>
-  </tbody>
-</table>
-
-::note::
-
-<Note :notes="[
-  'build-id 是編譯器寫入每個執行檔的唯一識別碼。驗證顯示通過，不代表真的比對到應該比對的內容。',
-  'golden 錄製時某個 build 目錄尚未存在，該目錄出現後，比對結果隨之改變。',
-  '分析程式一律讀取原始目錄；若沒有發現，以轉換後資料重跑的驗證將毫無意義。',
-  '叢集資料中，測試程式的呼叫位置其實從未成功解析，而且沒有任何提示。',
-]" />
-
-<!--
-三件事的共同點：檢查顯示通過，但實際上沒有比對到應該比對的內容。
-處理方式也一致：讓失敗成為明確的錯誤或標示，而不是靜默地給出看似正常的結果。
 -->

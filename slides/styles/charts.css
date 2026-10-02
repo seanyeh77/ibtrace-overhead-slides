@@ -15,3 +15,4 @@
 .tb-main th { text-align: left; font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tb-mut); border-bottom: 2px solid var(--tb-ink); padding: 10px 22px; font-weight: 600; }
 .tb-main td { border-bottom: 1.5px solid var(--tb-rule); padding: 14px 22px; }
 .tb-main td.num, .tb-main th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tb-main td:first-child { white-space: nowrap; }

@@ -10,13 +10,13 @@ routerMode: hash
 drawings:
   enabled: false
 layout: cover
-subtitle: tracer 對量測的擾動、三項優化與量測方法
+subtitle: 量測 tracer 對被測程式的擾動，找出 overhead 的來源並加以優化
 ---
 
-# Tracer 的量測成本
+# ibtrace 的 Tracer Overhead
 
 <!--
-這次報告的主題是 ibtrace 自己的成本：掛上 tracer 之後，被量測的程式被拖慢多少，以及這件事對先前結論的影響。
+這次報告的主題是 ibtrace 自身的 overhead：啟用 tracer 之後，被測程式被拖慢多少，以及這件事對先前結論的影響。
 -->
 
 ---
@@ -26,13 +26,13 @@ chapter: Overview
 
 # 報告重點
 
-1. tracer 會扭曲 transport 之間的比較
-2. 成本集中在三處，優化後降到約三分之一
-3. 量測方法：先拆解、再優化，統計要誠實
-4. 正確性：優化不改輸出，驗證不能假通過
+1. 啟用 tracer 會放大 rc_verbs 與 rc_mlx5 之間的差距，使先前的 transport 比較失準
+2. Overhead 主要來自兩個 syscall、snprintf 與時鐘讀取，三項優化後降至原本的 18–43 %
+3. 量測方法上，先拆解成本再優化，以單次執行為統計單位，並只比較同一 job 內的差值
+4. 優化過程中確保記錄格式完全不變，並找出三次誤判為通過的驗證
 
 <!--
-四個重點，前兩個是結果，後兩個是過程中學到的方法。時間不夠時講第 1、2 點，以及第 3 點裡「為什麼停在這裡」。
+前兩點是結果，後兩點是過程中整理出的方法。時間不夠時，講第 1、2 點，以及第 3 點中「為什麼優化停在這裡」。
 -->
 
 ---

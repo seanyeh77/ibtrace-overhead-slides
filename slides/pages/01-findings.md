@@ -6,9 +6,9 @@ chapter: Part 1 · Findings
 
 # 主要發現
 
-- **1.1** tracer 扭曲 transport 比較
-- **1.2** 成本集中的三處
-- **1.3** 優化後的總成本
+- **1.1** Tracer 放大 transport 之間的差距
+- **1.2** Overhead 的三個主要來源
+- **1.3** 三項優化後的總 overhead
 - **1.4** 空轉輪詢不在關鍵路徑上
 
 ---
@@ -17,7 +17,7 @@ chapter: Part 1 · Findings
 clicks: 2
 ---
 
-# 掛著 tracer 比較，差距被放大
+# Tracer 放大 transport 之間的差距
 
 <GroupedBars
   :cats="[['rc_verbs', '64 KiB'], ['rc_mlx5', '64 KiB']]"
@@ -32,16 +32,16 @@ clicks: 2
 ::note::
 
 <Note :notes="[
-  '不掛 tracer 時，兩種 transport 的 RTT 只差 0.68 µs。',
-  '掛上舊版 tracer 後差到 5.8 µs：rc_verbs 多一層 verbs 攔截，被拖得比較多。',
-  '先前「rc_mlx5 的處理時間只有 rc_verbs 的 45 %」主要是這個效應；不掛 tracer 時只差 2–14 %。',
+  '不啟用 tracer 時，兩種 transport 在 64 KiB 下的 RTT 只相差 0.68 µs。',
+  '啟用優化前的 tracer 後，差距擴大到 5.8 µs，因為 rc_verbs 多經過一層 verbs 攔截。',
+  '先前「rc_mlx5 處理時間僅為 rc_verbs 的 45 %」主要來自這個效應；不啟用 tracer 時兩者只差 2–14 %。',
 ]" />
 
 <!--
-先講結論：tracer 的成本對兩種 transport 不一樣，所以掛著 tracer 量出來的 transport 比較會被放大。
-點一下：綠色是掛著優化前的 tracer。rc_verbs 多付 12.7 µs，rc_mlx5 多付 7.6 µs，差 5.1 µs，這個差異是顯著的。
-先前兩次 job 量到的 25.5 µs 和 17.7 µs，正好就是這裡的綠色柱子，所以那個 45 % 主要是 tracer 自己造成的。
-不掛 tracer 時，rc_mlx5 確實比較快，三種大小的信賴區間都不包含 0，但只快 2–14 %，沒有倍數級差距。
+先講結論：tracer 的 overhead 在兩種 transport 上不同，所以在啟用 tracer 的情況下比較 transport，差距會被放大。
+綠色柱子是啟用優化前的 tracer。rc_verbs 多出 12.7 µs，rc_mlx5 多出 7.6 µs，兩者相差 5.1 µs，這個差異是顯著的。
+先前兩次 job 量到的 25.5 µs 和 17.7 µs 正好對應這裡的綠色柱子，所以 45 % 這個比例主要是 tracer 本身造成的。
+不啟用 tracer 時，rc_mlx5 確實比較快，三種訊息大小的信賴區間都不包含 0，但只快 2–14 %，沒有倍數級的差距。
 -->
 
 ---
@@ -50,7 +50,7 @@ chapter: Part 1 · Findings
 clicks: 1
 ---
 
-# 成本集中在三處
+# Overhead 的三個主要來源
 
 <HBars
   :panels="[
@@ -73,15 +73,15 @@ clicks: 1
 ::note::
 
 <Note :notes="[
-  '寫一筆記錄約 296 ns，兩個 syscall 加上 snprintf 就占了九成以上。',
-  '每個被攔截的呼叫都是一個 span，約 41 ns，其中兩次 clock_gettime 占 31 ns。',
+  '寫入一筆記錄約需 296 ns，其中 getpid、gettid 兩個 syscall 與 snprintf 合計占九成以上。',
+  '每次被攔截的呼叫稱為一個 span，約需 41 ns，其中兩次 clock_gettime 就占了 31 ns。',
 ]" />
 
 <!--
-做法是在副本裡一次拿掉一項，跟原版交錯執行，量出每一項各自的成本。
-寫記錄：getpid、gettid 各約 130 ns，snprintf 約 61 ns。atomic 取號只有 7 ns，而且多執行緒共用 ring 時一定要有，所以不動。
-各項分別拿掉省下的量加起來比一次全拿掉多，代表兩個 syscall 的成本不是單純相加。
-span：兩次讀時鐘是大宗；TLS、深度計數各只有 1–3 ns，低於叢集量測的解析度，不值得冒險改。
+做法是在程式副本中一次移除一項，與原版交錯執行，量出每一項各自的成本。
+寫入記錄：getpid、gettid 各約 130 ns，snprintf 約 61 ns。atomic 取號只有 7 ns，而且多執行緒共用 ring 時不可缺少，所以保留。
+各項分別移除時省下的時間加總，比一次全部移除時更多，代表兩個 syscall 的成本並非單純相加。
+span：兩次讀取時鐘是主要成本；TLS 與深度計數各只有 1–3 ns，低於叢集量測的解析度，不值得承擔修改的風險。
 -->
 
 ---
@@ -90,14 +90,14 @@ chapter: Part 1 · Findings
 clicks: 2
 ---
 
-# 三項優化後，總成本降到約三分之一
+# 三項優化使 overhead 降至原本的 18–43 %
 
 <GroupedBars
   :cats="[['rc_mlx5', '8 B'], ['rc_mlx5', '64 KiB'], ['rc_mlx5', '1 MiB'], ['rc_verbs', '8 B'], ['rc_verbs', '64 KiB'], ['rc_verbs', '1 MiB']]"
   :series="[
     { name: 'Before', fill: '#aeacac', values: [3.916, 7.610, 7.149, 6.427, 12.738, 11.706] },
-    { name: 'Record path', fill: '#adf0c7', values: [1.163, 3.284, 3.490, 1.810, 4.532, 4.240] },
-    { name: 'TSC span', fill: '#6eea9e', values: [0.726, 2.784, 3.103, 1.311, 4.168, 4.471] },
+    { name: 'After record fix', fill: '#adf0c7', values: [1.163, 3.284, 3.490, 1.810, 4.532, 4.240] },
+    { name: 'After TSC clock', fill: '#6eea9e', values: [0.726, 2.784, 3.103, 1.311, 4.168, 4.471] },
   ]"
   :max="14" :step="2" unit="C3 - C0 µs" :width="1320" :height="720" :bar-w="54"
   reveal
@@ -106,16 +106,16 @@ clicks: 2
 ::note::
 
 <Note :notes="[
-  '優化前，完整 tracer 每次來回多 3.9–12.7 µs，相當於 RTT 的 21–139 %。',
-  'pid／tid 快取、名稱改用複製：每筆記錄從 296 降到約 20 ns。',
-  'span 改讀 TSC：每個 span 從 41.5 降到 23.8 ns。最終 0.7–4.5 µs，占 RTT 8–28 %。',
+  '優化前，完整 tracer 讓每次來回增加 3.9–12.7 µs，相當於 RTT 的 21–139 %。',
+  '快取 pid 與 tid，並改以複製寫入函式名稱後，每筆記錄的成本由 296 ns 降至約 20 ns。',
+  'span 改以 TSC 計時後，每個 span 由 41.5 ns 降至 23.8 ns；最終 overhead 為 0.7–4.5 µs，占 RTT 的 8–28 %。',
 ]" />
 
 <!--
-三根柱子是三次量測，每次都在同一個 job 內以 C0 當錨點，所以比較的是同一次量測內的差值，不比絕對 RTT。
-六格「優化前到最後」的變化，信賴區間全部不包含 0。
-rc_verbs 比 rc_mlx5 多付的 tracer 成本，從 2.5–5.1 µs 降到 0.6–1.4 µs，縮小了但仍然顯著。
-第三次量測的 span 優化，總成本只有一格能和 0 區分，原因在方法那一節說明。
+三種柱子代表三次量測，每次都在同一個 job 內以 C0 作為錨點，所以比較的是同一次量測內的差值，而不是絕對 RTT。
+六格從優化前到最後的變化，信賴區間全部不包含 0。
+rc_verbs 比 rc_mlx5 多出的 overhead，從 2.5–5.1 µs 縮小到 0.6–1.4 µs，但仍然顯著。
+第三次量測中，span 優化對總 overhead 的效果只有一格能與 0 區分，原因在量測方法一節說明。
 -->
 
 ---
@@ -139,13 +139,13 @@ clicks: 1
 ::note::
 
 <Note :notes="[
-  '每次迭代被攔截 150–380 次，其中 92–97 % 是 progress loop 的空轉。',
-  '只拿「做了事的呼叫」乘上 span 成本，六格中有五格落在實測區間內。若把空轉也算進去，會多出 5–60 µs。',
+  '關鍵路徑是決定 RTT 長短的那串操作。每次迭代被攔截 150–380 次，其中 92–97 % 是 progress loop 的空轉輪詢。',
+  '只以非空轉呼叫數乘上 span 成本來預測，六格中有五格落在實測區間內；若連空轉也算入，預測會多出 5–60 µs。',
 ]" />
 
 <!--
-空轉輪詢的成本藏在「等網路」的時間裡，不會延後資料抵達，所以不會拉長 RTT。
-真正拉長 RTT 的是每次迭代 15–45 個做了事的呼叫。
-這個推論先在資料上成立，才去優化 span；之後實際的改善幅度 0.26–0.89 µs，也符合 14–46 個呼叫乘上每個省 17 ns 的預測。
-也因此「總成本除以攔截次數」不能當作每次攔截的成本。
+空轉輪詢的成本落在等待網路的時間裡，不會延後資料抵達，因此不會拉長 RTT。
+真正拉長 RTT 的是每次迭代 15–45 個非空轉呼叫。
+這個推論先在資料上驗證成立，才開始優化 span；之後實際的改善幅度 0.26–0.89 µs，也符合 14–46 個呼叫各省 17 ns 的預測。
+也因此，總 overhead 除以攔截次數，不能當作每次攔截的成本。
 -->

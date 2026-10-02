@@ -39,7 +39,7 @@ const ticks = computed(() => {
     </g>
     <g :style="{ opacity: $clicks >= 1 ? 1 : 0.15 }" class="c-bar">
       <rect :x="M.l + 530" y="20" width="24" height="24" fill="#fff" stroke="#0f766e" stroke-width="4" />
-      <text :x="M.l + 570" y="42" class="c-lg">Predicted: busy calls x 39.8 ns</text>
+      <text :x="M.l + 570" y="42" class="c-lg">Predicted: non-idle calls x 39.8 ns</text>
     </g>
     <text x="0" :y="M.t - 18" class="c-unit">{{ unit }}</text>
     <g v-for="t in ticks" :key="'t' + t">

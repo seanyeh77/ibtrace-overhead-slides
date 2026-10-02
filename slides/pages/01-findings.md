@@ -88,6 +88,43 @@ CLOCK_MONOTONIC 從開機後某個固定點起算，只會往前走，不受修�
 ---
 layout: textbook
 chapter: Part 1 · Findings
+ltag: trace.c
+---
+
+# 一個 span 做的事
+
+```c {all|2|6|8-9|10}
+void ibt_span_begin(struct ibt_span *sp, ...) {
+    sp->t0_mono = ibt_mono_ns();     /* clock */
+    sp->own = g_depth[sp->layer]++;
+}
+void ibt_span_end_args(struct ibt_span *sp, ...) {
+    uint64_t t1 = ibt_mono_ns();     /* clock */
+    g_depth[sp->layer]--;
+    if (!g_enabled || sp->own > 0)
+        return;                      /* not recorded */
+    emit(api, sp->t0_mono, t1 - sp->t0_mono, ...);
+}
+```
+
+::note::
+
+<Note :notes="[
+  '每個被攔截的呼叫，進入時呼叫 ibt_span_begin，離開時呼叫 ibt_span_end_args。',
+  '進入時讀一次 CLOCK_MONOTONIC。',
+  '離開時再讀一次；兩次讀取合計約 31 ns，是 span 成本的大宗。',
+  '同一層的巢狀呼叫只執行、不記錄；IBTRACE_RECORD=0 時也在這裡返回。',
+  '其餘的呼叫交給 emit 寫成一筆記錄，這是下一頁的寫入成本。',
+]" />
+
+<!--
+ibt_mono_ns 就是 clock_gettime(CLOCK_MONOTONIC)。
+C2 條件（只攔截、不寫記錄）付的就是這一頁上面到 return 為止的成本；C3 再加上 emit。
+-->
+
+---
+layout: textbook
+chapter: Part 1 · Findings
 clicks: 1
 ---
 
@@ -128,6 +165,116 @@ span：兩次讀取時鐘是主要成本；TLS 與深度計數各只有 1–3 ns
 ---
 layout: textbook
 chapter: Part 1 · Findings
+ltag: trace.c
+clicks: 2
+---
+
+# 優化一、二：寫入一筆記錄
+
+<ConfigDiff lang="c" :rows="[
+  ['', 'static void emit(const char *api, ...) {'],
+  ['', '    uint64_t seq = ibt_ring_claim(g_ring);'],
+  ['', '    struct ibt_rec *rec = ibt_ring_slot(g_ring, seq);'],
+  ['', '    rec->t_mono_ns = t0;'],
+  ['', '    rec->dur_ns = dur;'],
+  ['del', '    rec->pid = getpid();                 /* syscall */'],
+  ['del', '    rec->tid = syscall(SYS_gettid);      /* syscall */'],
+  ['del', '    snprintf(rec->name, 28, &quot;%s&quot;, api);  /* format */'],
+  ['add', '    ids(&amp;rec->pid, &amp;rec->tid);           /* cached */'],
+  ['add', '    copy_name(rec->name, api);           /* copy */'],
+  ['', '    ibt_ring_publish(rec, seq);'],
+  ['', '}'],
+]" />
+
+::note::
+
+<Note :notes="[
+  '這是寫入一筆記錄的函式。優化前，每筆都要做兩個 syscall 和一次 snprintf。',
+  '這三行合計約 318 ns：getpid、gettid 各約 130 ns，snprintf 約 61 ns。改為讀快取的 pid 與 tid，名稱改用複製。',
+  '每筆記錄由 296 ns 降至約 20 ns，寫出的位元組完全不變。',
+]" />
+
+<!--
+ring 取號（ibt_ring_claim）只有約 7 ns，而且多執行緒共用 ring 時不可缺少，所以保留。
+ids 與 copy_name 的內容在後面兩頁與 Part 3 說明。
+-->
+
+---
+layout: textbook
+chapter: Part 1 · Findings
+ltag: trace.c
+---
+
+# pid 與 tid 的快取
+
+```c {all|2-6|7-10|11}
+static void ids(int32_t *pid, int32_t *tid) {
+    int p = *g_fork_page;            /* WIPEONFORK page */
+    if (p == 0) {                    /* fresh fork */
+        p = getpid();
+        *g_fork_page = p;
+    }
+    if (t_pid != p) {                /* new thread */
+        t_tid = syscall(SYS_gettid);
+        t_pid = p;
+    }
+    *pid = p; *tid = t_tid;
+}
+```
+
+::note::
+
+<Note :notes="[
+  'pid 每個行程只需取得一次，tid 每條執行緒只需取得一次，所以快取起來。',
+  '快取所在的記憶體頁在 fork 後會被 kernel 清零；讀到 0 就代表這是新行程，重新呼叫 getpid。',
+  '每條執行緒記下取得 tid 時的 pid；pid 一變，代表換了行程，tid 也要重讀。',
+  '平常的呼叫只做一次記憶體讀取，不進入 kernel。',
+]" />
+
+<!--
+簡化版：實際程式碼以 __atomic_load_n／__atomic_store_n 存取這一頁，並在 g_fork_page 為 NULL（madvise 失敗）時，退回每次都呼叫兩個 syscall。
+為什麼需要清零：fork 會複製整個記憶體，包含快取，子行程若直接沿用就會拿到父行程的 pid。
+-->
+
+---
+layout: textbook
+chapter: Part 1 · Findings
+ltag: trace.c
+---
+
+# 優化三：以 TSC 計時
+
+```c {all|3|4-6|7-8}
+uint64_t ibt_clock_ns(void) {
+    struct tsc_clock *c = &t_clk;
+    uint64_t d = __rdtsc() - c->tsc;    /* ticks */
+    uint64_t ns = d > REANCHOR_TICKS
+        ? tsc_reanchor(c)               /* real clock */
+        : c->ns + ((d * c->mult) >> 32);
+    if (ns < c->last)
+        ns = c->last;                   /* monotonic */
+    return c->last = ns;
+}
+```
+
+::note::
+
+<Note :notes="[
+  'TSC 是 CPU 內建的時間戳計數器，以 rdtsc 指令讀取，不需進入 kernel，只要幾 ns。',
+  '先算出距離上一個錨點經過了多少 tick。',
+  '在 1 ms 以內，就從錨點的 ns 以斜率內插；超過 1 ms 才真的讀一次 CLOCK_MONOTONIC，並重新量斜率。',
+  '每條執行緒的讀值不會倒退，span 的時長不會變成負數。每個 span 由 41.5 ns 降至 23.8 ns。',
+]" />
+
+<!--
+簡化版：實際程式碼還處理尚未建立錨點的情況，並在 CPU 不支援 constant_tsc、nonstop_tsc，或 kernel 的 clocksource 不是 tsc 時，退回 clock_gettime。REANCHOR_TICKS 約為 1 ms 的 tick 數。
+要定期重新量斜率，是因為 chrony 會微調 CLOCK_MONOTONIC 的速率，在這個叢集上約差 13.6 ppm，而且會變。
+換算結果仍是 CLOCK_MONOTONIC 的 ns，所以與 ibmon 的計數器取樣仍在同一條時間軸上。
+-->
+
+---
+layout: textbook
+chapter: Part 1 · Findings
 clicks: 2
 ---
 
@@ -149,7 +296,7 @@ clicks: 2
 <Note :notes="[
   '優化前，完整 tracer 讓每次來回增加 3.9–12.7 µs，相當於 RTT 的 21–139 %。',
   '快取 pid 與 tid，並改以複製寫入函式名稱後，每筆記錄的成本由 296 ns 降至約 20 ns。',
-  'TSC 是 CPU 內建的時間戳計數器，讀取不需進入 kernel。span 改以 TSC 計時後，每個 span 由 41.5 ns 降至 23.8 ns；最終 overhead 為 0.7–4.5 µs，占 RTT 的 8–28 %。',
+  'span 改以 TSC 計時後，每個 span 由 41.5 ns 降至 23.8 ns；最終 overhead 為 0.7–4.5 µs，占 RTT 的 8–28 %。',
 ]" />
 
 <!--

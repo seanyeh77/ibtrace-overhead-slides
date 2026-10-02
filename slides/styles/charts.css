@@ -16,3 +16,5 @@
 .tb-main td { border-bottom: 1.5px solid var(--tb-rule); padding: 14px 22px; }
 .tb-main td.num, .tb-main th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .tb-main td:first-child { white-space: nowrap; }
+.tb-main .deflist.wide-term > div { grid-template-columns: 300px 1fr; }
+.deflist.wide-term b { line-height: 1.35; }

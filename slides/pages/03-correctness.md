@@ -20,10 +20,10 @@ cards:
     text: snprintf 只寫入名稱與一個 NUL，其後保留舊位元組；新寫法輸出相同內容，比對 285 個緩衝區差異為 0。
   - label: pid 快取
     title: fork 後仍正確
-    text: pid 存放在標記 <code>MADV_WIPEONFORK</code> 的記憶體頁，子行程取得的是歸零的頁，讀到 0 時便重新取得。
+    text: pid 存放在以 madvise 標記 <code>MADV_WIPEONFORK</code> 的記憶體頁；fork 後子行程拿到的這一頁會被 kernel 清零，讀到 0 時便重新取得。
   - label: TSC 時鐘
     title: 時間語意不變
-    text: 換算結果仍是 CLOCK_MONOTONIC 的 ns；每 1 ms 重新錨定並重算斜率，60 s 測試中偏差最多 84 ns。
+    text: 換算結果仍是 CLOCK_MONOTONIC（Linux 不會倒退的系統時鐘）的 ns；每 1 ms 重新錨定並重算斜率，60 s 測試中偏差最多 84 ns。
   - label: 測試
     title: 以注入錯誤驗證
     text: pid／tid、時鐘、符號解析三項測試，都曾故意注入錯誤，確認測試在出錯時確實會失敗。
@@ -57,7 +57,7 @@ clicks: 3
 ::note::
 
 <Note :notes="[
-  '驗證顯示通過，不代表它真的比對到應該比對的內容。',
+  'golden 是以固定資料產生的參考輸出，程式修改後要逐位元組相符；build-id 是編譯器寫入每個執行檔的唯一識別碼。驗證顯示通過，不代表真的比對到應該比對的內容。',
   'golden 錄製時某個 build 目錄尚未存在，該目錄出現後，比對結果隨之改變。',
   '分析程式一律讀取原始目錄；若沒有發現，以轉換後資料重跑的驗證將毫無意義。',
   '叢集資料中，測試程式的呼叫位置其實從未成功解析，而且沒有任何提示。',

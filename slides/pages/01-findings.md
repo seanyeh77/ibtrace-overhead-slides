@@ -108,7 +108,7 @@ clicks: 2
 <Note :notes="[
   '優化前，完整 tracer 讓每次來回增加 3.9–12.7 µs，相當於 RTT 的 21–139 %。',
   '快取 pid 與 tid，並改以複製寫入函式名稱後，每筆記錄的成本由 296 ns 降至約 20 ns。',
-  'span 改以 TSC 計時後，每個 span 由 41.5 ns 降至 23.8 ns；最終 overhead 為 0.7–4.5 µs，占 RTT 的 8–28 %。',
+  'TSC 是 CPU 內建的時間戳計數器，讀取不需進入 kernel。span 改以 TSC 計時後，每個 span 由 41.5 ns 降至 23.8 ns；最終 overhead 為 0.7–4.5 µs，占 RTT 的 8–28 %。',
 ]" />
 
 <!--

@@ -32,6 +32,7 @@ jobs:
           cache-dependency-path: slides/package-lock.json
       - run: npm ci
       - run: npx slidev build --base /ibtrace-overhead-slides/ --out dist
+      - run: npx slidev build attribution.md --base /ibtrace-overhead-slides/attribution/ --out dist/attribution
       - uses: actions/upload-pages-artifact@v3
         with:
           path: slides/dist

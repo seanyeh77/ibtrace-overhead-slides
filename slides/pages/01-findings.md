@@ -22,8 +22,8 @@ clicks: 2
 <GroupedBars
   :cats="[['rc_verbs', '64 KiB'], ['rc_mlx5', '64 KiB']]"
   :series="[
-    { name: 'No tracer (C0)', fill: '#e7e7e7', values: [11.175, 10.497] },
-    { name: 'Tracer before optimization (C3)', fill: '#6eea9e', values: [23.913, 18.107] },
+    { name: 'No tracer', fill: '#e7e7e7', values: [11.175, 10.497] },
+    { name: 'Tracer, before optimization', fill: '#6eea9e', values: [23.913, 18.107] },
   ]"
   :max="25" :step="5" unit="RTT µs" :digits="2" :width="1240" :height="720" :bar-w="150"
   reveal
@@ -32,12 +32,13 @@ clicks: 2
 ::note::
 
 <Note :notes="[
-  '不啟用 tracer 時，兩種 transport 在 64 KiB 下的 RTT 只相差 0.68 µs。',
-  '啟用優化前的 tracer 後，差距擴大到 5.8 µs，因為 rc_verbs 多經過一層 verbs 攔截。',
-  '先前「rc_mlx5 處理時間僅為 rc_verbs 的 45 %」主要來自這個效應；不啟用 tracer 時兩者只差 2–14 %。',
+  ['不開 tracer：兩者只差 0.68 µs。'],
+  ['開優化前的 tracer：差距變成 5.8 µs。', 'rc_verbs 多經過一層 verbs 攔截。'],
+  ['先前的「45 %」主要來自這個效應。', '不開 tracer 時，兩者只差 2–14 %。'],
 ]" />
 
 <!--
+這裡比的是 64 KiB 的 RTT。「45 %」指先前的結論：rc_mlx5 處理時間僅為 rc_verbs 的 45 %。
 先講結論：tracer 的 overhead 在兩種 transport 上不同，所以在啟用 tracer 的情況下比較 transport，差距會被放大。
 綠色柱子是啟用優化前的 tracer。rc_verbs 多出 12.7 µs，rc_mlx5 多出 7.6 µs，兩者相差 5.1 µs，這個差異是顯著的。
 先前兩次 job 量到的 25.5 µs 和 17.7 µs 正好對應這裡的綠色柱子，所以 45 % 這個比例主要是 tracer 本身造成的。
@@ -54,7 +55,9 @@ clicks: 2
 
 <DgSnprintf />
 
-兩種寫法寫出的位元組完全相同，只省掉格式解析。
+兩種寫法寫出的位元組完全相同。
+
+差別只在省掉格式解析。
 
 <!--
 snprintf 是通用的格式化輸出函式，要處理 %d、%x 等各種格式，所以即使格式只有 %s，也得先走一遍格式解析。
@@ -75,7 +78,9 @@ clicks: 1
 
 <DgClock />
 
-trace 與計數器讀同一個時鐘，兩者才能對齊。
+trace 與 counter 讀同一個時鐘。
+
+所以兩者的時間能對齊。
 
 <!--
 另一個常見的時鐘是 CLOCK_REALTIME，也就是牆上時間，可能被手動調整或跳動，不適合量時長。
@@ -110,16 +115,17 @@ void ibt_span_end_args(struct ibt_span *sp, ...) {
 ::note::
 
 <Note :notes="[
-  '每個被攔截的呼叫，進入時呼叫 ibt_span_begin，離開時呼叫 ibt_span_end_args。',
-  '進入時讀一次 CLOCK_MONOTONIC。',
-  '離開時再讀一次；兩次讀取合計約 31 ns，是 span 成本的大宗。',
-  '同一層的巢狀呼叫只執行、不記錄；IBTRACE_RECORD=0 時也在這裡返回。',
-  '其餘的呼叫交給 emit 寫成一筆記錄，這是下一頁的寫入成本。',
+  ['進入呼叫時執行 ibt_span_begin。', '離開時執行 ibt_span_end_args。'],
+  ['進入時讀一次 CLOCK_MONOTONIC。'],
+  ['離開時再讀一次。', '兩次合計約 31 ns，是主要成本。'],
+  ['同一層的巢狀呼叫不記錄。', '關閉記錄時也在這裡返回。'],
+  ['其餘的呼叫交給 emit 寫成記錄。', '這是下一頁的寫入成本。'],
 ]" />
 
 <!--
 ibt_mono_ns 就是 clock_gettime(CLOCK_MONOTONIC)。
-C2 條件（只攔截、不寫記錄）付的就是這一頁上面到 return 為止的成本；C3 再加上 emit。
+「只攔截」條件付的就是這一頁上面到 return 為止的成本；完整 tracer 再加上 emit。
+關閉記錄指 IBTRACE_RECORD=0。
 -->
 
 ---
@@ -151,8 +157,8 @@ clicks: 1
 ::note::
 
 <Note :notes="[
-  '寫入一筆記錄約需 296 ns，其中 getpid、gettid 兩個 syscall 與 snprintf 合計占九成以上。',
-  '每次被攔截的呼叫稱為一個 span，約需 41 ns，其中兩次 clock_gettime 就占了 31 ns。',
+  ['寫一筆記錄約 296 ns。', '兩個 syscall 與 snprintf 占九成以上。'],
+  ['一個 span 約 41 ns。', '兩次讀時鐘就占了 31 ns。'],
 ]" />
 
 <!--
@@ -189,12 +195,13 @@ clicks: 2
 ::note::
 
 <Note :notes="[
-  '這是寫入一筆記錄的函式。優化前，每筆都要做兩個 syscall 和一次 snprintf。',
-  '這三行合計約 318 ns：getpid、gettid 各約 130 ns，snprintf 約 61 ns。改為讀快取的 pid 與 tid，名稱改用複製。',
-  '每筆記錄由 296 ns 降至約 20 ns，寫出的位元組完全不變。',
+  ['這是寫入一筆記錄的函式。', '每筆都做兩個 syscall 和一次 snprintf。'],
+  ['這三行合計約 318 ns。', '改為讀快取的 pid 與 tid。', '名稱改用直接複製。'],
+  ['每筆記錄：296 ns → 約 20 ns。', '寫出的位元組完全不變。'],
 ]" />
 
 <!--
+三行的成本：getpid、gettid 各約 130 ns，snprintf 約 61 ns。
 ring 取號（ibt_ring_claim）只有約 7 ns，而且多執行緒共用 ring 時不可缺少，所以保留。
 ids 與 copy_name 的內容在後面兩頁與 Part 3 說明。
 -->
@@ -225,10 +232,10 @@ static void ids(int32_t *pid, int32_t *tid) {
 ::note::
 
 <Note :notes="[
-  'pid 每個行程只需取得一次，tid 每條執行緒只需取得一次，所以快取起來。',
-  '快取所在的記憶體頁在 fork 後會被 kernel 清零；讀到 0 就代表這是新行程，重新呼叫 getpid。',
-  '每條執行緒記下取得 tid 時的 pid；pid 一變，代表換了行程，tid 也要重讀。',
-  '平常的呼叫只做一次記憶體讀取，不進入 kernel。',
+  ['pid 每個行程只需取得一次。', 'tid 每條執行緒只需取得一次。', '所以把兩者快取起來。'],
+  ['fork 後，kernel 會把快取頁清零。', '讀到 0 就重新呼叫 getpid。'],
+  ['每條執行緒記下當時的 pid。', 'pid 一變，tid 也要重讀。'],
+  ['平常只做一次記憶體讀取。', '不必進入 kernel。'],
 ]" />
 
 <!--
@@ -260,13 +267,14 @@ uint64_t ibt_clock_ns(void) {
 ::note::
 
 <Note :notes="[
-  'TSC 是 CPU 內建的時間戳計數器，以 rdtsc 指令讀取，不需進入 kernel，只要幾 ns。',
-  '先算出距離上一個錨點經過了多少 tick。',
-  '在 1 ms 以內，就從錨點的 ns 以斜率內插；超過 1 ms 才真的讀一次 CLOCK_MONOTONIC，並重新量斜率。',
-  '每條執行緒的讀值不會倒退，span 的時長不會變成負數。每個 span 由 41.5 ns 降至 23.8 ns。',
+  ['TSC 是 CPU 內建的時間計數器。', '用 rdtsc 讀取，只要幾 ns。'],
+  ['先算出距離錨點經過幾個 tick。'],
+  ['1 ms 以內：用斜率從錨點內插。', '超過 1 ms：讀一次真的時鐘，重量斜率。'],
+  ['讀值不會倒退，span 不會是負的。', '每個 span：41.5 → 23.8 ns。'],
 ]" />
 
 <!--
+rdtsc 不需進入 kernel。超過 1 ms 時讀的是 CLOCK_MONOTONIC。讀值不倒退是以每條執行緒為單位。
 簡化版：實際程式碼還處理尚未建立錨點的情況，並在 CPU 不支援 constant_tsc、nonstop_tsc，或 kernel 的 clocksource 不是 tsc 時，退回 clock_gettime。REANCHOR_TICKS 約為 1 ms 的 tick 數。
 要定期重新量斜率，是因為 chrony 會微調 CLOCK_MONOTONIC 的速率，在這個叢集上約差 13.6 ppm，而且會變。
 換算結果仍是 CLOCK_MONOTONIC 的 ns，所以與 ibmon 的計數器取樣仍在同一條時間軸上。
@@ -287,20 +295,20 @@ clicks: 2
     { name: 'After record fix', fill: '#adf0c7', values: [1.163, 3.284, 3.490, 1.810, 4.532, 4.240] },
     { name: 'After TSC clock', fill: '#6eea9e', values: [0.726, 2.784, 3.103, 1.311, 4.168, 4.471] },
   ]"
-  :max="14" :step="2" unit="C3 - C0 µs" :width="1320" :height="720" :bar-w="54"
+  :max="14" :step="2" unit="Tracer overhead, µs" :width="1320" :height="720" :bar-w="54"
   reveal
 />
 
 ::note::
 
 <Note :notes="[
-  '優化前，完整 tracer 讓每次來回增加 3.9–12.7 µs，相當於 RTT 的 21–139 %。',
-  '快取 pid 與 tid，並改以複製寫入函式名稱後，每筆記錄的成本由 296 ns 降至約 20 ns。',
-  'span 改以 TSC 計時後，每個 span 由 41.5 ns 降至 23.8 ns；最終 overhead 為 0.7–4.5 µs，占 RTT 的 8–28 %。',
+  ['優化前：每次來回多 3.9–12.7 µs。', '相當於 RTT 的 21–139 %。'],
+  ['快取 pid、tid，並直接複製名稱。', '每筆記錄：296 ns → 約 20 ns。'],
+  ['span 改用 TSC：41.5 → 23.8 ns。', '最終 overhead 為 0.7–4.5 µs。', '占 RTT 的 8–28 %。'],
 ]" />
 
 <!--
-三種柱子代表三次量測，每次都在同一個 job 內以 C0 作為錨點，所以比較的是同一次量測內的差值，而不是絕對 RTT。
+三種柱子代表三次量測，每次都在同一個 job 內以不開 tracer 的執行作為錨點，所以比較的是同一次量測內的差值，而不是絕對 RTT。
 六格從優化前到最後的變化，信賴區間全部不包含 0。
 rc_verbs 比 rc_mlx5 多出的 overhead，從 2.5–5.1 µs 縮小到 0.6–1.4 µs，但仍然顯著。
 第三次量測中，span 優化對總 overhead 的效果只有一格能與 0 區分，原因在量測方法一節說明。
@@ -327,11 +335,12 @@ clicks: 1
 ::note::
 
 <Note :notes="[
-  '關鍵路徑是決定 RTT 長短的那串操作。每次迭代被攔截 150–380 次，其中 92–97 % 是 progress loop 的空轉輪詢。',
-  '只以非空轉呼叫數乘上 span 成本來預測，六格中有五格落在實測區間內；若連空轉也算入，預測會多出 5–60 µs。',
+  ['關鍵路徑是決定 RTT 的那串操作。', '每次迭代被攔截 150–380 次。', '其中 92–97 % 是空轉輪詢。'],
+  ['只用非空轉的呼叫數來預測。', '六格中有五格落在實測區間內。', '連空轉也算，會多估 5–60 µs。'],
 ]" />
 
 <!--
+實測值是只攔截、不寫記錄時的 overhead。預測是非空轉呼叫數乘上 span 成本。
 空轉輪詢的成本落在等待網路的時間裡，不會延後資料抵達，因此不會拉長 RTT。
 真正拉長 RTT 的是每次迭代 15–45 個非空轉呼叫。
 這個推論先在資料上驗證成立，才開始優化 span；之後實際的改善幅度 0.26–0.89 µs，也符合 14–46 個呼叫各省 17 ns 的預測。

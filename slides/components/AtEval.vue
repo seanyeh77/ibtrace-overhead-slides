@@ -6,12 +6,12 @@ import { useSlideContext } from '@slidev/client'
 const { $clicks } = useSlideContext()
 const on = (k) => ({ opacity: $clicks.value >= k ? 1 : 0.15 })
 const rows = [
-  { step: 'develop v1', what: 'point to point runs', fill: '#adf0c7', k: 0 },
-  { step: 'freeze v1', what: 'git tag model-v1-frozen', fill: '#6eea9e', k: 0 },
-  { step: 'evaluate v1 once', what: 'allreduce runs', fill: '#adf0c7', k: 0 },
-  { step: 'develop v2', what: 'every run seen so far', fill: '#adf0c7', k: 1 },
-  { step: 'freeze v2', what: 'git tag model-v2-frozen', fill: '#6eea9e', k: 1 },
-  { step: 'evaluate v2 once', what: 'alltoall and miniFE, new', fill: '#adf0c7', k: 1 },
+  { step: 'develop first version', what: 'point to point runs', fill: '#adf0c7', k: 0 },
+  { step: 'freeze it', what: 'git tag, no more changes', fill: '#6eea9e', k: 0 },
+  { step: 'evaluate once', what: 'allreduce runs', fill: '#adf0c7', k: 0 },
+  { step: 'develop second version', what: 'every run seen so far', fill: '#adf0c7', k: 1 },
+  { step: 'freeze it', what: 'git tag, no more changes', fill: '#6eea9e', k: 1 },
+  { step: 'evaluate once', what: 'alltoall and miniFE, new', fill: '#adf0c7', k: 1 },
 ]
 const ry = (i) => 10 + i * 100
 </script>

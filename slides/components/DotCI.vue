@@ -35,7 +35,7 @@ const ticks = computed(() => {
       <line :x1="M.l" :x2="M.l + 40" y1="32" y2="32" stroke="#1a1a1a" stroke-width="2" />
       <line :x1="M.l + 20" :x2="M.l + 20" y1="18" y2="46" stroke="#1a1a1a" stroke-width="2" />
       <rect :x="M.l + 10" y="22" width="20" height="20" fill="#6eea9e" stroke="#1a1a1a" stroke-width="2" />
-      <text :x="M.l + 56" y="42" class="c-lg">Measured C2 - C0 with 95 % CI</text>
+      <text :x="M.l + 56" y="42" class="c-lg">Measured overhead, 95 % CI</text>
     </g>
     <g :style="{ opacity: $clicks >= 1 ? 1 : 0.15 }" class="c-bar">
       <rect :x="M.l + 530" y="20" width="24" height="24" fill="#fff" stroke="#0f766e" stroke-width="4" />

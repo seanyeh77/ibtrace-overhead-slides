@@ -6,12 +6,12 @@ big: true
 
 # 重點整理
 
-<Tile variant="hero" label="主要發現" value="看使用率會給出有害的建議">多開 rail 讓 allreduce 慢 38 %；trace 找到的原因是重新登記記憶體，修掉後快 43 %。</Tile>
-<Tile label="Tracer overhead" value="0.84–2.91 µs">預先配置 ring 之後，每次操作增加的時間，約為上次報告的一半。</Tile>
-<Tile label="資料集" value="2,200 次執行">每一筆都有實際執行優化動作量出的 ΔT。</Tile>
-<Tile variant="accent" label="選對優化動作" value="93 %">在沒看過的程式上；counter 與 profiler 做法都是 53 %。</Tile>
-<Tile label="開 tracer 與結論" value="ΔT 比值 1.02">開與不開 tracer 量到的 ΔT 幾乎相同，NUMA 類例外。</Tile>
-<Tile label="限制" value="收益大小仍不夠準" wide>預測能快多少的誤差與 counter 做法相當，下一版改用就地校準。</Tile>
+<Tile variant="hero" label="主要發現" value="看使用率會給出有害的建議">counter 的建議：慢 38 %。<br>trace 的建議：快 43 %。</Tile>
+<Tile label="Tracer overhead" value="0.84–2.91 µs">每次操作多花的時間。<br>約為上次報告的一半。</Tile>
+<Tile label="資料集" value="2,200 次執行">每一筆的 ΔT 都來自實際執行。</Tile>
+<Tile variant="accent" label="選對優化動作" value="93 %">在沒看過的程式上。<br>傳統做法都是 53 %。</Tile>
+<Tile label="開 tracer 與結論" value="ΔT 比值 1.02">開不開 tracer，ΔT 幾乎相同。<br>NUMA 錯置是例外。</Tile>
+<Tile label="限制" value="收益大小仍不夠準" wide>誤差與 counter 做法相當。<br>下一版改用就地校準。</Tile>
 
 <!--
 一句話總結：要知道修哪裡、能快多少，必須看 trace 並考慮關鍵路徑；只看使用率，可能會做出讓程式更慢的決定。
@@ -20,7 +20,7 @@ big: true
 ---
 layout: end
 chapter: Summary
-next: 回報上游、公開資料集，並做成一個指令就能執行的工具
+next: 回報上游、公開資料集、做成一個指令的工具
 ---
 
 # Q&A

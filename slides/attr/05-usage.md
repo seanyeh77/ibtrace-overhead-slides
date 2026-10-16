@@ -19,13 +19,13 @@ chapter: Part 6 · Usage
 clicks: 3
 items:
   - title: 錄下 trace
-    text: 在原本的啟動指令前加上 ibmon，程式不用修改，也不需要特權。
+    text: ['在原本的指令前加上 ibmon。', '不用改程式，也不需要特權。']
   - title: 看時間花在哪裡
-    text: 分析 trace，把每個 rank 的時間拆成等待、登記、停頓與計算。
+    text: ['分析 trace，拆開每個 rank 的時間。', '分成等待、登記、停頓與計算。']
   - title: 看排序後的建議
-    text: 模型列出可做的優化動作，依預測收益排序，有害的會是負數。
+    text: ['模型依預測收益排出優化動作。', '有害的動作是負數。']
   - title: 實際執行驗證
-    text: 依第一名的建議再跑一次，量出真正快了多少。
+    text: ['照第一名的建議再跑一次。', '量出真正快了多少。']
 ---
 
 # 遇到程式變慢時的四個步驟
@@ -42,9 +42,18 @@ chapter: Part 6 · Usage
 
 # 範例：4 個節點上的 allreduce 比預期慢
 
-你的 MPI 程式在 4 個節點上反覆做 4 MiB 的 allreduce，每個節點有 8 張 400 Gb/s 的網卡，跑起來卻明顯比預期慢。網卡的 counter 顯示只有少數網卡在傳資料，直覺會想多開 rail。接下來四頁照著步驟走一次。
+程式在 4 個節點上反覆做 4 MiB 的 allreduce。
+
+每個節點有 8 張 400 Gb/s 的網卡。
+
+跑起來卻明顯比預期慢。
+
+counter 顯示只有少數網卡在傳資料。
+
+直覺會想：那就多開 rail。
 
 <!--
+接下來四頁照著步驟走一次。
 這就是第 4 部分的案例，從使用者的角度重走一次：使用者一開始不知道原因，只知道程式慢。
 -->
 
@@ -67,11 +76,12 @@ ibmon: 503214 records read, 0 lost to ring overrun in 0 gap(s)
 ::note::
 
 <Note :notes="[
-  '只是在程式前面多一層 ibmon。SLURM_PROCID 是每個 rank 的編號，所以 4 個 rank 各寫一份 trace：trace.0.csv 到 trace.3.csv。',
-  '每個 rank 結束時印出讀到與遺失的筆數。遺失必須是 0，這份 trace 才完整、可以拿來分析。',
+  ['只在程式前面多一層 ibmon。', '每個 rank 各寫一份 trace。'],
+  ['結束時印出讀到與遺失的筆數。', '遺失必須是 0，trace 才完整。'],
 ]" />
 
 <!--
+SLURM_PROCID 是每個 rank 的編號，所以 4 個 rank 各寫一份 trace：trace.0.csv 到 trace.3.csv。
 程式不需要重新編譯：ibmon 用 LD_PRELOAD 讓程式啟動時載入 tracer。也不需要 root 權限。
 筆數是示意，實際取決於程式跑多久。每個被追蹤的行程會多用 128 MiB 記憶體放 ring。
 -->
@@ -98,11 +108,12 @@ note: the same 2 buffers are registered on every call
 ::note::
 
 <Note :notes="[
-  '報告把每個 rank 的時間拆成四類：等待傳輸（wait）、登記記憶體（register）、CPU 被搶走的空檔（stall），以及計算（compute）。登記占了將近四成，這是第一個線索。',
-  '報告也指出同樣兩塊暫存空間在每次呼叫都被重新登記。只看網卡的 counter，看不到這件事。',
+  ['每個 rank 的時間拆成四類。', '登記占了將近四成。', '這是第一個線索。'],
+  ['同樣兩塊暫存空間每次都被重新登記。', '只看 counter 看不到這件事。'],
 ]" />
 
 <!--
+四類是等待傳輸（wait）、登記記憶體（register）、CPU 被搶走的空檔（stall），以及計算（compute）。
 這一頁的指令與輸出格式是示意；比例取自案例的量測：登記占總時間 37.7 %，真正在網路上傳資料約占 10 %。
 等待（wait）占比高不一定代表網路慢：它也包含等其他 rank 的時間，所以要配合下一步的關鍵路徑分析。
 -->
@@ -117,7 +128,7 @@ clicks: 1
 # 步驟 3：看依預測收益排序的建議
 
 ```bash {1|2-5}
-$ python analysis/attribution/v2.py trace.*.csv
+$ python analysis/predict.py trace.*.csv
 action                           predicted gain
 keep scratch buffers (malloc)    +180 ms
 change NUMA binding                 0 ms
@@ -127,12 +138,13 @@ use 8 rails                      -210 ms
 ::note::
 
 <Note :notes="[
-  '模型讀入同一批 trace、counter 與設定資訊，對每個可做的動作預測 ΔT。',
-  '第一名是保留暫存空間；NUMA 綁定已經正確，收益為 0；多開 rail 是負數，代表會更慢，應該避免。這正好和直覺相反。',
+  ['模型讀入同一批 trace 與設定。', '對每個動作預測 ΔT。'],
+  ['第一名是保留暫存空間。', 'NUMA 綁定已經正確，收益為 0。', '多開 rail 是負數，會更慢。'],
 ]" />
 
 <!--
-輸出格式是示意，數字取自案例：保留暫存空間的預測約 +180 ms；改用 8 條 rail 實測約慢 210 ms。
+多開 rail 的結果正好和直覺相反。
+指令與輸出格式是示意，數字取自案例：保留暫存空間的預測約 +180 ms；改用 8 條 rail 實測約慢 210 ms。
 如果只看第 2 步的報告，可能會以為「登記很多，那就多開 rail 分散一下」；模型考慮了每多一張網卡就要多登記一次，所以給出負數。
 -->
 
@@ -150,14 +162,14 @@ clicks: 1
 $ export MALLOC_MMAP_THRESHOLD_=33554432
 $ export MALLOC_TRIM_THRESHOLD_=1073741824
 $ srun -N 4 --ntasks-per-node=1 ./my_mpi_app
-# 實測 535 ms → 307 ms，快 43 %，比預測的 180 ms 還多
+# 實測 535 ms → 307 ms，快 43 %
 ```
 
 ::note::
 
 <Note :notes="[
-  '不用改程式，只加兩個環境變數。這一次不開 tracer，量到的才是使用者真正在乎的時間。',
-  '實際省下 228 ms，模型預測 180 ms：方向和排序正確，大小低估了約兩成。這就是為什麼最後一步一定要實際跑一次。',
+  ['只加兩個環境變數，不用改程式。', '這次不開 tracer，量的才是真實時間。'],
+  ['實測省下 228 ms，預測 180 ms。', '方向和排序正確，大小低估約兩成。', '所以最後一定要實際跑一次。'],
 ]" />
 
 <!--
@@ -181,7 +193,7 @@ chapter: Part 6 · Usage
 | 同一塊記憶體反覆登記 | 每次呼叫都登記與取消同一個位址 | 設定 MALLOC 門檻，保留暫存空間 |
 
 <!--
-這張表對應資料集裡的五種瓶頸：I1 搶 CPU、I2 NUMA 錯置、I3 網路被佔用、I4 rail 太少，以及案例中的重新登記。
+這張表對應資料集裡的五種瓶頸：搶 CPU、NUMA 錯置、網路被佔用、rail 太少，以及案例中的重新登記。
 第一列：被搶 CPU 時，程式不是每次都變慢，而是偶爾被暫停十幾到二十毫秒，所以中位數可能完全不變，只有總時間變長。
 第三列：一般使用者也能用 rdma resource show qp 看到同一張網卡上其他行程的連線，確認是誰在佔用。
 第四列：一對一傳輸時多開 rail 快了 40 %，但如果同時有重新登記的問題，多開反而更慢，所以要先處理第五列。
@@ -195,13 +207,13 @@ clicks: 2
 items:
   - label: 注意 1
     title: 以實測為準
-    text: 模型的排序大多可靠，但收益大小可能差數十個百分點，每個建議都應該像步驟 4 一樣實際跑一次。
+    text: ['模型的排序大多可靠。', '收益大小可能差數十個百分點。', '每個建議都要實際跑一次。']
   - label: 注意 2
     title: Tracer 的成本
-    text: 開 tracer 時每次操作多花約 1–3 µs，每個行程多用 128 MiB 記憶體；量時間請用不開 tracer 的執行。
+    text: ['每次操作多花約 1–3 µs。', '每個行程多用 128 MiB 記憶體。', '量時間請用不開 tracer 的執行。']
   - label: 注意 3
     title: 目前的範圍
-    text: 支援透過 UCX 傳輸的 MPI 程式；GPU 與 NCCL 還不支援。NUMA 類的問題從設定判斷，不從 trace 判斷。
+    text: ['支援透過 UCX 傳輸的 MPI 程式。', 'GPU 與 NCCL 還不支援。', 'NUMA 類問題從設定判斷。']
 ---
 
 # 使用時的注意事項

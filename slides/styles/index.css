@@ -11,7 +11,7 @@
   align-content: stretch;
   row-gap: 26px;
 }
-.slidev-layout.textbook.has-note { grid-template-columns: minmax(0, 1fr) 330px; column-gap: 56px; }
+.slidev-layout.textbook.has-note { grid-template-columns: minmax(0, 1fr) 440px; column-gap: 56px; }
 .slidev-layout.textbook.near { grid-template-rows: minmax(0, 1fr); }
 .slidev-layout.textbook.near .tb-note { grid-row: 1 / span 30; }
 .tb-head { grid-column: 1 / -1; }
@@ -109,10 +109,10 @@
 /* ---------- Larger body text ---------- */
 .tb-main > p, .tb-main > ul, .tb-main > ol,
 .tb-group > p, .tb-group > ul, .fig-body > p { font-size: 40px; }
-.tb-note { font-size: 30px; }
+.tb-note { font-size: 26px; }
 .tb-note-label { font-size: 20px; }
-.deflist > div { grid-template-columns: 270px 1fr; font-size: 38px; }
-.deflist b { font-size: 35px; }
+.deflist > div { grid-template-columns: 270px 1fr; font-size: 33px; }
+.deflist b { font-size: 31px; }
 .slidev-layout pre.slidev-code, .slidev-layout .slidev-code { font-size: 31px !important; }
 .diff, .cd-code { font-size: 30px; }
 .tb-obj ol li { font-size: 40px; }
@@ -145,3 +145,8 @@
 .def-ex p code { font-size: 29px; }
 .def-ex-label { font-size: 18px; }
 .tb-steps .steps-row { width: 1700px; max-width: 1760px; }
+
+/* ---------- Short sentences: one per line, in notes, definitions and tiles ---------- */
+.tb-note .tb-note-text > p { text-wrap: balance; }
+.tb-note .tb-note-text > p + p { margin-top: 14px; }
+.def-body p + p { margin-top: -6px; }

@@ -5,10 +5,10 @@ import { useSlideContext } from '@slidev/client'
 const { $clicks } = useSlideContext()
 const on = (k) => ({ opacity: $clicks.value >= k ? 1 : 0 })
 const runs = [
-  { name: 'C3 rc_mlx5 64 KiB', order: '0001', exit: '0', output: 'run_0001' },
-  { name: 'C0 rc_verbs 8 B', order: '0002', exit: '0', output: 'run_0002' },
-  { name: 'C4 rc_mlx5 8 B', order: '0228', exit: '1', output: 'none', bad: true },
-  { name: 'C2 rc_verbs 1 MiB', order: '0229', exit: '0', output: 'run_0229' },
+  { name: 'full rc_mlx5 64 KiB', order: '0001', exit: '0', output: 'run_0001' },
+  { name: 'baseline rc_verbs 8 B', order: '0002', exit: '0', output: 'run_0002' },
+  { name: 'no UCT rc_mlx5 8 B', order: '0228', exit: '1', output: 'none', bad: true },
+  { name: 'hooks rc_verbs 1 MiB', order: '0229', exit: '0', output: 'run_0229' },
 ]
 const rowY = (i) => 80 + i * 60
 const cols = [
@@ -17,7 +17,8 @@ const cols = [
   { k: 'exit', x: 860, w: 90 },
   { k: 'output', x: 950, w: 180 },
 ]
-const cell = (r, k) => (k === 'condition' ? r.name.split(' ').slice(0, 2).join(' ') : r[k])
+// condition column: the name without its message size (the last two words)
+const cell = (r, k) => (k === 'condition' ? r.name.split(' ').slice(0, -2).join(' ') : r[k])
 </script>
 
 <template>

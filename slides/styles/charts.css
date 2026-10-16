@@ -34,7 +34,7 @@
 .slidev-layout.tb-rows { flex-direction: column; gap: 22px; display: flex; justify-content: flex-start; padding: 104px 80px 96px !important; }
 .slidev-layout.tb-rows h1 { font-family: var(--tb-serif); margin: 0; font-size: 54px; font-weight: 600; line-height: 1.25; }
 .rows-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); column-gap: 56px; min-height: 0; }
-.tb-rows.has-note .rows-body { grid-template-columns: minmax(0, 1fr) 330px; }
+.tb-rows.has-note .rows-body { grid-template-columns: minmax(0, 1fr) 440px; }
 .tb-rows .tb-note { grid-area: auto; align-self: start; }
 .rows-list { margin: auto; width: 100%; max-width: 1640px; display: grid; }
 .tb-rows.has-note .rows-row { grid-template-columns: 150px 380px 1fr; }

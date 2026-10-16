@@ -36,36 +36,6 @@ clicks: 2
 -->
 
 ---
-layout: textbook
-chapter: Part 5 · Model
-ltag: Example
-clicks: 1
----
-
-# 模型輸出的形式
-
-```text {1|2-5}
-$ python analysis/attribution/v2.py logs/allreduce-4MiB/run03
-action                           predicted gain
-keep scratch buffers (malloc)    +180 ms
-change NUMA binding                 0 ms
-use 8 rails                      -210 ms
-```
-
-::note::
-
-<Note :notes="[
-  '輸入是一次執行留下的 trace、counter 與設定資訊，也就是使用者手上那一次跑得慢的 job。',
-  '輸出是可做的優化動作，依預測收益排序。收益為 0 代表修了也沒用；負數代表會變慢，這一項應該避免。',
-]" />
-
-<!--
-這一頁的輸出格式是示意，數字取自 4 MiB allreduce 的案例：保留暫存空間的預測約 +180 ms；改用 8 條 rail 實測約慢 210 ms。
-NUMA 綁定這一行是說明「設定已經正確時，模型會給出 0」。
-下一步要做的工具，就是讓使用者只下一個指令，就得到這樣一張經過實測確認的清單。
--->
-
----
 layout: definition
 chapter: Part 5 · Model
 term: critical path

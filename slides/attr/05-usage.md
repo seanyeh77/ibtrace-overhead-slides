@@ -32,7 +32,7 @@ items:
 
 <!--
 四個步驟各對應一個 ibtrace 指令。前三步只需要跑一次被測程式；第四步是改設定後再跑幾次，用實測確認建議是對的。
-這套指令在 branch cli（commit 1cad82a），還沒有併入 main。分析用的是凍結的模型 v2，程式碼一行都沒改，啟動時會檢查模型檔案的雜湊。
+這套指令已併入 ibtrace 的 main（commit 29b6fe3）。分析用的是凍結的模型 v2，程式碼一行都沒改，啟動時會檢查模型檔案的雜湊。
 目前能分析的程式是 OSU micro-benchmarks、ucx_ib_test 與 miniFE；其他程式照樣能錄，但分析會說不支援。
 後面幾頁用重新登記記憶體的案例，把每一步實際走一次，輸出都是真實的。
 -->
@@ -69,13 +69,13 @@ clicks: 1
 
 # 步驟 1：在程式前面加上 ibtrace record
 
-```bash {1-4|5-7}
+```text {1-4|5-7}
 $ srun -N 4 --ntasks-per-node=1 --mpi=pmix \
     ibtrace record runs/2rails-traced -- \
     taskset -c 0 osu_allreduce -m 4194304:4194304 \
     -i 400 -x 40 -z
-# （osu_allreduce 自己的輸出照常印出，這裡省略）
-ibtrace: 4 ranks, 373674 records, 0 lost
+ibtrace: 4 ranks, 374891 records, 0 lost
+ibtrace: program output in runs/2rails-traced/rank0.out
 ibtrace: saved in runs/2rails-traced/
 ```
 
@@ -83,15 +83,15 @@ ibtrace: saved in runs/2rails-traced/
 
 <Note :notes="[
   ['在程式前面加上 ibtrace record。', '每個 rank 的資料存進同一個目錄。'],
-  ['最後印出記錄筆數與遺失筆數。', '遺失必須是 0，trace 才完整。'],
+  ['最後印出記錄筆數與遺失筆數。', '遺失必須是 0，trace 才完整。', '程式自己的輸出存在 rank0.out。'],
 ]" />
 
 <!--
-這是實際的輸出（job 557079，4 個節點，13 秒）。省略的是 osu_allreduce 自己印的 4 行結果。
+這是實際的輸出（job 557154，4 個節點，9 秒）。程式自己的輸出不印在終端機，存在 rank0.out；加 --show-output 才會照常印出。結束後節點的 /dev/shm 沒有留下任何 ibtrace 的檔案。
 record 會自動處理：每個 rank 的檔名、tracer 的共享記憶體、它放在哪個 NUMA node，以及讀取端用哪兩顆 CPU。同一個 NUMA node 上沒有空的 CPU 時，會印出警告。
 目錄裡每個 rank 有 trace（rank0.csv）、設定（rank0.json）、程式輸出（rank0.out）與網卡 counter。
 不需要 root 權限，也不必重新編譯程式。每個被追蹤的行程會多用 128 MiB 記憶體放 ring。
-接下來兩步分析的是資料集裡同樣設定的那一次執行（job 517932），整理成同名的目錄，數字和第 4 部分一致。新錄的這一次分析起來幾乎一樣：每個 rank 登記 197–209 ms，預測保留暫存空間快 208 ms。
+接下來兩步分析的是資料集裡同樣設定的那一次執行（job 517932），整理成同名的目錄，數字和第 4 部分一致。用 record 新錄的另一次（job 557079）分析起來幾乎一樣：每個 rank 登記 197–209 ms，預測保留暫存空間快 208 ms。
 -->
 
 ---

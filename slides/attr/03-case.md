@@ -129,32 +129,31 @@ clicks: 2
 
 # 從 trace 數出登記次數
 
-```bash {1-3|4-7|8-11}
-$ cd logs/injection_matrix/I7_W2_4x1-517932/runs
-$ T2=0078_W2-I7xI4-4MB_removed_rails_C3_rep00.r0.trace.csv
-$ T8=0050_W2-I7xI4-4MB_injected_C3_rep00.r0.trace.csv
-$ awk -F, '$9 ~ /^ibv_reg_mr/' $T2 | wc -l
+```text {1-2|3-4|5-9}
+$ grep -c ibv_reg_mr runs/2rails-traced/rank0.csv
 1846
-$ awk -F, '$9 ~ /^ibv_reg_mr/' $T8 | wc -l
+$ grep -c ibv_reg_mr runs/8rails-traced/rank0.csv
 7126
-$ awk -F, '$9 ~ /^ibv_reg_mr/ {printf "0x%x %d\n", $11, $12}' \
-      $T2 | sort | uniq -c | sort -rn | head -2
-    878 0x303f020 1048576
-    878 0x2f3f010 1048576
+$ awk -F, '/ibv_reg_mr/ {printf "0x%x %d\n", $11, $12}' \
+    runs/2rails-traced/rank0.csv \
+    | sort | uniq -c | sort -rn | head -2
+    878 0x3671060 1048576
+    878 0x3571050 1048576
 ```
 
 ::note::
 
 <Note :notes="[
-  ['兩份都是 rank 0 的 trace。', 'T2 是預設 2 條 rail，T8 是 8 條。'],
-  ['trace 是 CSV 檔，第 9 欄是 API 名稱。', '2 條 rail：登記 1,846 次。', '8 條 rail：7,126 次，約 4 倍。'],
-  ['第 11 欄是被登記的位址。', '只有兩個 1 MiB 的位址，各 878 次。', '每次呼叫都在重新登記它們。'],
+  ['trace 是 CSV 檔，用 grep 就能數。', '2 條 rail：登記 1,846 次。'],
+  ['8 條 rail：7,126 次。', '約 4 倍，正好對應網卡數 2 → 8。'],
+  ['被登記的只有兩個 1 MiB 的位址。', '兩個各出現 878 次。', '每次呼叫都在重新登記它們。'],
 ]" />
 
 <!--
-指令與輸出都是實際的：job 517932，8 張網卡都可見，rank 0。T2 是預設 2 條 rail 的狀態，T8 是改用 8 條 rail 的狀態。
-UCX 實際呼叫的是 ibv_reg_mr_iova2，所以用 ^ibv_reg_mr 開頭比對；取消登記的 ibv_dereg_mr 不會被算進來。位址在第 11 欄，是十進位，所以用 printf 轉成十六進位；第 12 欄是長度。
-878 = 2 張網卡 × 439 次。8 條 rail 時，同樣兩個位址各 3,512 次，也就是 8 × 439。
+指令與輸出都是實際的。runs/ 底下是把 job 517932 的執行整理成的目錄（只有符號連結）：2rails-traced 是預設 2 條 rail、開 tracer 的一次，8rails-traced 是改用 8 條 rail、開 tracer 的一次。兩份都是 rank 0 的 trace。
+grep 算到的是 ibv_reg_mr_iova2，也就是 UCX 實際呼叫的版本；取消登記的 ibv_dereg_mr 不含這個字串，不會被算進來。ibtrace breakdown 印出的登記次數與 grep 完全相同。
+位址在第 11 欄，是十進位，所以用 printf 轉成十六進位；第 12 欄是長度。
+878 = 2 張網卡 × 439 次呼叫。8 條 rail 時，同樣兩個位址各 3,512 次，也就是 8 × 439。
 只開放一張網卡時，同樣兩個位址各 439 次，共 912 次。
 counter 看不到這件事：網卡只記錄送了多少位元組，不記錄登記了幾次記憶體。
 -->
@@ -180,6 +179,7 @@ chapter: Part 4 · Case Study
 只改 UCX 使用的網卡數，其他條件都相同。網卡數加倍，登記次數也幾乎加倍，因為每張網卡都要各自登記。
 都是 rank 0 一次執行的登記次數。1 張網卡來自只開放 mlx5_0 的情境（job 517932）；2、4、8 張來自 8 張都可見、改變 rail 數的診斷實驗（diag_rails，job 517043）。
 從 2 條到 8 條 rail，不開 tracer 量到的總時間多了 208 ms（job 517932）。
+ibtrace breakdown 量到的登記時間：2 條 rail 時每個 rank 198–211 ms，8 條 rail 時 394–414 ms，多出約 200 ms，和變慢的 208 ms 相當。
 所以多開 rail 變慢，不是因為傳輸變差，而是要重複登記的網卡變多了。傳輸估算只占約 10 %，省下的時間遠小於多出的登記。
 -->
 

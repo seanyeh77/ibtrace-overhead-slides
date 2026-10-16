@@ -1,20 +1,20 @@
 ---
 layout: section
-number: 5
-chapter: Part 5 · Model
+number: 4
+chapter: Part 4 · Model
+question: 怎麼從一次執行的 trace 算出 ΔT？
 ---
 
 # 預測模型
 
-- **5.1** 從 trace 預測每個動作的收益
-- **5.2** 關鍵路徑
-- **5.3** 案例的兩個預測怎麼算出來
-- **5.4** 評估方式
-- **5.5** 結果與誤差來源
+- **4.1** 從 trace 預測每個動作的收益
+- **4.2** 關鍵路徑
+- **4.3** 案例的兩個預測怎麼算出來
+- **4.4** 與傳統做法比較
 
 ---
 layout: textbook
-chapter: Part 5 · Model
+chapter: Part 4 · Model
 clicks: 2
 ---
 
@@ -40,7 +40,7 @@ clicks: 2
 
 ---
 layout: definition
-chapter: Part 5 · Model
+chapter: Part 4 · Model
 term: critical path
 kind: 關鍵路徑
 size: 52px
@@ -62,7 +62,7 @@ clicks: 2
 
 ---
 layout: textbook
-chapter: Part 5 · Model
+chapter: Part 4 · Model
 clicks: 2
 ---
 
@@ -88,7 +88,7 @@ clicks: 2
 
 ---
 layout: textbook
-chapter: Part 5 · Model
+chapter: Part 4 · Model
 clicks: 2
 ---
 
@@ -100,8 +100,8 @@ clicks: 2
 
 <Note :notes="[
   ['每次呼叫送 6 則 1 MiB 的訊息。', '每則從 11.8 µs 變 5.7 µs。', '400 次共省 14.6 ms。'],
-  ['每次呼叫重複登記 4 次。', '網卡從 2 張變 8 張，每次要多登記 3 次。', '登記加取消一次要 31.8 µs。', '400 次呼叫共多 152.8 ms。'],
-  ['合起來是 −138 ms，模型預測會變慢。', '實測慢了 208 ms。', '方向對，大小低估。'],
+  ['每次呼叫重複登記 4 次。', '網卡從 2 張變 8 張。', '每次要多登記 3 次。', '登記加取消一次要 31.8 µs。', '400 次呼叫共多 152.8 ms。'],
+  ['合起來是 −138 ms。', '模型預測會變慢。', '實測慢了 208 ms。', '方向對，大小低估。'],
 ]" />
 
 <!--
@@ -112,8 +112,44 @@ clicks: 2
 -->
 
 ---
+layout: textbook
+chapter: Part 4 · Model
+ltag: Terminal
+clicks: 2
+---
+
+# 模型的輸出：依預測收益排序的建議
+
+```text {1-5|6-7|8-9}
+$ ibtrace suggest runs/2rails-traced
+gain (ms, % of 572.3 ms)  action and setting
+ +210.1  +36.7 %  keep scratch buffers:
+                  MALLOC_TRIM_THRESHOLD_=1073741824
+                  MALLOC_MMAP_THRESHOLD_=33554432
+  +30.2   +5.3 %  stop other work on the ranks' CPUs
+ -138.1  -24.1 %  use 8 rails: UCX_MAX_RNDV_RAILS=8
+not checked: NUMA binding (ranks already on the HCA's node);
+  competing traffic (none seen); fewer rails (already 2)
+```
+
+::note::
+
+<Note :notes="[
+  ['第一名是保留暫存空間。', '連要設的環境變數都列出來。'],
+  ['改用 8 條 rail 是負的。', '代表它會讓程式更慢。'],
+  ['沒有評估的動作也會說明原因。', '例如 NUMA 綁定已經正確。'],
+]" />
+
+<!--
+ibtrace suggest 印出的就是前兩頁算出來的數字。預測收益的百分比是除以程式回報的 572.3 ms。
+多開 rail 是負的，因為每多一張網卡，每塊暫存空間就要多登記一次：傳輸省 14.6 ms，多出的登記 152.8 ms。
+如果只看 breakdown，可能會以為「登記很多，那就多開 rail 分散一下」；模型給出的是相反的答案。
+第二名「移除干擾 +30 ms」可能是誤判：那些停頓可能來自新配置的暫存空間，見本部分最後一頁。
+-->
+
+---
 layout: rows
-chapter: Part 5 · Model
+chapter: Part 4 · Model
 reveal: true
 clicks: 2
 items:
@@ -134,7 +170,7 @@ items:
 
 <Note :notes="[
   ['案例中網卡的使用率約 5 %。', '算出改用 8 條 rail 快 21 ms。'],
-  ['案例中等待最多的 rank 是 146 ms。', '全部算成改用 8 條 rail 的收益。'],
+  ['等待最多的 rank 是 146 ms。', '全部算成改用 8 條 rail 的收益。'],
   ['同一個動作，模型預測 −138 ms。', '實測慢了 208 ms。'],
 ]" />
 
@@ -143,99 +179,12 @@ counter 做法的收益 = 程式時間 × 最大的網卡使用率 × (1 − 目
 profiler 做法對四類時間各取四個 rank 中最大的總和，直接當成收益：等待 145.9、登記 210.6、其他 104.1、停頓 12.9 ms。等待被當成多開 rail 能省下的時間。
 counter 做法代表傳統的網路監控：有外來流量就判斷為網路被佔用。profiler 做法代表傳統的效能分析工具。兩者都是我們依照它們的典型做法實作的，作為比較的基準（baseline）。
 profiler 做法的問題是忽略關鍵路徑：花最多時間的地方不一定在最慢的 rank 上，修掉也未必變快。
--->
-
----
-layout: textbook
-chapter: Part 5 · Model
-clicks: 1
----
-
-# 先定版，再在沒看過的程式上評估一次
-
-<AtEval />
-
-::note::
-
-<Note :notes="[
-  ['第一版用一對一傳輸的資料開發。', '定版後不再修改。', '再到 allreduce 上評估一次。'],
-  ['第二版已經看過 allreduce 的資料。', '所以改用全新的程式評估。', '包括 alltoall 與真實應用 miniFE。'],
-]" />
-
-<!--
-這個流程避免「看了答案再調整」：如果用同一份資料開發又評估，結果一定好看，但不代表能用在新的程式上。
-定版的方式是在 git 打上標籤，之後不再修改。
-第一版用一對一傳輸的資料開發，在 allreduce 上評估。第二版修正了第一版的錯誤，所以第一版的測試資料已經看過，不能再用；第二版改在全新的程式上評估：
-osu_alltoall 是每個 rank 都送資料給其他每個 rank 的測試程式；miniFE 是一個真實的科學計算小程式，用有限元素法求解方程式。兩者各 4 個節點，共 960 次執行。
--->
-
----
-layout: textbook
-chapter: Part 5 · Model
-clicks: 2
----
-
-# 第二版在沒看過的程式上的結果
-
-| 問題 | 本研究 | counter 做法 | profiler 做法 |
-| --- | ---: | ---: | ---: |
-| 實測收益最大的動作排在第一 | **93 %** | 53 % | 53 % |
-| 預測會變快或變慢，方向正確 | **20 / 22** | 13 / 22 | 17 / 22 |
-| 預測收益的誤差（百分點） | 38.2 | 37.2 | 72.8 |
-
-::note::
-
-<Note :notes="[
-  ['第一列：模型排第一的，實測也最好嗎？', '模型 93 %，傳統做法都是 53 %。'],
-  ['第二列：預測變快或變慢，方向對嗎？', '22 組中，模型對了 20 組。'],
-  ['第三列：預測和實測差多少，越小越好。', '模型與 counter 做法相當。', '比 profiler 做法好得多。'],
-]" />
-
-<!--
-方向錯的其中一組是 alltoall 1 MiB 改用更多 rail：模型預測會變快，實際並沒有。
-誤差的單位是百分點：例如實測快 30 %、預測快 40 %，誤差就是 10 個百分點。
-解讀：在「該做哪一個、會不會有害」這種決策問題上，模型明顯勝出；在「能快多少」的數字上，目前與 counter 做法打平。
-這是照實報告的結果，事先也指定了誤差（第三列）為主要指標，比較對象是 profiler 做法，這一項模型勝出。
-第一版在 allreduce 上的結果：誤差 18.3 個百分點，profiler 做法為 22.7、counter 做法為 58.9；只有模型把多開 rail 預測為變慢。
+實際使用時，ibtrace suggest --baselines 會把三種做法並列印出：改用 8 條 rail，模型 −138.1、counter 做法 +20.9、profiler 做法 +145.9 ms。
 -->
 
 ---
 layout: rows
-chapter: Part 5 · Model
-reveal: true
-clicks: 2
-items:
-  - label: 誤差來源 1
-    title: 常數不適用大量傳輸
-    text: ['常數來自量測延遲的小型測試。', '大量傳輸時，低估數倍到數十倍。']
-  - label: 誤差來源 2
-    title: 計算被當成等待
-    text: ['miniFE 的計算被當成 CPU 被搶。', '正常的執行也出現假的瓶頸。']
-  - label: 下一版
-    title: 就地校準
-    text: ['不用外部常數。', '改用沒受影響的網卡當對照。']
----
-
-# 預測收益大小的兩個誤差來源
-
-::note::
-
-<Note :notes="[
-  ['alltoall 64 KiB<br>實測 4.9–18.6 µs<br>常數 1.2–2.7 µs', 'NUMA 1 MiB<br>實測 19.7 µs<br>常數 0.35 µs'],
-  ['每一輪計算 4–6 ms。', '都被算成 CPU 被搶。'],
-  ['拿其他網卡當對照。', '兩邊的差值就是懲罰。'],
-]" />
-
-<!--
-兩個誤差來源都已經找到具體的證據。
-來源 1：例如 alltoall 64 KiB 時，網路被佔用讓每則訊息多花 4.9–18.6 µs，常數只有 1.2–2.7 µs；1 MiB 的 NUMA 懲罰實測 19.7 µs，常數只有 0.35 µs。
-來源 2 是分類上的錯誤，不是方法本身的問題。
-就地校準的好處是自動適應延遲型與頻寬型的情境，也不需要知道競爭流量用了幾條連線這類看不到的資訊。
--->
-
----
-layout: rows
-chapter: Part 5 · Model
+chapter: Part 4 · Model
 reveal: true
 clicks: 2
 items:
@@ -266,4 +215,5 @@ items:
 改用 8 條 rail：在 collective 中，多開 rail 的傳輸收益在其他測試裡沒有實現（alltoall 1 MiB：預測 +45.7 ms，實測 −49.0 ms），所以 +14.6 ms 可能根本不存在。登記成本用的是單張網卡的小型測試；同一塊記憶體依序在多張網卡上登記的實測更貴：從 2 張到 8 張，每塊多 224 µs，模型用的是 191 µs。兩點都換掉，預測是 −179 ms，與實測仍差約 29 ms。
 可能的誤判：如果那些停頓真的來自新 buffer，保留暫存空間之後它們也會消失，「移除干擾」這個建議就是錯的。
 開發集上也是同樣的模式：方向一致，大小偏小。
+這只是一個案例。下一部分在沒看過的程式上評估模型。
 -->

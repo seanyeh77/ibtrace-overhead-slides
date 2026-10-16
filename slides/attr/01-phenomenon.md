@@ -1,18 +1,19 @@
 ---
 layout: section
 number: 1
-chapter: Part 1 · Background
+chapter: Part 1 · Phenomenon
+question: 閒置的 rail，該不該打開？
 ---
 
-# 背景
+# 反直覺的現象
 
 - **1.1** 叢集、網卡與 rail
 - **1.2** 平行程式的通訊：allreduce
-- **1.3** 兩種觀察方式：counter 與 trace
+- **1.3** 多開 rail，allreduce 反而變慢
 
 ---
 layout: textbook
-chapter: Part 1 · Background
+chapter: Part 1 · Phenomenon
 ---
 
 # 背景名詞
@@ -27,13 +28,13 @@ chapter: Part 1 · Background
 </div>
 
 <!--
-這六個名詞會貫穿整份簡報。最重要的是 rail：後面的主要案例就是「該用幾條 rail」。
+這六個名詞會貫穿整份簡報。最重要的是 rail：整份報告從「該用幾條 rail」這個問題開始。
 下一頁把這些名詞畫成一張圖。
 -->
 
 ---
 layout: textbook
-chapter: Part 1 · Background
+chapter: Part 1 · Phenomenon
 clicks: 1
 ---
 
@@ -44,8 +45,8 @@ clicks: 1
 ::note::
 
 <Note :notes="[
-  ['程式把資料交給 UCX。', 'UCX 透過 8 張 HCA 送出。', '兩邊的 HCA 一對一相連，形成 8 條 rail。'],
-  ['UCX 送大訊息時，預設只用 2 條 rail。', '其餘 6 條閒置。', '這是主要案例的起點。'],
+  ['程式把資料交給 UCX。', 'UCX 透過 8 張 HCA 送出。', '兩邊的 HCA 一對一相連。', '這樣就形成 8 條 rail。'],
+  ['UCX 預設只用 2 條 rail。', '其餘 6 條閒置。', '後面的案例就從這裡開始。'],
 ]" />
 
 <!--
@@ -56,12 +57,12 @@ UCX 的參數 UCX_MAX_RNDV_RAILS 預設為 2，用 ucx_info -c 可以看到。
 
 ---
 layout: textbook
-chapter: Part 1 · Background
+chapter: Part 1 · Phenomenon
 ltag: Terminal
 clicks: 2
 ---
 
-# 在節點上查看網卡
+# 查看網卡與 UCX 的 rail 設定
 
 ```bash {1-4|5-7|8-9}
 $ for d in mlx5_0 mlx5_3 mlx5_4 mlx5_5 \
@@ -71,27 +72,28 @@ $ for d in mlx5_0 mlx5_3 mlx5_4 mlx5_5 \
 mlx5_0 400 Gb/sec (4X NDR)
 mlx5_3 400 Gb/sec (4X NDR)
 ...                          # 其餘 6 張相同
-$ cat /sys/class/infiniband/mlx5_0/device/numa_node
-0
+$ ucx_info -c | grep MAX_RNDV_RAILS
+UCX_MAX_RNDV_RAILS=2
 ```
 
 ::note::
 
 <Note :notes="[
   ['/sys 底下的檔案記錄硬體資訊。', '一般使用者也能讀。', '這個迴圈讀出 8 張網卡的速度。'],
-  ['每張都是 400 Gb/s。', '兩個節點之間有 8 條 400 Gb/s 的 rail。'],
-  ['numa_node 是網卡旁邊那顆 CPU 的編號。', 'mlx5_0 接在 CPU 0 旁邊。', 'NUMA 實驗會故意綁到另一顆 CPU。'],
+  ['每張都是 400 Gb/s。', '8 張網卡就是 8 條 rail。'],
+  ['ucx_info -c 列出 UCX 的參數。', '大訊息最多只用 2 條 rail。', '其餘 6 條閒置。'],
 ]" />
 
 <!--
 Linux 把硬體資訊放在 /sys 底下，變成一般使用者也能讀的檔案。
 mlx5 是 Mellanox（現為 NVIDIA）網卡的驅動名稱，後面的數字是網卡編號。節點上還有其他不屬於 InfiniBand 的網卡，所以編號不連續。
 4X NDR 代表四條通道、每條 100 Gb/s 的 NDR 規格。
+UCX_MAX_RNDV_RAILS 是 UCX 送大訊息時最多使用的 rail 數，預設為 2。一對一傳輸時，網卡的 counter 也顯示 8 張只有 2 張有流量。
 -->
 
 ---
 layout: definition
-chapter: Part 1 · Background
+chapter: Part 1 · Phenomenon
 term: allreduce
 kind: MPI 的集體通訊
 clicks: 2
@@ -111,57 +113,53 @@ AI 訓練的每一步都要用 allreduce 把各個 GPU 算出的梯度加總，�
 -->
 
 ---
-layout: textbook
-chapter: Part 1 · Background
-clicks: 2
+layout: statement
+chapter: Part 1 · Phenomenon
 ---
 
-# 兩種觀察方式：counter 與 trace
+# 直覺：rail 閒著，就多開
 
-<AtTraceCounter />
+程式在 4 個節點上反覆做 4 MiB 的 allreduce。
 
-::note::
+8 條 rail 只用了其中 2 條。
 
-<Note :notes="[
-  ['程式透過 UCX 與 verbs 把資料交給 HCA。', 'verbs 是操作網卡的最底層 API。'],
-  ['HCA 的 counter 記錄送出多少位元組。', '一般使用者就能讀。', '但它看不到程式呼叫了什麼。'],
-  ['tracer 在程式啟動時載入。', '它記下每一次呼叫的名稱與耗時。', '這份紀錄就是 trace。'],
-]" />
+監控工具看到的是：網卡閒置。
+
+直覺的做法是改用 8 條。
 
 <!--
-傳統的網路監控只看 counter；trace 則是 ibtrace 提供的。後面的主要案例會說明，只看 counter 會得到錯誤的建議。
-ibtrace 的 tracer 叫 libibtrace，用 LD_PRELOAD 的方式載入：程式不需要重新編譯，也不需要任何特權。
-開啟 tracer 會讓程式變慢一點，這個額外的成本稱為 overhead，上一次報告專門處理它。
+這一頁刻意先站在「只看使用率」的角度：這是傳統監控工具會給的建議，也是一般人會做的事。
+改的方式只要一個環境變數：UCX_MAX_RNDV_RAILS=8。
+設定：4 個節點、每節點 1 個 rank，8 張網卡都可見，UCX_MAX_RNDV_RAILS 是預設的 2（job 517932）。這個設定就是整份報告的案例。
 -->
 
 ---
 layout: textbook
-chapter: Part 1 · Background
-ltag: Terminal
+chapter: Part 1 · Phenomenon
 clicks: 1
 ---
 
-# 讀取 counter 與錄下 trace
+# 多開 rail 在一對一傳輸變快，在 allreduce 卻變慢
 
-```bash {1-4|5-7}
-# counter：累計送出的資料量，以 4 位元組為單位
-$ C=/sys/class/infiniband/mlx5_0/ports/1/counters
-$ cat $C/port_xmit_data
-352187340021
-# trace：ibmon 啟動程式並載入 tracer，記錄寫進 trace.csv
-$ ibmon -o trace.csv -- ./ucx_ib_test ...
-ibmon: 41207 records read, 0 lost to ring overrun in 0 gap(s)
-```
+<GroupedBars
+  :cats="[['ucx_ib_test', 'one to one, 4 MiB'], ['osu_allreduce', '4 ranks, 4 MiB']]"
+  :series="[
+    { name: '2 rails, default', fill: '#e7e7e7', values: [100, 100] },
+    { name: '8 rails', fill: '#6eea9e', values: [59.6, 138.0] },
+  ]"
+  :max="150" :step="25" unit="Time relative to 2 rails, %" :digits="1" :width="1300" :height="660" :bar-w="170"
+  reveal
+/>
 
 ::note::
 
 <Note :notes="[
-  ['counter 是一個不斷累加的數字。', '兩次讀取相減再除以時間，就是流量。', '它不會告訴你程式在做什麼。'],
-  ['ibmon 啟動程式時載入 tracer。', '結束時印出讀到與遺失的筆數。'],
+  ['以預設的 2 條 rail 為 100 %。', '比較改用 8 條之後的時間。'],
+  ['一對一傳輸快了 40 %。', 'allreduce 反而慢了 38 %。', '下一部分用 trace 找原因。'],
 ]" />
 
 <!--
-輸出的數字是示意：counter 的值取決於開機以來的流量，trace 的筆數取決於程式跑多久。
-ibmon 從共享記憶體讀出每一筆記錄。結束時一定會印出最後那一行；遺失不為 0 的執行，在資料集中一律標為無效。
-LD_PRELOAD 是 Linux 的機制：讓程式啟動時先載入指定的函式庫，於是 tracer 可以攔截程式對 UCX 與 verbs 的呼叫，不必修改或重新編譯程式。
+兩組來自不同的程式。一對一傳輸是 ucx_ib_test 在 2 個節點上的 4 MiB ping-pong：62.9 ms 降到 37.5 ms，單向頻寬從 67 GB/s 升到 110 GB/s。
+allreduce 是 osu_allreduce，4 個節點、8 張網卡都可見（job 517932）：548.8 ms 變成 757.3 ms，每種狀態不開 tracer 跑 10 次取中位數。
+allreduce 變慢的結果和我們事先寫下的預期相反（事先寫下預期的做法見第 5 部分）。依照規則，預期沒有修改，結果照實記為預測錯誤，再去找原因。
 -->

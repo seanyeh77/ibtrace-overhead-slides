@@ -150,3 +150,7 @@
 .tb-note .tb-note-text > p { text-wrap: balance; }
 .tb-note .tb-note-text > p + p { margin-top: 14px; }
 .def-body p + p { margin-top: -6px; }
+
+/* Section slides: the question the part answers, above its title. */
+.sec-q { font-size: 40px; line-height: 1.35; color: var(--tb-ink); margin-bottom: 34px; padding-bottom: 28px; border-bottom: 1.5px solid var(--tb-rule); }
+.sec-q span { display: block; margin-bottom: 10px; font-size: 19px; font-weight: 600; letter-spacing: .08em; color: var(--tb-teal); }

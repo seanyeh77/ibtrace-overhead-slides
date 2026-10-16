@@ -1,19 +1,19 @@
 ---
 layout: section
-number: 3
-chapter: Part 3 · Tool and Dataset
+number: 5
+chapter: Part 5 · Validation
+question: 換一個程式，預測還準嗎？
 ---
 
-# 量測工具與資料集
+# 驗證
 
-- **3.1** ring 被繞圈時不再卡住
-- **3.2** 預先配置記憶體，overhead 再降一半
-- **3.3** 每一筆都有實測答案的資料集
-- **3.4** 開 tracer 不改變結論
+- **5.1** trace 不能掉資料，也不能拖慢程式
+- **5.2** 每一筆都有實測答案的資料集
+- **5.3** 在沒看過的程式上評估
 
 ---
 layout: textbook
-chapter: Part 3 · Tool and Dataset
+chapter: Part 5 · Validation
 clicks: 2
 ---
 
@@ -24,12 +24,13 @@ clicks: 2
 ::note::
 
 <Note :notes="[
-  ['tracer 把記錄寫進環形的 ring。', '寫到尾端就繞回開頭。', 'ibmon 跟在後面依序讀出。'],
-  ['tracer 寫得太快，繞了一圈。', '兩筆還沒讀的記錄被蓋掉。', '舊版 ibmon 一直等第 3 號，於是卡死。'],
-  ['修正後，ibmon 跳到最舊的有效記錄。', '它會記下遺失了 2 筆。', 'ring 加大到約 100 萬格後，遺失為 0。'],
+  ['評估要用上千份 trace。', 'tracer 把記錄寫進環形的 ring。', '寫到尾端就繞回開頭。', 'ibmon 跟在後面依序讀出。'],
+  ['tracer 寫得太快，繞了一圈。', '兩筆還沒讀的記錄被蓋掉。', '舊版 ibmon 一直等第 3 號。', '它因此卡死。'],
+  ['修正後，ibmon 跳到最舊的記錄。', '它會記下遺失了 2 筆。', 'ring 加大到約 100 萬格。', '之後遺失為 0。'],
 ]" />
 
 <!--
+評估要用上千次執行的 trace，每一份都必須完整，tracer 也不能改變結果。接下來三頁是為此做的修正。
 ring 是環形的緩衝區；格子裡的數字是記錄的序號。MPI 程式產生記錄的速度很快，所以會被繞圈。
 舊版的 ibmon 只會等「序號剛好相等」的那一筆。修正時另外發現，舊版在被繞圈時還可能讀到寫到一半的記錄；新的回歸測試會故意製造繞圈，確認這兩個問題都不再發生。
 另一項修正：MPI 每次檢查「請求完成了沒」都會記一筆。現在把連續的「還沒完成」合併成一筆，記錄量減少約三分之二。
@@ -37,7 +38,7 @@ ring 是環形的緩衝區；格子裡的數字是記錄的序號。MPI 程式�
 
 ---
 layout: definition
-chapter: Part 3 · Tool and Dataset
+chapter: Part 5 · Validation
 term: page fault
 kind: 作業系統的記憶體機制
 clicks: 1
@@ -57,7 +58,7 @@ MAP_POPULATE 是建立 ring 時的一個選項，讓作業系統一次把所有�
 
 ---
 layout: textbook
-chapter: Part 3 · Tool and Dataset
+chapter: Part 5 · Validation
 clicks: 2
 ---
 
@@ -77,7 +78,7 @@ clicks: 2
 ::note::
 
 <Note :notes="[
-  ['柱子是開 tracer 後每次操作多花的時間。', '灰色是舊的 ring，約 6.5 萬格。'],
+  ['柱子是每次操作多花的時間。', '灰色是舊的 ring，約 6.5 萬格。'],
   ['ring 加大到約 100 萬格。', '第一次寫到的頁變多。', '64 KiB 的 overhead 反而變大。'],
   ['建立 ring 時一次配置所有頁。', 'overhead 降到原本的一半左右。', '更新後的範圍是 0.84–2.91 µs。'],
 ]" />
@@ -91,7 +92,7 @@ allreduce 這兩組是 2 個節點各 1 個 rank 的 osu_allreduce，ucx_ib_test
 
 ---
 layout: textbook
-chapter: Part 3 · Tool and Dataset
+chapter: Part 5 · Validation
 ---
 
 # 用一般使用者的權限製造與移除瓶頸
@@ -106,14 +107,14 @@ chapter: Part 3 · Tool and Dataset
 
 <!--
 這個叢集沒有 root 權限，所以每一種瓶頸都必須用一般使用者能做的方式製造，也要有一般使用者能做的優化動作。
-NUMA：伺服器有兩顆 CPU，每張網卡接在其中一顆旁邊；程式跑在另一顆時，資料要多跨一段 CPU 之間的連線。
+NUMA：伺服器有兩顆 CPU，每張網卡接在其中一顆旁邊；程式跑在另一顆時，資料要多跨一段 CPU 之間的連線。網卡接在哪一顆旁邊，可以用 cat /sys/class/infiniband/mlx5_0/device/numa_node 查到：mlx5_0 是 0。
 灌流量用的是 perftest 的 ib_write_bw，可以調整強度，實驗用了約 100、200、390 Gb/s 三種。
 對照組（negative control）是「看起來有異常，但不應該有影響」的情境，用來檢查方法會不會誤報。
 -->
 
 ---
 layout: textbook
-chapter: Part 3 · Tool and Dataset
+chapter: Part 5 · Validation
 ltag: Terminal
 clicks: 3
 ---
@@ -136,7 +137,7 @@ $ UCX_MAX_RNDV_RAILS=8 ./program
 
 <Note :notes="[
   ['taskset 把行程綁在指定的核心。', '忙迴圈和程式搶同一個核心。', '移到別的核心就是優化動作。'],
-  ['numactl 指定 CPU 與記憶體的位置。', '綁到網卡另一側，資料要多跨一段。', '綁回 0 號就是優化動作。'],
+  ['numactl 指定 CPU 與記憶體。', '綁到網卡另一側，資料要多跨一段。', '綁回 0 號就是優化動作。'],
   ['ib_write_bw 拿來當競爭流量。', 'rate_limit 調整流量的強度。', '對照組把流量灌到沒用的網卡。'],
   ['環境變數只影響這一次執行。', '一對一傳輸時快 40 %。', 'allreduce 時反而慢 38 %。'],
 ]" />
@@ -152,7 +153,7 @@ ib_write_bw 是 perftest 套件的頻寬測試程式。它需要兩端：另一�
 layout: rows
 numbered: true
 reveal: true
-chapter: Part 3 · Tool and Dataset
+chapter: Part 5 · Validation
 clicks: 3
 items:
   - title: 製造瓶頸
@@ -169,13 +170,13 @@ items:
 
 <!--
 job 是向叢集排程系統 Slurm 申請的一次執行，期間使用同一批節點。換一對節點，基準時間可能差 10–33 %，所以只比較同一個 job 內的結果。
-事先寫下預期，是為了避免看到結果之後才回頭找解釋。實際上有幾項預期沒有命中，這些都照實記錄，其中一項就是後面的主要案例。
+事先寫下預期，是為了避免看到結果之後才回頭找解釋。實際上有幾項預期沒有命中，這些都照實記錄，其中一項就是第 1 部分的多開 rail。
 最終資料集共 1,240 次執行，trace 遺失 0 筆；另外為最後的測試收集了 960 次，合計 2,200 次。
 -->
 
 ---
 layout: textbook
-chapter: Part 3 · Tool and Dataset
+chapter: Part 5 · Validation
 ltag: Terminal
 clicks: 2
 ---
@@ -195,9 +196,9 @@ $ squeue -w "$SLURM_JOB_NODELIST"   # 執行中確認只有自己的 job
 ::note::
 
 <Note :notes="[
-  ['想獨占節點，避免別人干擾。', '但這個叢集不允許獨占。', '改成申請整台的 GPU、CPU 與記憶體。'],
+  ['想獨占節點，避免別人干擾。', '但這個叢集不允許獨占。', '所以把整台的資源都申請下來。'],
   ['sbatch 向 Slurm 申請 4 個節點。', '環境變數決定這一批跑哪些情境。'],
-  ['開始、中間與結束各查一次 squeue。', '確認節點上只有自己的工作。'],
+  ['執行中查三次 squeue。', '確認節點上只有自己的工作。'],
 ]" />
 
 <!--
@@ -209,7 +210,7 @@ matrix.sbatch 會把這一批的所有條件以固定的隨機種子打亂順序
 
 ---
 layout: textbook
-chapter: Part 3 · Tool and Dataset
+chapter: Part 5 · Validation
 clicks: 1
 ---
 
@@ -227,8 +228,8 @@ clicks: 1
 ::note::
 
 <Note :notes="[
-  ['每一列是 ΔT 的比值：開 tracer ÷ 不開。', '1 代表 tracer 不影響結論。', '全部 32 組的中位數是 1.02。'],
-  ['例外是 NUMA 錯置：開 tracer 時效果變小。', '這一類改從設定資訊判斷。'],
+  ['每一列是 ΔT 的比值。', '比值 = 開 tracer ÷ 不開。', '1 代表 tracer 不影響結論。', '全部 32 組的中位數是 1.02。'],
+  ['例外是 NUMA 錯置。', '開 tracer 時，效果變小。', '這一類改從設定資訊判斷。'],
 ]" />
 
 <!--
@@ -236,5 +237,93 @@ clicks: 1
 方塊是中位數，橫線是各情境的範圍。沒有任何一組方向相反。
 搶 CPU 的比值略高於 1：tracer 本身會用到一點 CPU，CPU 被搶時多被拖一點。
 NUMA 錯置改從設定判斷，也就是比對程式的 CPU 和網卡在不在同一側。原因已排除攔截本身、ring 的位置和 ibmon 的位置，仍未完全確認，這裡照實列為限制。
-重新登記是下一節的主要案例。
+重新登記就是第 2 部分的案例。
+-->
+
+---
+layout: textbook
+chapter: Part 5 · Validation
+clicks: 1
+---
+
+# 先定版，再在沒看過的程式上評估一次
+
+<AtEval />
+
+::note::
+
+<Note :notes="[
+  ['第一版用一對一傳輸的資料開發。', '定版後不再修改。', '再到 allreduce 上評估一次。'],
+  ['第二版已經看過 allreduce 的資料。', '所以改用全新的程式評估。', '包括 alltoall 與真實應用 miniFE。'],
+]" />
+
+<!--
+這個流程避免「看了答案再調整」：如果用同一份資料開發又評估，結果一定好看，但不代表能用在新的程式上。
+定版的方式是在 git 打上標籤，之後不再修改。
+第一版用一對一傳輸的資料開發，在 allreduce 上評估。第二版修正了第一版的錯誤，所以第一版的測試資料已經看過，不能再用；第二版改在全新的程式上評估：
+osu_alltoall 是每個 rank 都送資料給其他每個 rank 的測試程式；miniFE 是一個真實的科學計算小程式，用有限元素法求解方程式。兩者各 4 個節點，共 960 次執行。
+-->
+
+---
+layout: textbook
+chapter: Part 5 · Validation
+clicks: 2
+---
+
+# 第二版在沒看過的程式上的結果
+
+| 問題 | 本研究 | counter 做法 | profiler 做法 |
+| --- | ---: | ---: | ---: |
+| 實測收益最大的動作排在第一 | **93 %** | 53 % | 53 % |
+| 預測會變快或變慢，方向正確 | **20 / 22** | 13 / 22 | 17 / 22 |
+| 預測收益的誤差（百分點） | 38.2 | 37.2 | 72.8 |
+
+::note::
+
+<Note :notes="[
+  ['第一列問：第一名選對了嗎？', '模型 93 %，傳統做法都是 53 %。'],
+  ['第二列問：方向對嗎？', '22 組中，模型對了 20 組。'],
+  ['第三列是預測的誤差。', '數字越小越好。', '模型與 counter 做法相當。', '比 profiler 做法好得多。'],
+]" />
+
+<!--
+方向錯的其中一組是 alltoall 1 MiB 改用更多 rail：模型預測會變快，實際並沒有。
+誤差的單位是百分點：例如實測快 30 %、預測快 40 %，誤差就是 10 個百分點。
+解讀：在「該做哪一個、會不會有害」這種決策問題上，模型明顯勝出；在「能快多少」的數字上，目前與 counter 做法打平。
+這是照實報告的結果，事先也指定了誤差（第三列）為主要指標，比較對象是 profiler 做法，這一項模型勝出。
+第一版在 allreduce 上的結果：誤差 18.3 個百分點，profiler 做法為 22.7、counter 做法為 58.9；只有模型把多開 rail 預測為變慢。
+-->
+
+---
+layout: rows
+chapter: Part 5 · Validation
+reveal: true
+clicks: 2
+items:
+  - label: 誤差來源 1
+    title: 常數不適用大量傳輸
+    text: ['常數來自量測延遲的小型測試。', '大量傳輸時，低估數倍到數十倍。']
+  - label: 誤差來源 2
+    title: 計算被當成等待
+    text: ['miniFE 的計算被當成 CPU 被搶。', '正常的執行也出現假的瓶頸。']
+  - label: 下一版
+    title: 就地校準
+    text: ['不用外部常數。', '改用沒受影響的網卡當對照。']
+---
+
+# 預測收益大小的兩個誤差來源
+
+::note::
+
+<Note :notes="[
+  ['alltoall 64 KiB<br>實測 4.9–18.6 µs<br>常數 1.2–2.7 µs', 'NUMA 1 MiB<br>實測 19.7 µs<br>常數 0.35 µs'],
+  ['每一輪計算 4–6 ms。', '都被算成 CPU 被搶。'],
+  ['拿其他網卡當對照。', '兩邊的差值就是懲罰。'],
+]" />
+
+<!--
+兩個誤差來源都已經找到具體的證據。案例中預測偏小（第 4 部分最後一頁），也屬於第一種。
+來源 1：例如 alltoall 64 KiB 時，網路被佔用讓每則訊息多花 4.9–18.6 µs，常數只有 1.2–2.7 µs；1 MiB 的 NUMA 懲罰實測 19.7 µs，常數只有 0.35 µs。
+來源 2 是分類上的錯誤，不是方法本身的問題。
+就地校準的好處是自動適應延遲型與頻寬型的情境，也不需要知道競爭流量用了幾條連線這類看不到的資訊。
 -->

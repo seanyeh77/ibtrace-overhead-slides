@@ -55,6 +55,40 @@ UCX 的參數 UCX_MAX_RNDV_RAILS 預設為 2，用 ucx_info -c 可以看到。
 -->
 
 ---
+layout: textbook
+chapter: Part 1 · Background
+ltag: Terminal
+clicks: 2
+---
+
+# 在節點上查看網卡
+
+```bash {1-4|5-7|8-9}
+$ for d in mlx5_0 mlx5_3 mlx5_4 mlx5_5 \
+>          mlx5_6 mlx5_7 mlx5_8 mlx5_9; do
+>   echo "$d $(cat /sys/class/infiniband/$d/ports/1/rate)"
+> done
+mlx5_0 400 Gb/sec (4X NDR)
+mlx5_3 400 Gb/sec (4X NDR)
+...                          # 其餘 6 張相同
+$ cat /sys/class/infiniband/mlx5_0/device/numa_node
+0
+```
+
+::note::
+
+<Note :notes="[
+  'Linux 把硬體資訊放在 /sys 底下，變成一般使用者也能讀的檔案。這個迴圈逐一讀出 8 張 InfiniBand 網卡的連線速度。',
+  '每張都是 400 Gb/s 的 NDR，所以兩個節點之間有 8 條 400 Gb/s 的 rail。',
+  'numa_node 告訴我們這張網卡接在哪一顆 CPU 旁邊：mlx5_0 接在 CPU 0。後面的 NUMA 實驗就是把程式故意綁到另一顆 CPU。',
+]" />
+
+<!--
+mlx5 是 Mellanox（現為 NVIDIA）網卡的驅動名稱，後面的數字是網卡編號。節點上還有其他不屬於 InfiniBand 的網卡，所以編號不連續。
+4X NDR 代表四條通道、每條 100 Gb/s 的 NDR 規格。
+-->
+
+---
 layout: definition
 chapter: Part 1 · Background
 term: allreduce
@@ -95,4 +129,35 @@ clicks: 2
 傳統的網路監控只看 counter；trace 則是 ibtrace 提供的。後面的主要案例會說明，只看 counter 會得到錯誤的建議。
 tracer 是用 LD_PRELOAD 的方式載入：程式不需要重新編譯，也不需要任何特權。
 開啟 tracer 會讓程式變慢一點，這個額外的成本稱為 overhead，上一次報告專門處理它。
+-->
+
+---
+layout: textbook
+chapter: Part 1 · Background
+ltag: Terminal
+clicks: 1
+---
+
+# 讀取 counter 與錄下 trace
+
+```bash {1-3|4-6}
+# counter：累計送出的資料量，以 4 位元組為單位
+$ cat /sys/class/infiniband/mlx5_0/ports/1/counters/port_xmit_data
+352187340021
+# trace：ibmon 啟動程式並載入 tracer，記錄寫進 trace.csv
+$ ibmon -o trace.csv -- ./ucx_ib_test ...
+ibmon: 41207 records read, 0 lost to ring overrun in 0 gap(s)
+```
+
+::note::
+
+<Note :notes="[
+  'counter 只是一個不斷累加的數字。兩次讀取相減再除以時間，就得到這段期間的流量；但它不會告訴你程式在做什麼。',
+  'ibmon 啟動被測程式時，用 LD_PRELOAD 載入 tracer，再從共享記憶體讀出每一筆記錄。結束時印出讀到幾筆、遺失幾筆。',
+]" />
+
+<!--
+輸出的數字是示意：counter 的值取決於開機以來的流量，trace 的筆數取決於程式跑多久。
+ibmon 結束時一定會印出最後那一行；遺失不為 0 的執行，在資料集中一律標為無效。
+LD_PRELOAD 是 Linux 的機制：讓程式啟動時先載入指定的函式庫，於是 tracer 可以攔截程式對 UCX 與 verbs 的呼叫，不必修改或重新編譯程式。
 -->

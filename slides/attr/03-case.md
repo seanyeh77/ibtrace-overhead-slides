@@ -115,6 +115,41 @@ clicks: 3
 ---
 layout: textbook
 chapter: Part 4 · Case Study
+ltag: Terminal
+clicks: 2
+---
+
+# 從 trace 數出登記次數
+
+```bash {1-3|4-5|6-9}
+# rank 0 的 trace 中，登記記憶體的呼叫有幾次
+$ grep -c ibv_reg_mr rails2/rank0.csv
+1846
+$ grep -c ibv_reg_mr rails8/rank0.csv
+7126
+# 被登記的位址：同樣兩個位址反覆出現
+$ grep ibv_reg_mr rails2/rank0.csv | cut -d, -f6 | sort | uniq -c
+    878 0x7f2c4a200000
+    878 0x7f2c4a400000
+```
+
+::note::
+
+<Note :notes="[
+  'trace 是一般的 CSV 文字檔，每一行是一次呼叫，所以用 grep 就能數。預設 2 條 rail 時，rank 0 一次執行登記了 1,846 次。',
+  '只把 rail 改成 8 條，登記次數變成 7,126 次，幾乎是 4 倍，正好對應網卡數從 2 變 8。',
+  '把被登記的位址列出來數，同樣兩個位址各出現 878 次：每次 allreduce 都在重新登記同兩塊暫存空間。',
+]" />
+
+<!--
+次數是實際量到的值；檔名、欄位編號與位址是示意，實際以 trace 的格式為準。
+grep -c ibv_reg_mr 也會算到 ibv_reg_mr_iova2，這正是 UCX 實際呼叫的版本。
+counter 看不到這件事：網卡只記錄送了多少位元組，不記錄登記了幾次記憶體。
+-->
+
+---
+layout: textbook
+chapter: Part 4 · Case Study
 ---
 
 # 登記次數與使用的網卡數成正比

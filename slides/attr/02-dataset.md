@@ -182,29 +182,29 @@ clicks: 2
 
 # 申請節點並執行一整批實驗
 
-```bash {1-2|3-6|7}
-$ sbatch --exclusive -N 2 matrix.sbatch
-sbatch: error: Exclusive mode is not allowed
-# 改成申請整台節點的 GPU、CPU 與記憶體
-$ sbatch -N 2 --gpus-per-node=8 --cpus-per-gpu=12 \
-         --mem=0 matrix.sbatch
-Submitted batch job 517929
+```bash {1-3|4-6|7}
+# matrix.sbatch 的標頭：不能用 --exclusive，改成申請整台節點
+#SBATCH --ntasks-per-node=1 --cpus-per-task=96
+#SBATCH --gres=gpu:8 --mem=0
+$ GROUP=i7 MX=W2 sbatch -N 4 \
+      docs/injection_matrix/scripts/matrix.sbatch
+Submitted batch job 517932
 $ squeue -w "$SLURM_JOB_NODELIST"   # 執行中確認只有自己的 job
 ```
 
 ::note::
 
 <Note :notes="[
-  ['sbatch 向 Slurm 申請節點。', '想獨占節點，避免別人干擾。', '但這個叢集不允許獨占。'],
-  ['改成申請整台的 GPU、CPU 與記憶體。', '別人的工作就排不進來。'],
+  ['想獨占節點，避免別人干擾。', '但這個叢集不允許獨占。', '改成申請整台的 GPU、CPU 與記憶體。'],
+  ['sbatch 向 Slurm 申請 4 個節點。', 'GROUP 與 MX 選出這一批的情境。'],
   ['開始、中間與結束各查一次 squeue。', '確認節點上只有自己的工作。'],
 ]" />
 
 <!--
-517929 是最終資料集中一對一傳輸那一批。
-獨占節點的選項是 --exclusive，這個叢集不允許使用。
+517932 是最終資料集中重新登記那一批：4 個節點，跑了 6 分 21 秒。一對一傳輸那一批是 517929，2 個節點。
+標頭的完整內容：--account、--partition=dev、--nodes=2（被命令列的 -N 4 覆蓋）、--ntasks-per-node=1、--gres=gpu:8、--cpus-per-task=96、--mem=0、--time=02:00:00。
+每節點有 8 張 GPU 與 96 個 CPU；全部申請下來，別人的工作就排不進來。
 matrix.sbatch 會把這一批的所有條件以固定的隨機種子打亂順序，逐一執行，每次執行在 manifest.csv 記一行：條件、開始與結束時間、結束碼、輸出檔位置。
-每節點有 8 張 GPU、每張最多搭配 12 個 CPU，所以 --cpus-per-gpu=12 就是 96 個 CPU。
 -->
 
 ---

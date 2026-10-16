@@ -9,7 +9,7 @@ const kinds = [
   { name: 'wait', fill: '#ffffff' },
   { name: 'register', fill: '#6eea9e' },
   { name: 'stall', fill: '#aeacac' },
-  { name: 'compute', fill: '#adf0c7' },
+  { name: 'other', fill: '#adf0c7' },
 ]
 const ranks = [
   [0.45, 0.38, 0.02, 0.15],
@@ -28,8 +28,8 @@ const segs = (r) => {
   })
 }
 const actions = [
-  { name: 'keep buffers', gain: '+180 ms', fill: '#adf0c7' },
-  { name: 'use 8 rails', gain: '−210 ms', fill: '#aeacac' },
+  { name: 'keep buffers', gain: '+210 ms', fill: '#adf0c7' },
+  { name: 'use 8 rails', gain: '−138 ms', fill: '#aeacac' },
 ]
 </script>
 

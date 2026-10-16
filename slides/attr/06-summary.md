@@ -6,7 +6,7 @@ big: true
 
 # 重點整理
 
-<Tile variant="hero" label="主要發現" value="看使用率會給出有害的建議">counter 的建議：慢 38 %。<br>trace 的建議：快 43 %。</Tile>
+<Tile variant="hero" label="主要發現" value="看使用率會給出有害的建議">counter 的建議：慢 38 %。<br>trace 的建議：快 45 %。</Tile>
 <Tile label="Tracer overhead" value="0.84–2.91 µs">每次操作多花的時間。<br>約為上次報告的一半。</Tile>
 <Tile label="資料集" value="2,200 次執行">每一筆的 ΔT 都來自實際執行。</Tile>
 <Tile variant="accent" label="選對優化動作" value="93 %">在沒看過的程式上。<br>傳統做法都是 53 %。</Tile>

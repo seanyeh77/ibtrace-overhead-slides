@@ -21,7 +21,7 @@ items:
   - title: 錄下 trace
     text: ['在原本的指令前加上 ibmon。', '不用改程式，也不需要特權。']
   - title: 看時間花在哪裡
-    text: ['分析 trace，拆開每個 rank 的時間。', '分成等待、登記、停頓與計算。']
+    text: ['分析 trace，拆開每個 rank 的時間。', '分成等待、登記、停頓與其他。']
   - title: 看排序後的建議
     text: ['模型依預測收益排出優化動作。', '有害的動作是負數。']
   - title: 實際執行驗證
@@ -32,7 +32,8 @@ items:
 
 <!--
 這是目前的使用流程。前三步只需要跑一次被測程式；第四步是再跑一次，用實測結果確認建議是對的。
-目前這幾步是分開的腳本，下一步要整合成一個指令。後面四頁用重新登記記憶體的案例，把每一步實際走一次。
+目前這幾步還是分開的：錄 trace 用 ibmon，分析與預測是呼叫模型的函式，還沒有指令列介面。下一步要整合成一個指令。
+後面四頁用重新登記記憶體的案例，把每一步實際走一次。數字都來自 job 517932 與分析 job 556928。
 -->
 
 ---
@@ -46,15 +47,16 @@ chapter: Part 6 · Usage
 
 每個節點有 8 張 400 Gb/s 的網卡。
 
-跑起來卻明顯比預期慢。
+UCX 預設只用其中 2 張。
 
-counter 顯示只有少數網卡在傳資料。
+跑起來卻明顯比預期慢。
 
 直覺會想：那就多開 rail。
 
 <!--
 接下來四頁照著步驟走一次。
 這就是第 4 部分的案例，從使用者的角度重走一次：使用者一開始不知道原因，只知道程式慢。
+設定：8 張網卡都可見，UCX_MAX_RNDV_RAILS 是預設的 2。
 -->
 
 ---
@@ -66,11 +68,12 @@ clicks: 1
 
 # 步驟 1：在原本的指令前加上 ibmon
 
-```bash {1-3|4}
-# 原本是 srun -N 4 --ntasks-per-node=1 ./my_mpi_app
-$ srun -N 4 --ntasks-per-node=1 bash -c \
-    'ibmon -o trace.$SLURM_PROCID.csv -- ./my_mpi_app'
-ibmon: 503214 records read, 0 lost to ring overrun in 0 gap(s)
+```bash {1-4|5}
+# 簡化版：實驗中由 matrix.sbatch 逐次啟動
+$ srun --mpi=pmix -N 4 --ntasks-per-node=1 bash -c \
+    'ibmon -o trace.r$SLURM_PROCID.csv -b mlx5_0:1 -- \
+     osu_allreduce -m 4194304:4194304 -i 400 -x 40 -z'
+ibmon: 91176 records read, 0 lost to ring overrun in 0 gap(s)
 ```
 
 ::note::
@@ -81,71 +84,73 @@ ibmon: 503214 records read, 0 lost to ring overrun in 0 gap(s)
 ]" />
 
 <!--
-SLURM_PROCID 是每個 rank 的編號，所以 4 個 rank 各寫一份 trace：trace.0.csv 到 trace.3.csv。
-程式不需要重新編譯：ibmon 用 LD_PRELOAD 讓程式啟動時載入 tracer。也不需要 root 權限。
-筆數是示意，實際取決於程式跑多久。每個被追蹤的行程會多用 128 MiB 記憶體放 ring。
+這是簡化版，沒有照這一行原樣跑過。實驗中由 matrix.sbatch 對每次執行呼叫 srun，再由 mx_task.py 在每個 rank 啟動 ibmon，並加上 -s、-N、-C 控制 ring 與讀取端的位置。
+用 bash -c 包起來，SLURM_PROCID 才會在每個 rank 上展開，4 個 rank 各寫一份 trace。-b mlx5_0:1 是要取樣 counter 的網卡。
+最後一行是實際的輸出：取自同一批實驗（job 517932）只開放 mlx5_0 那一組的 rank 0。
+程式不需要重新編譯：ibmon 用 LD_PRELOAD 讓程式啟動時載入 tracer。也不需要 root 權限。每個被追蹤的行程會多用 128 MiB 記憶體放 ring。
 -->
 
 ---
 layout: textbook
 chapter: Part 6 · Usage
 ltag: Terminal
-clicks: 1
+clicks: 2
 ---
 
 # 步驟 2：看每個 rank 的時間花在哪裡
 
-```bash {1-6|7}
-$ python analysis/report.py trace.*.csv
-rank    wait   register   stall   compute
-0       45 %     38 %      2 %     15 %
-1       50 %     36 %      2 %     12 %
-2       40 %     40 %      5 %     15 %
-3       48 %     37 %      3 %     12 %
-note: the same 2 buffers are registered on every call
+```bash {1-3|4-5|4-8}
+$ R=logs/injection_matrix/I7_W2_4x1-517932/runs
+$ python3 docs/slides/v2_case_dump.py logs/analysis/v2frozen \
+      $R/0009_W2-I7xI4-4MB_removed_rails_C3_rep08
+rank       W    wait     reg   stall   other   avoid
+r0     431.6   133.8   200.6     0.0    97.3   200.6
+r1     451.9   131.8   210.6     5.4   104.1   210.6
+r2     456.7   145.9   197.8     9.8   103.2   197.8
+r3     458.1   144.4   202.8    12.9    97.9   202.8
 ```
 
 ::note::
 
 <Note :notes="[
-  ['每個 rank 的時間拆成四類。', '登記占了將近四成。', '這是第一個線索。'],
-  ['同樣兩塊暫存空間每次都被重新登記。', '只看 counter 看不到這件事。'],
+  ['模型還沒有指令列介面。', '這支小腳本呼叫凍結版模型的函式。'],
+  ['rank 0 有 201 ms 花在登記。', '比等待通訊的 134 ms 還多。'],
+  ['avoid 是重複登記的時間。', '每個 rank 的登記全是重複的。'],
 ]" />
 
 <!--
-四類是等待傳輸（wait）、登記記憶體（register）、CPU 被搶走的空檔（stall），以及計算（compute）。
-這一頁的指令與輸出格式是示意；比例取自案例的量測：登記占總時間 37.7 %，真正在網路上傳資料約占 10 %。
-等待（wait）占比高不一定代表網路慢：它也包含等其他 rank 的時間，所以要配合下一步的關鍵路徑分析。
+分析在計算節點上執行（job 556928，3 秒）。v2_case_dump.py 約 70 行，只呼叫凍結版模型的 load_run、analyse、decompose 與 model，然後印出結果。
+輸出是節錄，單位是 ms，是 400 次計時迭代的總和。原本還有 stall 的四個來源、outside、rep_c 與登記次數等欄位。
+W 是每次迭代的牆鐘時間總和，W = wait + reg + stall + other。wait 是等通訊，包含等 RDMA 傳完與等其他 rank；other 是程式自己的工作，例如歸約計算。
+等待占比高不一定代表網路慢，所以要配合下一步的關鍵路徑分析。
 -->
 
 ---
 layout: textbook
 chapter: Part 6 · Usage
-ltag: Terminal
 clicks: 1
 ---
 
 # 步驟 3：看依預測收益排序的建議
 
-```bash {1|2-5}
-$ python analysis/predict.py trace.*.csv
-action                           predicted gain
-keep scratch buffers (malloc)    +180 ms
-change NUMA binding                 0 ms
-use 8 rails                      -210 ms
-```
+| 優化動作 | 本研究 | counter 做法 | profiler 做法 |
+| --- | ---: | ---: | ---: |
+| 保留暫存空間 | **+210 ms** | 沒有列出 | +211 ms |
+| 移除干擾 | +30 ms | 沒有列出 | +13 ms |
+| 改用 8 條 rail | **−138 ms** | +21 ms | +146 ms |
 
 ::note::
 
 <Note :notes="[
-  ['模型讀入同一批 trace 與設定。', '對每個動作預測 ΔT。'],
-  ['第一名是保留暫存空間。', 'NUMA 綁定已經正確，收益為 0。', '多開 rail 是負數，會更慢。'],
+  ['本研究把保留暫存空間排第一。', '改用 8 條 rail 是負的，會更慢。'],
+  ['兩種傳統做法都建議改用 8 條 rail。', '實測它會慢 208 ms。'],
 ]" />
 
 <!--
-多開 rail 的結果正好和直覺相反。
-指令與輸出格式是示意，數字取自案例：保留暫存空間的預測約 +180 ms；改用 8 條 rail 實測約慢 210 ms。
-如果只看第 2 步的報告，可能會以為「登記很多，那就多開 rail 分散一下」；模型考慮了每多一張網卡就要多登記一次，所以給出負數。
+三欄都來自同一支小腳本的輸出，分析的是步驟 2 那一次執行（job 556928）。
+本研究的預測：保留暫存空間 +210.1 ms，占總時間 36.7 %；改用 8 條 rail −138.1 ms，其中傳輸省 14.6 ms，多出的登記 152.8 ms。
+NUMA 綁定沒有列出，因為四個 rank 都沒有放錯 NUMA，模型不評估它；外來流量低於門檻，競爭流量也不評估。
+如果只看第 2 步，可能會以為「登記很多，那就多開 rail 分散一下」；模型考慮了每多一張網卡就要多登記一次，所以給出負數。
 -->
 
 ---
@@ -157,23 +162,24 @@ clicks: 1
 
 # 步驟 4：照建議再跑一次，量出實際收益
 
-```bash {1-4|5}
+```bash {1-5|6}
 # 依第一名的建議設定環境變數，其他都不變
 $ export MALLOC_MMAP_THRESHOLD_=33554432
 $ export MALLOC_TRIM_THRESHOLD_=1073741824
-$ srun -N 4 --ntasks-per-node=1 ./my_mpi_app
-# 實測 535 ms → 307 ms，快 43 %
+$ srun --mpi=pmix -N 4 --ntasks-per-node=1 \
+      osu_allreduce -m 4194304:4194304 -i 400 -x 40 -z
+# 實測 549 ms → 304 ms，快 45 %
 ```
 
 ::note::
 
 <Note :notes="[
   ['只加兩個環境變數，不用改程式。', '這次不開 tracer，量的才是真實時間。'],
-  ['實測省下 228 ms，預測 180 ms。', '方向和排序正確，大小低估約兩成。', '所以最後一定要實際跑一次。'],
+  ['實測省下 245 ms，預測 210 ms。', '方向和排序正確，大小低估約 14 %。', '所以最後一定要實際跑一次。'],
 ]" />
 
 <!--
-535 ms 與 307 ms 是 4 個節點、每節點 1 個 rank 的 4 MiB allreduce 實測值，每種狀態不開 tracer 跑 10 次取中位數。
+srun 這一行是簡化版。548.8 與 304.2 ms 是 job 517932 中 8 張網卡都可見、預設 2 條 rail 的實測值，每種狀態不開 tracer 跑 10 次取中位數。
 如果第一名的動作沒有帶來收益，就回到步驟 3 試第二名。
 -->
 

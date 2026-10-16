@@ -29,3 +29,16 @@
 .dg .m { fill: var(--tb-mut); }
 .dg .step { transition: opacity 0.35s; }
 .def-body .dg + p { margin-top: 26px; }
+
+/* ---------- Rows: a vertical list, one full-width row per item ---------- */
+.slidev-layout.tb-rows { flex-direction: column; gap: 22px; display: flex; justify-content: flex-start; padding: 104px 80px 96px !important; }
+.slidev-layout.tb-rows h1 { font-family: var(--tb-serif); margin: 0; font-size: 54px; font-weight: 600; line-height: 1.25; }
+.rows-list { margin: auto; width: 100%; max-width: 1640px; display: grid; }
+.rows-row { display: grid; grid-template-columns: 170px 400px 1fr; column-gap: 32px; align-items: baseline; padding: 30px 0; border-bottom: 1.5px solid var(--tb-rule); transition: opacity 0.35s; }
+.rows-row:first-child { border-top: 1.5px solid var(--tb-rule); }
+.rows-row.off { opacity: 0.16; }
+.rows-mark { color: var(--tb-teal); font-size: 21px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.rows-mark.num { font-family: var(--tb-serif); font-size: 46px; letter-spacing: 0; line-height: 1; }
+.rows-title { font-family: var(--tb-serif); font-size: 40px; font-weight: 600; line-height: 1.25; }
+.rows-text { color: #3b434c; font-size: 32px; line-height: 1.55; }
+.rows-text code { font-family: var(--tb-mono); background: var(--tb-code); padding: 0 6px; font-size: 28px; }

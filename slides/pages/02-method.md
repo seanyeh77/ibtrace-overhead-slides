@@ -10,11 +10,11 @@ chapter: Part 2 · Method
 - **2.2** 量測解析度決定優化的終點
 
 ---
-layout: cols
+layout: rows
 chapter: Part 2 · Method
 reveal: true
-clicks: 4
-cards:
+clicks: 3
+items:
   - label: 原則 1
     title: 先拆解，再優化
     text: 在程式副本中一次移除一項，量出各自的成本，再依節省幅度與風險決定要優化哪些項目。

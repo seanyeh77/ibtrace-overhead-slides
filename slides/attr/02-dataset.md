@@ -144,10 +144,12 @@ ib_write_bw 需要兩端：另一個節點先以相同參數、不帶主機名�
 -->
 
 ---
-layout: steps
+layout: rows
+numbered: true
+reveal: true
 chapter: Part 3 · Tool and Dataset
 clicks: 3
-steps:
+items:
   - title: 製造瓶頸
     text: 程式在有瓶頸的狀態下執行 10 次，記下每次的時間。
   - title: 執行優化動作

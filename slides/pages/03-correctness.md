@@ -33,11 +33,11 @@ madvise 失敗時退回每筆記錄都呼叫 getpid，較慢但不會錯。
 -->
 
 ---
-layout: cols
+layout: rows
 chapter: Part 3 · Correctness
 reveal: true
-clicks: 4
-cards:
+clicks: 3
+items:
   - label: 名稱複製
     title: 位元組完全相同
     text: snprintf 只寫入名稱與一個 NUL，其後保留舊位元組；新寫法輸出相同內容，比對 285 個緩衝區差異為 0。

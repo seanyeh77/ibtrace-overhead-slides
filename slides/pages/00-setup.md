@@ -44,21 +44,22 @@ ring 有 65,536 個 slot，每個 128 B，共 8 MB。
 -->
 
 ---
-layout: steps
+layout: rows
+reveal: true
 chapter: Overview · 量測設計
 clicks: 3
-steps:
+items:
   - title: 純測試程式
-    code: C0
+    label: C0
     text: 只執行 ucx_ib_test，作為量測 ping-pong steady RTT 的基準。
   - title: 加上 ibmon
-    code: C1
+    label: C1
     text: 經 ibmon 啟動並取樣網卡計數器，但不載入 tracer；C1 − C0 即取樣的 overhead。
   - title: 只攔截
-    code: C2
+    label: C2
     text: 載入 tracer 並攔截呼叫，但不寫入記錄；C2 − C1 即攔截與讀取時鐘的 overhead。
   - title: 完整 tracer
-    code: C3
+    label: C3
     text: 攔截並寫入 ring；C3 − C2 即寫入記錄的 overhead，C3 − C0 則是總 overhead。
 ---
 

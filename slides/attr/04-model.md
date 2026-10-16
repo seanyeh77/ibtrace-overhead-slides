@@ -56,11 +56,11 @@ clicks: 2
 -->
 
 ---
-layout: cols
+layout: rows
 chapter: Part 5 · Model
 reveal: true
-clicks: 3
-cards:
+clicks: 2
+items:
   - label: B0
     title: counter 做法
     text: 只看網卡的 counter 與設定，例如有 rail 閒置就建議多開，有外來流量就判斷為網路被佔用。
@@ -80,21 +80,21 @@ B1 的問題是忽略關鍵路徑：花最多時間的地方不一定在最慢�
 -->
 
 ---
-layout: steps
+layout: textbook
 chapter: Part 5 · Model
-clicks: 3
-steps:
-  - title: 開發
-    text: 只用一部分資料調整模型的規則與門檻。
-  - title: 定版
-    text: 在版本控制打上標籤，之後不再修改模型。
-  - title: 事先寫下預期
-    text: 評估前先記錄預期會出錯的地方。
-  - title: 只評估一次
-    text: 在沒看過的程式上執行一次，照實報告結果。
+clicks: 1
 ---
 
 # 先定版，再在沒看過的程式上評估一次
+
+<AtEval />
+
+::note::
+
+<Note :notes="[
+  '第一版只用一對一傳輸的資料開發，打上標籤定版之後不再修改，再到沒看過的 allreduce 資料上評估一次。',
+  '第二版修正了第一版的錯誤，等於已經看過第一版的測試資料，所以要換一批全新的程式：alltoall 與真實應用 miniFE。',
+]" />
 
 <!--
 這個流程避免「看了答案再調整」：如果用同一份資料開發又評估，結果一定好看，但不代表能用在新的程式上。
@@ -132,14 +132,14 @@ clicks: 2
 -->
 
 ---
-layout: cols
+layout: rows
 chapter: Part 5 · Model
 reveal: true
-clicks: 3
-cards:
+clicks: 2
+items:
   - label: 誤差來源 1
     title: 常數不適用大量傳輸
-    text: 常數來自量測延遲的小型測試；在大量傳輸、頻寬吃緊的情況下，每則訊息的實際懲罰大了數倍到數十倍。
+    text: 常數來自量測延遲的小型測試；在大量傳輸、頻寬吃緊時，每則訊息的實際懲罰大了數倍到數十倍。
   - label: 誤差來源 2
     title: 計算被當成等待
     text: miniFE 的計算時段被誤判為 CPU 被搶走，每一次正常的執行都出現一個不存在的瓶頸。

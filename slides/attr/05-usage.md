@@ -12,10 +12,12 @@ chapter: Part 6 · Usage
 - **6.4** 使用時的注意事項
 
 ---
-layout: steps
+layout: rows
+numbered: true
+reveal: true
 chapter: Part 6 · Usage
 clicks: 3
-steps:
+items:
   - title: 錄下 trace
     text: 在原本的啟動指令前加上 ibmon，程式不用修改，也不需要特權。
   - title: 看時間花在哪裡
@@ -186,11 +188,11 @@ chapter: Part 6 · Usage
 -->
 
 ---
-layout: cols
+layout: rows
 chapter: Part 6 · Usage
 reveal: true
-clicks: 3
-cards:
+clicks: 2
+items:
   - label: 注意 1
     title: 以實測為準
     text: 模型的排序大多可靠，但收益大小可能差數十個百分點，每個建議都應該像步驟 4 一樣實際跑一次。

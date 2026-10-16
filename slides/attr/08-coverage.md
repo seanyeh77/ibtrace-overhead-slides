@@ -1,19 +1,19 @@
 ---
 layout: section
-number: 7
-chapter: Part 7 · Coverage
+number: 8
+chapter: Part 8 · Coverage
 question: 六個動作之外，還有哪些優化？
 ---
 
 # 還沒涵蓋的優化
 
-- **7.1** 目前會評估的六個動作
-- **7.2** 每一層還有哪些優化
-- **7.3** 下一個要加哪一個
+- **8.1** 目前會評估的六個動作
+- **8.2** 每一層還有哪些優化
+- **8.3** 下一個要加哪一個
 
 ---
 layout: textbook
-chapter: Part 7 · Coverage
+chapter: Part 8 · Coverage
 ---
 
 # 目前會評估的六個動作
@@ -41,7 +41,7 @@ NUMA 錯置：有 rank 的程式 CPU 或 --membind 在網卡之外的 NUMA node�
 
 ---
 layout: textbook
-chapter: Part 7 · Coverage
+chapter: Part 8 · Coverage
 clicks: 2
 ---
 
@@ -65,7 +65,7 @@ clicks: 2
 
 ---
 layout: textbook
-chapter: Part 7 · Coverage
+chapter: Part 8 · Coverage
 ---
 
 # 應用程式層：要改程式的優化
@@ -86,7 +86,7 @@ chapter: Part 7 · Coverage
 
 ---
 layout: textbook
-chapter: Part 7 · Coverage
+chapter: Part 8 · Coverage
 ---
 
 # MPI 與 UCX 層：改參數就能試的優化
@@ -111,7 +111,7 @@ collective 元件：Open MPI 5 可以用 --mca coll_ucc_enable 1 改走 UCC；�
 
 ---
 layout: textbook
-chapter: Part 7 · Coverage
+chapter: Part 8 · Coverage
 ---
 
 # 需要管理員、或目前看不到的優化
@@ -138,7 +138,7 @@ GPU：NCCL 有自己的網路傳輸，不經過 UCX，目前的 tracer 攔截不
 layout: rows
 numbered: true
 reveal: true
-chapter: Part 7 · Coverage
+chapter: Part 8 · Coverage
 clicks: 2
 items:
   - title: 一般使用者能改
@@ -160,13 +160,13 @@ items:
 ]" />
 
 <!--
-三個條件對應這份報告的方法：沒有特權（第 5 部分製造瓶頸的方式）、從 trace 預測（第 4 部分的模型）、用實際執行驗證（第 5 部分的資料集與定版評估）。
+三個條件對應這份報告的方法：沒有特權（第 5 部分製造瓶頸的方式）、從 trace 預測（第 4 部分的模型）、用實際執行驗證（第 5 部分的資料集與第 6 部分的定版評估）。
 每加一個動作，要做的事是：寫出一條從 trace 算 ΔT 的公式、用小型測試量公式裡的常數、製造這個瓶頸並實際執行，最後定版後再評估。
 -->
 
 ---
 layout: rows
-chapter: Part 7 · Coverage
+chapter: Part 8 · Coverage
 reveal: true
 clicks: 2
 items:

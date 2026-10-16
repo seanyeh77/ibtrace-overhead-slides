@@ -1,21 +1,21 @@
 ---
 layout: section
-number: 6
-chapter: Part 6 · Usage
+number: 7
+chapter: Part 7 · Usage
 question: 怎麼用在自己的程式上？
 ---
 
 # 使用方式
 
-- **6.1** 四個指令
-- **6.2** 不同情況的判讀
-- **6.3** 使用時的注意事項
+- **7.1** 四個指令
+- **7.2** 不同情況的判讀
+- **7.3** 使用時的注意事項
 
 ---
 layout: rows
 numbered: true
 reveal: true
-chapter: Part 6 · Usage
+chapter: Part 7 · Usage
 clicks: 3
 items:
   - title: 錄下 trace
@@ -48,7 +48,7 @@ items:
 
 ---
 layout: textbook
-chapter: Part 6 · Usage
+chapter: Part 7 · Usage
 ---
 
 # 不同情況下，ibtrace 看到什麼、該做什麼
@@ -70,7 +70,7 @@ chapter: Part 6 · Usage
 
 ---
 layout: rows
-chapter: Part 6 · Usage
+chapter: Part 7 · Usage
 reveal: true
 clicks: 2
 items:

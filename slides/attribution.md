@@ -57,17 +57,21 @@ src: ./attr/04-model.md
 ---
 
 ---
-src: ./attr/05-validation.md
+src: ./attr/05-dataset.md
 ---
 
 ---
-src: ./attr/06-usage.md
+src: ./attr/06-evaluation.md
 ---
 
 ---
-src: ./attr/07-coverage.md
+src: ./attr/07-usage.md
 ---
 
 ---
-src: ./attr/08-summary.md
+src: ./attr/08-coverage.md
+---
+
+---
+src: ./attr/09-summary.md
 ---

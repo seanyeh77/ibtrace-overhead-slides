@@ -19,21 +19,22 @@ chapter: Part 6 · Usage
 clicks: 3
 items:
   - title: 錄下 trace
-    text: ['在原本的指令前加上 ibmon。', '不用改程式，也不需要特權。']
+    text: ['程式前面加上 ibtrace record。', '不用改程式，也不需要特權。']
   - title: 看時間花在哪裡
-    text: ['分析 trace，拆開每個 rank 的時間。', '分成等待、登記、停頓與其他。']
+    text: ['用 ibtrace breakdown 拆開時間。', '分成等待、登記、停頓與其他。']
   - title: 看排序後的建議
-    text: ['模型依預測收益排出優化動作。', '有害的動作是負數。']
+    text: ['ibtrace suggest 依預測收益排序。', '每個建議都附上要改的設定。']
   - title: 實際執行驗證
-    text: ['照第一名的建議再跑一次。', '量出真正快了多少。']
+    text: ['照建議改設定，再跑幾次。', '用 ibtrace compare 比較前後。']
 ---
 
 # 遇到程式變慢時的四個步驟
 
 <!--
-這是目前的使用流程。前三步只需要跑一次被測程式；第四步是再跑一次，用實測結果確認建議是對的。
-目前這幾步還是分開的：錄 trace 用 ibmon，分析與預測是呼叫模型的函式，還沒有指令列介面。下一步要整合成一個指令。
-後面四頁用重新登記記憶體的案例，把每一步實際走一次。數字都來自 job 517932 與分析 job 556928。
+四個步驟各對應一個 ibtrace 指令。前三步只需要跑一次被測程式；第四步是改設定後再跑幾次，用實測確認建議是對的。
+這套指令在 branch cli（commit 1cad82a），還沒有併入 main。分析用的是凍結的模型 v2，程式碼一行都沒改，啟動時會檢查模型檔案的雜湊。
+目前能分析的程式是 OSU micro-benchmarks、ucx_ib_test 與 miniFE；其他程式照樣能錄，但分析會說不支援。
+後面幾頁用重新登記記憶體的案例，把每一步實際走一次，輸出都是真實的。
 -->
 
 ---
@@ -54,7 +55,7 @@ UCX 預設只用其中 2 張。
 直覺會想：那就多開 rail。
 
 <!--
-接下來四頁照著步驟走一次。
+接下來照著步驟走一次。
 這就是第 4 部分的案例，從使用者的角度重走一次：使用者一開始不知道原因，只知道程式慢。
 設定：8 張網卡都可見，UCX_MAX_RNDV_RAILS 是預設的 2。
 -->
@@ -66,28 +67,31 @@ ltag: Terminal
 clicks: 1
 ---
 
-# 步驟 1：在原本的指令前加上 ibmon
+# 步驟 1：在程式前面加上 ibtrace record
 
-```bash {1-4|5}
-# 簡化版：實驗中由 matrix.sbatch 逐次啟動
-$ srun --mpi=pmix -N 4 --ntasks-per-node=1 bash -c \
-    'ibmon -o trace.r$SLURM_PROCID.csv -b mlx5_0:1 -- \
-     osu_allreduce -m 4194304:4194304 -i 400 -x 40 -z'
-ibmon: 91176 records read, 0 lost to ring overrun in 0 gap(s)
+```bash {1-4|5-7}
+$ srun -N 4 --ntasks-per-node=1 --mpi=pmix \
+    ibtrace record runs/2rails-traced -- \
+    taskset -c 0 osu_allreduce -m 4194304:4194304 \
+    -i 400 -x 40 -z
+# （osu_allreduce 自己的輸出照常印出，這裡省略）
+ibtrace: 4 ranks, 373674 records, 0 lost
+ibtrace: saved in runs/2rails-traced/
 ```
 
 ::note::
 
 <Note :notes="[
-  ['只在程式前面多一層 ibmon。', '每個 rank 各寫一份 trace。'],
-  ['結束時印出讀到與遺失的筆數。', '遺失必須是 0，trace 才完整。'],
+  ['在程式前面加上 ibtrace record。', '每個 rank 的資料存進同一個目錄。'],
+  ['最後印出記錄筆數與遺失筆數。', '遺失必須是 0，trace 才完整。'],
 ]" />
 
 <!--
-這是簡化版，沒有照這一行原樣跑過。實驗中由 matrix.sbatch 對每次執行呼叫 srun，再由 mx_task.py 在每個 rank 啟動 ibmon，並加上 -s、-N、-C 控制 ring 與讀取端的位置。
-用 bash -c 包起來，SLURM_PROCID 才會在每個 rank 上展開，4 個 rank 各寫一份 trace。-b mlx5_0:1 是要取樣 counter 的網卡。
-最後一行是實際的輸出：取自同一批實驗（job 517932）只開放 mlx5_0 那一組的 rank 0。
-程式不需要重新編譯：ibmon 用 LD_PRELOAD 讓程式啟動時載入 tracer。也不需要 root 權限。每個被追蹤的行程會多用 128 MiB 記憶體放 ring。
+這是實際的輸出（job 557079，4 個節點，13 秒）。省略的是 osu_allreduce 自己印的 4 行結果。
+record 會自動處理：每個 rank 的檔名、tracer 的共享記憶體、它放在哪個 NUMA node，以及讀取端用哪兩顆 CPU。同一個 NUMA node 上沒有空的 CPU 時，會印出警告。
+目錄裡每個 rank 有 trace（rank0.csv）、設定（rank0.json）、程式輸出（rank0.out）與網卡 counter。
+不需要 root 權限，也不必重新編譯程式。每個被追蹤的行程會多用 128 MiB 記憶體放 ring。
+接下來兩步分析的是資料集裡同樣設定的那一次執行（job 517932），整理成同名的目錄，數字和第 4 部分一致。新錄的這一次分析起來幾乎一樣：每個 rank 登記 197–209 ms，預測保留暫存空間快 208 ms。
 -->
 
 ---
@@ -99,58 +103,67 @@ clicks: 2
 
 # 步驟 2：看每個 rank 的時間花在哪裡
 
-```bash {1-3|4-5|4-8}
-$ R=logs/injection_matrix/I7_W2_4x1-517932/runs
-$ python3 docs/slides/v2_case_dump.py logs/analysis/v2frozen \
-      $R/0009_W2-I7xI4-4MB_removed_rails_C3_rep08
-rank       W    wait     reg   stall   other   avoid
-r0     431.6   133.8   200.6     0.0    97.3   200.6
-r1     451.9   131.8   210.6     5.4   104.1   210.6
-r2     456.7   145.9   197.8     9.8   103.2   197.8
-r3     458.1   144.4   202.8    12.9    97.9   202.8
+```text {1|3-8|9-10}
+$ ibtrace breakdown runs/2rails-traced
+osu_allreduce 4 MB, 4 ranks; program-reported time 572.3 ms
+time the trace covers, its 400 timed calls (ms):
+rank   total    wait  register   stall   other
+   0   431.6   133.8     200.6     0.0    97.3
+   1   451.9   131.8     210.6     5.4   104.1
+   2   456.7   145.9     197.8     9.8   103.2
+   3   458.1   144.4     202.8    12.9    97.9
+rank 0: 1846 registrations; 9 buffers repeat (top 878x, 878x)
+same buffer registered again per call: 4.0 on every rank
 ```
 
 ::note::
 
 <Note :notes="[
-  ['模型還沒有指令列介面。', '這支小腳本呼叫凍結版模型的函式。'],
-  ['rank 0 有 201 ms 花在登記。', '比等待通訊的 134 ms 還多。'],
-  ['avoid 是重複登記的時間。', '每個 rank 的登記全是重複的。'],
+  ['只要給剛才的目錄。'],
+  ['每個 rank 的時間拆成四類。', 'rank 0 有 201 ms 花在登記。', '比等待通訊的 134 ms 還多。'],
+  ['同兩塊暫存空間被一再登記。', '每次呼叫都重新登記 4 次。'],
 ]" />
 
 <!--
-分析在計算節點上執行（job 556928，3 秒）。v2_case_dump.py 約 70 行，只呼叫凍結版模型的 load_run、analyse、decompose 與 model，然後印出結果。
-輸出是節錄，單位是 ms，是 400 次計時迭代的總和。原本還有 stall 的四個來源、outside、rep_c 與登記次數等欄位。
-W 是每次迭代的牆鐘時間總和，W = wait + reg + stall + other。wait 是等通訊，包含等 RDMA 傳完與等其他 rank；other 是程式自己的工作，例如歸約計算。
-等待占比高不一定代表網路慢，所以要配合下一步的關鍵路徑分析。
+四類：wait 是等網路與其他 rank，RDMA 傳輸進行中的時間也在這裡；register 是向網卡登記與取消登記記憶體；stall 是比同類情況的中位數多出 1 ms 以上的停頓；other 是程式自己的計算與送收呼叫本身。total = wait + register + stall + other。
+第一行的 program-reported time 是程式自己報的時間（OSU 的平均延遲 × 400），和 trace 涵蓋的 total 不同。這個落差還沒查明，列為待辦。
+878 次 = 2 張網卡 × 439 次呼叫，是整個 trace 的次數；「每次 4 次」= 2 塊暫存空間 × 2 張網卡，只算計時的 400 次。
+等待占比高不一定代表網路慢，所以模型還會做關鍵路徑分析。
 -->
 
 ---
 layout: textbook
 chapter: Part 6 · Usage
-clicks: 1
+ltag: Terminal
+clicks: 2
 ---
 
 # 步驟 3：看依預測收益排序的建議
 
-| 優化動作 | 本研究 | counter 做法 | profiler 做法 |
-| --- | ---: | ---: | ---: |
-| 保留暫存空間 | **+210 ms** | 沒有列出 | +211 ms |
-| 移除干擾 | +30 ms | 沒有列出 | +13 ms |
-| 改用 8 條 rail | **−138 ms** | +21 ms | +146 ms |
+```text {1-5|6-7|8-9}
+$ ibtrace suggest runs/2rails-traced
+gain (ms, % of 572.3 ms)  action and setting
+ +210.1  +36.7 %  keep scratch buffers:
+                  MALLOC_TRIM_THRESHOLD_=1073741824
+                  MALLOC_MMAP_THRESHOLD_=33554432
+  +30.2   +5.3 %  stop other work on the ranks' CPUs
+ -138.1  -24.1 %  use 8 rails: UCX_MAX_RNDV_RAILS=8
+not checked: NUMA binding (ranks already on the HCA's node);
+  competing traffic (none seen); fewer rails (already 2)
+```
 
 ::note::
 
 <Note :notes="[
-  ['本研究把保留暫存空間排第一。', '改用 8 條 rail 是負的，會更慢。'],
-  ['兩種傳統做法都建議改用 8 條 rail。', '實測它會慢 208 ms。'],
+  ['第一名是保留暫存空間。', '連要設的環境變數都列出來。'],
+  ['改用 8 條 rail 是負的。', '代表它會讓程式更慢。'],
+  ['沒有評估的動作也會說明原因。', '例如 NUMA 綁定已經正確。'],
 ]" />
 
 <!--
-三欄都來自同一支小腳本的輸出，分析的是步驟 2 那一次執行（job 556928）。
-本研究的預測：保留暫存空間 +210.1 ms，占總時間 36.7 %；改用 8 條 rail −138.1 ms，其中傳輸省 14.6 ms，多出的登記 152.8 ms。
-NUMA 綁定沒有列出，因為四個 rank 都沒有放錯 NUMA，模型不評估它；外來流量低於門檻，競爭流量也不評估。
-如果只看第 2 步，可能會以為「登記很多，那就多開 rail 分散一下」；模型考慮了每多一張網卡就要多登記一次，所以給出負數。
+預測收益的百分比是除以程式回報的 572.3 ms。
+多開 rail 是負的，因為每多一張網卡，每塊暫存空間就要多登記一次：傳輸省 14.6 ms，多出的登記 152.8 ms。
+如果只看第 2 步，可能會以為「登記很多，那就多開 rail 分散一下」；模型給出的是相反的答案。
 -->
 
 ---
@@ -160,26 +173,63 @@ ltag: Terminal
 clicks: 1
 ---
 
-# 步驟 4：照建議再跑一次，量出實際收益
+# 加上 --baselines，和傳統做法對照
 
-```bash {1-5|6}
-# 依第一名的建議設定環境變數，其他都不變
-$ export MALLOC_MMAP_THRESHOLD_=33554432
-$ export MALLOC_TRIM_THRESHOLD_=1073741824
-$ srun --mpi=pmix -N 4 --ntasks-per-node=1 \
-      osu_allreduce -m 4194304:4194304 -i 400 -x 40 -z
-# 實測 549 ms → 304 ms，快 45 %
+```text {1-6|5}
+$ ibtrace suggest --baselines runs/2rails-traced
+gain (ms)                model  counters  profiler
+keep scratch buffers    +210.1         —    +210.6
+stop other CPU work      +30.2         —     +12.9
+use 8 rails             -138.1     +20.9    +145.9
+faster computation           —         —    +104.1
+counters: port counters only; profiler: largest time class
 ```
 
 ::note::
 
 <Note :notes="[
-  ['只加兩個環境變數，不用改程式。', '這次不開 tracer，量的才是真實時間。'],
-  ['實測省下 245 ms，預測 210 ms。', '方向和排序正確，大小低估約 14 %。', '所以最後一定要實際跑一次。'],
+  ['同一份 trace，三種做法並列。', 'model 是本研究的模型。'],
+  ['兩種傳統做法都建議改用 8 條 rail。', '實測它會慢 208 ms。'],
 ]" />
 
 <!--
-srun 這一行是簡化版。548.8 與 304.2 ms 是 job 517932 中 8 張網卡都可見、預設 2 條 rail 的實測值，每種狀態不開 tracer 跑 10 次取中位數。
+counters 是只看網卡 counter 的做法：看到有 rail 閒置就建議多開。profiler 是「哪一類時間最多就改哪一類」的做法。兩者就是第 5 部分比較的兩個基準。
+「—」代表這個做法沒有提出這個動作。faster computation 沒有對應的設定，只有 profiler 做法會提。
+-->
+
+---
+layout: textbook
+chapter: Part 6 · Usage
+ltag: Terminal
+clicks: 1
+---
+
+# 步驟 4：照建議改設定，比較前後
+
+```text {1-4|5-10}
+# 照建議設定兩個環境變數，前後各跑 10 次，不開 tracer
+$ export MALLOC_TRIM_THRESHOLD_=1073741824
+$ export MALLOC_MMAP_THRESHOLD_=33554432
+# 每次用 ibtrace record --no-trace 存進 runs/keep-buffers/
+$ ibtrace compare runs/2rails runs/keep-buffers
+              runs  median (ms)
+2rails          10        548.8
+keep-buffers    10        304.2
+keep-buffers is 244.6 ms faster (-44.6 %)
+95 % interval of the difference: -248.3 to -242.6 ms
+```
+
+::note::
+
+<Note :notes="[
+  ['只加兩個環境變數，不用改程式。', '比較時不開 tracer，量的才是真實時間。'],
+  ['實測快 245 ms，預測 210 ms。', '方向和排序正確，大小低估約 14 %。', '所以最後一定要實際跑一次。'],
+]" />
+
+<!--
+compare 只用不開 tracer 的執行：各組取中位數，區間是在各組內重抽 10,000 次得到的 95 % 區間。區間不含 0 才算有差別。
+這兩組是資料集裡同設定的執行（job 517932，各 10 次），整理成 runs/2rails 與 runs/keep-buffers；當時由實驗腳本啟動，不是用 record。
+同一個指令比較 2 條與 8 條 rail：548.8 → 757.3 ms，慢 38.0 %。
 如果第一名的動作沒有帶來收益，就回到步驟 3 試第二名。
 -->
 
@@ -219,7 +269,7 @@ items:
     text: ['每次操作多花約 1–3 µs。', '每個行程多用 128 MiB 記憶體。', '量時間請用不開 tracer 的執行。']
   - label: 注意 3
     title: 目前的範圍
-    text: ['支援透過 UCX 傳輸的 MPI 程式。', 'GPU 與 NCCL 還不支援。', 'NUMA 類問題從設定判斷。']
+    text: ['支援透過 UCX 傳輸的 MPI 程式。', '分析目前只支援測試過的程式。', 'GPU 與 NCCL 還不支援。']
 ---
 
 # 使用時的注意事項
@@ -227,5 +277,5 @@ items:
 <!--
 注意 1：在沒看過的程式上，模型選對第一名的比例是 93 %，但收益大小的誤差平均 38 個百分點。
 注意 2：精確數字是 0.84–2.91 µs，占一次操作時間的 4.7–31.2 %。
-注意 3：NCCL 有自己的網路傳輸路徑，不經過 UCX，目前的 tracer 看不到；這是未來的工作。
+注意 3：分析需要知道程式回報的時間與迭代數，目前支援 OSU micro-benchmarks、ucx_ib_test 與 miniFE；其他程式照樣能錄。NUMA 類的問題從設定判斷，不從 trace 判斷。NCCL 有自己的網路傳輸路徑，不經過 UCX，目前的 tracer 看不到；這是未來的工作。
 -->

@@ -494,13 +494,13 @@ chapter: Part 5 · Validation
 | 做法 | 組 | 預測 ms | 實測 ms |
 | --- | --- | ---: | ---: |
 | 本研究 | alltoall 1 MiB 多開 rail | +45.7 | −49.0 |
-| 本研究 | alltoall 64 KiB 對照組 | 沒提出 | +0.3 |
-| counter | 三個程式的搶 CPU（6 組） | 沒提出 | +37 到 +996 |
+| 本研究 | alltoall 64 KiB 對照組 | 沒有建議（算 0） | +0.3 |
+| counter | 三個程式的搶 CPU（6 組） | 沒有建議（算 0） | +37 到 +996 |
 | counter | 兩個 alltoall 多開 rail | +7.3、+63.5 | −6.0、−49.0 |
-| counter | alltoall 64 KiB 對照組 | 沒提出 | +0.3 |
-| profiler | 兩個 alltoall 的 NUMA | 沒提出 | +5.2、+147.6 |
+| counter | alltoall 64 KiB 對照組 | 沒有建議（算 0） | +0.3 |
+| profiler | 兩個 alltoall 的 NUMA | 沒有建議（算 0） | +5.2、+147.6 |
 | profiler | 兩個 alltoall 多開 rail | +66.5、+176.6 | −6.0、−49.0 |
-| profiler | alltoall 64 KiB 對照組 | 沒提出 | +0.3 |
+| profiler | alltoall 64 KiB 對照組 | 沒有建議（算 0） | +0.3 |
 
 三種做法都錯的，只有 64 KiB 對照組。
 ---

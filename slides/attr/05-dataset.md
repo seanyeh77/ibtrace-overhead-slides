@@ -150,6 +150,42 @@ ib_write_bw 是 perftest 套件的頻寬測試程式。它需要兩端：另一�
 -->
 
 ---
+layout: textbook
+chapter: Part 5 · Data
+clicks: 2
+---
+
+# 資料怎麼做出來：整體流程
+
+<AtPipeline />
+
+::note::
+
+<Note :notes="[
+  ['先寫下每個情境的狀態與動作。', '再寫下預期，之後不能改。'],
+  ['每一批申請一個 job，用同一組節點。', '所有執行以固定種子打亂順序。', '每次執行在 manifest 記一列。'],
+  ['結束碼不是 0 的執行判為無效。', 'trace 遺失不是 0 也判為無效。'],
+]" />
+
+---
+layout: textbook
+chapter: Part 5 · Data
+clicks: 2
+---
+
+# 一組答案怎麼產生：40 次執行
+
+<AtPair />
+
+::note::
+
+<Note :notes="[
+  ['一組有兩個狀態。', '有瓶頸，與做了優化之後。', '每個狀態開與不開 tracer 各 10 次。'],
+  ['答案只用不開 tracer 的執行。', '兩邊各取中位數相減，就是 ΔT。'],
+  ['模型讀有瓶頸時的 10 份 trace。', '10 個預測取中位數。', '再和答案比較。'],
+]" />
+
+---
 layout: rows
 numbered: true
 reveal: true

@@ -22,7 +22,7 @@ chapter: Part 8 · Coverage
 | --- | --- | --- | --- |
 | 重複登記記憶體 | 保留暫存空間 | 兩個 MALLOC 門檻 | 同一塊記憶體登記兩次以上 |
 | 搶 CPU | 移走同核心的其他工作 | 沒有，要自己找出那個工作 | 停頓或計算不平衡超過 1 ms |
-| NUMA 錯置 | 綁回網卡那一側 | numactl 綁 CPU 與記憶體 | CPU 或記憶體在網卡另一側 |
+| NUMA 錯置 | 綁回網卡那一側 | numactl 綁 CPU 與記憶體 | 命令列綁到網卡另一側，且指定了網卡 |
 | 網路被佔用 | 移除競爭流量 | 沒有，要停掉外來流量 | 外來流量超過 1 Gb/s |
 | rail 太少 | 多開 rail | UCX_MAX_RNDV_RAILS=N | 有大訊息，且還有閒置網卡 |
 | rail 太多 | 降回 2 條 | UCX_MAX_RNDV_RAILS=2 | 有大訊息，且已多於 2 條 |
@@ -38,6 +38,24 @@ NUMA 錯置：有 rank 的程式 CPU 或 --membind 在網卡之外的 NUMA node�
 降回 2 條：有 64 KiB 以上的訊息，而且 rail 數多於 2。
 沒有評估的動作，suggest 會在 not checked 那一行寫出原因，例如案例中的 ranks already on the HCA's node。
 -->
+
+---
+layout: textbook
+chapter: Part 8 · Coverage
+---
+
+# NUMA 錯置：只在一種寫法下偵測得到
+
+| 情況 | 現在會怎樣 |
+| --- | --- |
+| taskset／numactl 綁到另一側，並指定網卡 | 偵測得到 |
+| 沒有指定網卡 | 漏判：網卡被挑在程式那一側 |
+| 完全沒有綁定 | 漏判，還會印「已在網卡那一側」 |
+| 遮罩、env、腳本、`--interleave` 等寫法 | 漏判：解析不到 |
+| 只用 --membind 綁記憶體 | 偵測得到，但只算訊息的懲罰 |
+| mpirun --bind-to | 不支援 |
+
+位置是從命令列解析的，不是量測程式實際跑在哪裡。
 
 ---
 layout: textbook

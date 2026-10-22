@@ -60,6 +60,23 @@ chapter: Part 8 · Coverage
 ---
 layout: textbook
 chapter: Part 8 · Coverage
+---
+
+# NUMA 錯置在 4 MiB allreduce 上只慢 0.2 %
+
+| 放法 | 實測變慢 [95 % 區間] | 模型預測 |
+| --- | ---: | ---: |
+| 兩個 rank 的 CPU 都在另一側 | +0.23 ms [−0.14, +0.81] ms | +0.55 ms |
+| CPU 與記憶體都在另一側 | +0.44 ms [+0.19, +1.18] ms | +0.55 ms |
+| 只有一個 rank 在另一側 | +0.50 ms [+0.28, +1.15] ms | 沒有建議（算 0 ms） |
+
+基準是放在網卡那一側：232.4 ms。每種放法各跑 10 次（job 601387）。
+
+只有一個 rank 放錯時，模型認出錯置，卻預測收益約 0 ms。
+
+---
+layout: textbook
+chapter: Part 8 · Coverage
 clicks: 2
 ---
 

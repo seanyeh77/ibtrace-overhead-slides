@@ -206,6 +206,35 @@ items:
 -->
 
 ---
+layout: textbook
+chapter: Part 8 · Coverage
+---
+
+# 在途請求數與切塊大小：查過，目前不加
+
+| 條件 | 判定 | 證據 |
+| --- | --- | --- |
+| 一般使用者能改 | 符合 | 全部是 UCX_* 環境變數 |
+| trace 看得到徵兆 | 不確定 | 「資源不足」回傳 0 次（共 1,366,150 筆記錄） |
+| 能製造並實測 | 不確定 | 已有設計（4 個節點），還沒跑 |
+
+每條連線最多 2 個 RDMA read 在途，每個 512 KiB。
+
+送出佇列的上限是 256 個，離上限很遠。
+
+tracer 已補上兩項：記下排隊（pending_add），記下 UCX 實際設定。
+
+下一個 job 會一併驗證。
+
+<!--
+資料：2rails 4 MiB allreduce（job 517932）與 holdout 1 MiB alltoall（job 519817），各 4 個 rank。
+UCS_ERR_NO_RESOURCE（−2）表示「現在沒有資源，稍後再送」；tracer 記下每個 UCT 送出函式的回傳值，所以發生的話會被記到。
+allreduce 每條連線最多 2 個在途，alltoall 最多 1 個。
+參數清單在 login node 上用 ucx_info 查；login node 只有 RoCE 網卡，計算節點的 auto 實際值要等下一個 job 才有記錄。
+詳細內容：docs/model/CANDIDATE_INFLIGHT.md（ibtrace commit 6aa207d、2c2b37d、cf5f940）。
+-->
+
+---
 layout: rows
 chapter: Part 8 · Coverage
 reveal: true

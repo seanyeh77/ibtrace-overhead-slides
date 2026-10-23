@@ -7,13 +7,14 @@ question: 要知道預測準不準，需要什麼資料？
 
 # 可信的資料
 
-- **5.1** trace 不能掉資料，也不能拖慢程式
+- **5.1** trace 完整，也不拖慢程式
 - **5.2** 用一般使用者的權限製造瓶頸
-- **5.3** 每一筆都有實測答案的資料集
+- **5.3** 每一筆答案怎麼從實際執行產生
+- **5.4** 開 tracer 不改變答案
 
 ---
 layout: textbook
-chapter: Part 5 · Data
+chapter: Part 5 · Data · 5.1 trace 完整
 clicks: 2
 ---
 
@@ -38,7 +39,7 @@ ring 是環形的緩衝區；格子裡的數字是記錄的序號。MPI 程式�
 
 ---
 layout: definition
-chapter: Part 5 · Data
+chapter: Part 5 · Data · 5.1 trace 完整
 term: page fault
 kind: 作業系統的記憶體機制
 clicks: 1
@@ -58,7 +59,7 @@ MAP_POPULATE 是建立 ring 時的一個選項，讓作業系統一次把所有�
 
 ---
 layout: textbook
-chapter: Part 5 · Data
+chapter: Part 5 · Data · 5.1 trace 完整
 clicks: 2
 ---
 
@@ -92,7 +93,7 @@ allreduce 這兩組是 2 個節點各 1 個 rank 的 osu_allreduce，ucx_ib_test
 
 ---
 layout: textbook
-chapter: Part 5 · Data
+chapter: Part 5 · Data · 5.2 製造瓶頸
 ---
 
 # 用一般使用者的權限製造與移除瓶頸
@@ -114,7 +115,7 @@ NUMA：伺服器有兩顆 CPU，每張網卡接在其中一顆旁邊；程式跑
 
 ---
 layout: textbook
-chapter: Part 5 · Data
+chapter: Part 5 · Data · 5.2 製造瓶頸
 ltag: Terminal
 clicks: 3
 ---
@@ -150,8 +151,33 @@ ib_write_bw 是 perftest 套件的頻寬測試程式。它需要兩端：另一�
 -->
 
 ---
+layout: rows
+numbered: true
+reveal: true
+chapter: Part 5 · Data · 5.3 產生答案
+clicks: 3
+items:
+  - title: 製造瓶頸
+    text: 在有瓶頸的狀態下執行 10 次。
+  - title: 執行優化動作
+    text: ['移除瓶頸或改設定，再執行 10 次。', '兩者的差就是 ΔT。']
+  - title: 開與不開 tracer
+    text: ['每種狀態都分別開與不開 tracer。', '兩者在同一個 job 內隨機交錯。']
+  - title: 事先寫下預期
+    text: 正式執行前，先寫下每個情境的預期。
+---
+
+# 每一筆答案都來自實際執行：四個原則
+
+<!--
+job 是向叢集排程系統 Slurm 申請的一次執行，期間使用同一批節點。換一對節點，基準時間可能差 10–33 %，所以只比較同一個 job 內的結果。
+事先寫下預期，是為了避免看到結果之後才回頭找解釋。實際上有幾項預期沒有命中，這些都照實記錄，其中一項就是第 1 部分的多開 rail。
+最終資料集共 1,240 次執行，trace 遺失 0 筆；另外為最後的測試收集了 960 次，合計 2,200 次。
+-->
+
+---
 layout: textbook
-chapter: Part 5 · Data
+chapter: Part 5 · Data · 5.3 產生答案
 clicks: 2
 ---
 
@@ -169,50 +195,7 @@ clicks: 2
 
 ---
 layout: textbook
-chapter: Part 5 · Data
-clicks: 2
----
-
-# 一組答案怎麼產生：40 次執行
-
-<AtPair />
-
-::note::
-
-<Note :notes="[
-  ['一組有兩個狀態。', '有瓶頸，與做了優化之後。', '每個狀態開與不開 tracer 各 10 次。'],
-  ['答案只用不開 tracer 的執行。', '兩邊各取中位數相減，就是 ΔT。'],
-  ['模型讀有瓶頸時的 10 份 trace。', '10 個預測取中位數。', '再和答案比較。'],
-]" />
-
----
-layout: rows
-numbered: true
-reveal: true
-chapter: Part 5 · Data
-clicks: 3
-items:
-  - title: 製造瓶頸
-    text: 在有瓶頸的狀態下執行 10 次。
-  - title: 執行優化動作
-    text: ['移除瓶頸或改設定，再執行 10 次。', '兩者的差就是 ΔT。']
-  - title: 開與不開 tracer
-    text: ['每種狀態都分別開與不開 tracer。', '兩者在同一個 job 內隨機交錯。']
-  - title: 事先寫下預期
-    text: 正式執行前，先寫下每個情境的預期。
----
-
-# 資料集的每一筆答案都來自實際執行
-
-<!--
-job 是向叢集排程系統 Slurm 申請的一次執行，期間使用同一批節點。換一對節點，基準時間可能差 10–33 %，所以只比較同一個 job 內的結果。
-事先寫下預期，是為了避免看到結果之後才回頭找解釋。實際上有幾項預期沒有命中，這些都照實記錄，其中一項就是第 1 部分的多開 rail。
-最終資料集共 1,240 次執行，trace 遺失 0 筆；另外為最後的測試收集了 960 次，合計 2,200 次。
--->
-
----
-layout: textbook
-chapter: Part 5 · Data
+chapter: Part 5 · Data · 5.3 產生答案
 ltag: Terminal
 clicks: 2
 ---
@@ -246,7 +229,25 @@ matrix.sbatch 會把這一批的所有條件以固定的隨機種子打亂順序
 
 ---
 layout: textbook
-chapter: Part 5 · Data
+chapter: Part 5 · Data · 5.3 產生答案
+clicks: 2
+---
+
+# 一組答案怎麼產生：40 次執行
+
+<AtPair />
+
+::note::
+
+<Note :notes="[
+  ['一組有兩個狀態。', '有瓶頸，與做了優化之後。', '每個狀態開與不開 tracer 各 10 次。'],
+  ['答案只用不開 tracer 的執行。', '兩邊各取中位數相減，就是 ΔT。'],
+  ['模型讀有瓶頸時的 10 份 trace。', '10 個預測取中位數。', '再和答案比較。'],
+]" />
+
+---
+layout: textbook
+chapter: Part 5 · Data · 5.4 tracer 不改變答案
 clicks: 1
 ---
 

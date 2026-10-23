@@ -7,14 +7,15 @@ question: 換一個沒看過的程式，預測還準嗎？
 
 # 評估結果
 
-- **6.1** 評估方式與測試資料
-- **6.2** 兩種傳統做法
-- **6.3** 三個指標的結果
-- **6.4** 誤差從哪裡來
+- **6.1** 評估設計：定版、測試資料、怎麼算
+- **6.2** 比較對象：兩種傳統做法的規則
+- **6.3** 總表
+- **6.4–6.6** 三個指標，各自先講規則再講結果
+- **6.7** 誤差從哪裡來，以及第一版的對照
 
 ---
 layout: textbook
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.1 評估設計
 clicks: 1
 ---
 
@@ -40,7 +41,7 @@ osu_alltoall 是每個 rank 都送資料給其他每個 rank 的測試程式；m
 layout: rows
 numbered: true
 reveal: true
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.1 評估設計
 clicks: 3
 items:
   - title: 三個新程式
@@ -66,7 +67,7 @@ items:
 
 ---
 layout: textbook
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.1 評估設計
 ---
 
 # 實測與預測怎麼算
@@ -82,7 +83,7 @@ chapter: Part 6 · Evaluation
 
 ---
 layout: textbook
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.2 比較對象
 ---
 
 # 兩種傳統做法的完整規則
@@ -100,7 +101,7 @@ chapter: Part 6 · Evaluation
 
 ---
 layout: rows
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.2 比較對象
 items:
   - label: counter
     title: 使用率與外來流量
@@ -120,7 +121,7 @@ items:
 
 ---
 layout: textbook
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.3 總表
 clicks: 3
 ---
 
@@ -143,8 +144,28 @@ clicks: 3
 ]" />
 
 ---
+layout: rows
+chapter: Part 6 · Evaluation · 6.4 排第一
+items:
+  - label: 規則 1
+    title: 只看名字
+    text: ['收益的正負號不看。', '預測有害的動作排第一，也可能算對。']
+  - label: 規則 2
+    title: 沒有容忍度
+    text: ['正確答案取點估計最大的動作。', '只有組合情境有兩個候選，差距都很大。']
+  - label: 規則 3
+    title: 沒提出算錯
+    text: ['沒有提出任何動作的執行算錯。', '它仍然留在分母裡。']
+  - label: 規則 4
+    title: 同分
+    text: ['480 次執行中，前兩名沒有同分。', '同一狀態 10 次的第一名都相同。']
+---
+
+# 排第一怎麼計分：四條規則
+
+---
 layout: textbook
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.4 排第一
 clicks: 2
 ---
 
@@ -167,7 +188,7 @@ clicks: 2
 
 ---
 layout: textbook
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.4 排第一
 ---
 
 # 排第一的另一種定義：以注入的瓶頸為準
@@ -184,52 +205,11 @@ chapter: Part 6 · Evaluation
 本研究在 miniFE 把正常的計算當成停頓，每次都排「移走 CPU 上的工作」第一。
 
 ---
-layout: rows
-chapter: Part 6 · Evaluation
-items:
-  - label: 規則 1
-    title: 只看名字
-    text: ['收益的正負號不看。', '預測有害的動作排第一，也可能算對。']
-  - label: 規則 2
-    title: 沒有容忍度
-    text: ['正確答案取點估計最大的動作。', '只有組合情境有兩個候選，差距都很大。']
-  - label: 規則 3
-    title: 沒提出算錯
-    text: ['沒有提出任何動作的執行算錯。', '它仍然留在分母裡。']
-  - label: 規則 4
-    title: 同分
-    text: ['480 次執行中，前兩名沒有同分。', '同一狀態 10 次的第一名都相同。']
----
-
-# 排第一的計分細節
-
----
 layout: textbook
-chapter: Part 6 · Evaluation
-clicks: 1
+chapter: Part 6 · Evaluation · 6.5 方向
 ---
 
-# 方向：只看實測確定的 22 組
-
-| 做法 | 錯的組數 | 錯在哪裡 |
-| --- | ---: | --- |
-| 本研究 | 2 組 | 1 MiB 多開 rail 預測變快；64 KiB 對照組沒有提出 |
-| counter 做法 | 9 組 | 6 組搶 CPU 沒有規則；2 組多開 rail 只會預測變快 |
-| profiler 做法 | 5 組 | 2 組 NUMA 沒有對應類別；2 組多開 rail 預測變快 |
-
-::note::
-
-<Note :notes="[
-  ['實測區間不含 0 的組才列入。', '排除的 8 組中，7 組是 miniFE。'],
-  ['預測與實測同號才算對。', '沒有提出動作，預測是 0，算錯。'],
-]" />
-
----
-layout: textbook
-chapter: Part 6 · Evaluation
----
-
-# 被排除的 8 組：實測區間含 0
+# 方向：先排除實測區間含 0 的 8 組
 
 | 程式 | 情境 | 實測 ΔT ms | 95 % 區間 |
 | --- | --- | ---: | --- |
@@ -246,7 +226,28 @@ miniFE 一次約 1 秒，這些瓶頸的影響小於執行之間的變動。
 
 ---
 layout: textbook
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.5 方向
+clicks: 1
+---
+
+# 方向：剩下 22 組的結果
+
+| 做法 | 錯的組數 | 錯在哪裡 |
+| --- | ---: | --- |
+| 本研究 | 2 組 | 1 MiB 多開 rail 預測變快；64 KiB 對照組沒有提出 |
+| counter 做法 | 9 組 | 6 組搶 CPU 沒有規則；2 組多開 rail 只會預測變快 |
+| profiler 做法 | 5 組 | 2 組 NUMA 沒有對應類別；2 組多開 rail 預測變快 |
+
+::note::
+
+<Note :notes="[
+  ['實測區間不含 0 的組才列入。', '排除的 8 組中，7 組是 miniFE。'],
+  ['預測與實測同號才算對。', '沒有提出動作，預測是 0，算錯。'],
+]" />
+
+---
+layout: textbook
+chapter: Part 6 · Evaluation · 6.5 方向
 ---
 
 # 每種做法錯的組
@@ -266,7 +267,7 @@ chapter: Part 6 · Evaluation
 
 ---
 layout: textbook
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.6 誤差
 clicks: 1
 ---
 
@@ -289,7 +290,7 @@ clicks: 1
 
 ---
 layout: rows
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.6 誤差
 items:
   - label: 公式
     title: 每組的誤差
@@ -305,24 +306,8 @@ items:
 # 誤差的公式與兩個觀察
 
 ---
-layout: textbook
-chapter: Part 6 · Evaluation
----
-
-# 對照：第一版在 allreduce 上的結果
-
-| 問題 | 第一版 | counter 做法 | profiler 做法 |
-| --- | ---: | ---: | ---: |
-| 實測最佳的動作排第一（事後才定義） | **119 / 150 次** | 50 / 150 次 | 20 / 150 次 |
-| 注入的瓶頸排第一 | 79 / 150 次 | **110 / 150 次** | 20 / 150 次 |
-| 方向正確 | **16 / 19 組** | 12 / 19 組 | 14 / 19 組 |
-| 預測收益的誤差（百分點，22 組） | **18.3 百分點** | 58.9 百分點 | 22.7 百分點 |
-
-第一版在 alltoall 上的方向也剛好是 16 / 19，引用時要說清楚是哪一個。
-
----
 layout: rows
-chapter: Part 6 · Evaluation
+chapter: Part 6 · Evaluation · 6.7 誤差從哪裡來
 reveal: true
 clicks: 2
 items:
@@ -353,3 +338,19 @@ items:
 來源 2 是分類上的錯誤，不是方法本身的問題。
 就地校準的好處是自動適應延遲型與頻寬型的情境，也不需要知道競爭流量用了幾條連線這類看不到的資訊。
 -->
+
+---
+layout: textbook
+chapter: Part 6 · Evaluation · 6.7 誤差從哪裡來
+---
+
+# 對照：第一版在 allreduce 上的結果
+
+| 問題 | 第一版 | counter 做法 | profiler 做法 |
+| --- | ---: | ---: | ---: |
+| 實測最佳的動作排第一（事後才定義） | **119 / 150 次** | 50 / 150 次 | 20 / 150 次 |
+| 注入的瓶頸排第一 | 79 / 150 次 | **110 / 150 次** | 20 / 150 次 |
+| 方向正確 | **16 / 19 組** | 12 / 19 組 | 14 / 19 組 |
+| 預測收益的誤差（百分點，22 組） | **18.3 百分點** | 58.9 百分點 | 22.7 百分點 |
+
+第一版在 alltoall 上的方向也剛好是 16 / 19，引用時要說清楚是哪一個。

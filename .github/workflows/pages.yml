@@ -33,6 +33,7 @@ jobs:
       - run: npm ci
       - run: npx slidev build --base /ibtrace-overhead-slides/ --out dist
       - run: npx slidev build attribution.md --base /ibtrace-overhead-slides/attribution/ --out dist/attribution
+      - run: npx slidev build extension.md --base /ibtrace-overhead-slides/extension/ --out dist/extension
       - uses: actions/upload-pages-artifact@v3
         with:
           path: slides/dist

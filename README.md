@@ -1,11 +1,12 @@
 # ibtrace 報告簡報
 
-ibtrace 的兩份報告簡報，都採 Textbook 版型，放在同一個 Slidev 專案 [slides/](slides/) 裡，共用版型與元件。
+ibtrace 的三份報告簡報，都採 Textbook 版型，放在同一個 Slidev 專案 [slides/](slides/) 裡，共用版型與元件。
 
 | 簡報 | 入口檔 | 內容 | 線上版 |
 | --- | --- | --- | --- |
 | Tracer Overhead | `slides.md` | tracer 對量測的擾動、三項優化、量測方法與正確性檢查，共 26 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/ |
-| Counterfactual Attribution | `attribution.md` | 零基礎版：用重新登記記憶體的案例串起全場，依序是反直覺的現象、用 trace 找原因、研究問題、預測模型、驗證與使用方式；每一部分的開頭寫出它要回答的問題，最後整理 suggest 目前評估的六個動作與還沒涵蓋的優化；以實際的 bash 指令與 ibtrace 輸出舉例，共 77 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/attribution/ |
+| Counterfactual Attribution | `attribution.md` | 零基礎版：用重新登記記憶體的案例串起全場，依序是反直覺的現象、用 trace 找原因、研究問題、預測模型、驗證與使用方式；每一部分的開頭寫出它要回答的問題，最後停在收益大小的兩個誤差來源；以實際的 bash 指令與 ibtrace 輸出舉例，共 65 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/attribution/ |
+| 擴充與第三版 | `extension.md` | 接續上一份：回顧第二版的結果與兩個誤差來源、還沒涵蓋的優化與在途數的新動作、第三版的三個改動與開發資料上的結果、定版與已知限制、評估協定與節點健康檢查 | https://seanyeh77.github.io/ibtrace-overhead-slides/extension/ |
 
 Tracer Overhead 簡報中的 overhead 數字（0.7–4.5 µs、降至 18–43 %）含有 ring 的 page fault；預先配置 ring 之後的數字見 Counterfactual Attribution 第 36 張。
 
@@ -16,6 +17,7 @@ cd slides
 npm install
 npm run dev                      # 本機預覽 Tracer Overhead，按 p 開講者模式
 npx slidev attribution.md        # 本機預覽 Counterfactual Attribution
+npx slidev extension.md          # 本機預覽 擴充與第三版
 npm run build                    # 輸出靜態網頁到 slides/dist
 ```
 

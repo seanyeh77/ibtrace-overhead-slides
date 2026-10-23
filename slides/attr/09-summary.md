@@ -9,7 +9,7 @@ big: true
 <Tile variant="hero" label="主要發現" value="看使用率會給出有害的建議">counter 的建議：慢 38 %。<br>trace 的建議：快 45 %。</Tile>
 <Tile variant="accent" label="選對優化動作" value="93 %">在沒看過的程式上。<br>傳統做法都是 53 %。</Tile>
 <Tile label="資料集" value="2,200 次執行">每一筆的 ΔT 都來自實際執行。</Tile>
-<Tile label="Tracer overhead" value="0.84–2.91 µs">每次操作多花的時間。<br>約為上次報告的一半。</Tile>
+<Tile label="下一份簡報" value="擴充與第三版">還沒涵蓋的優化。<br>修正兩個誤差來源。</Tile>
 <Tile label="開 tracer 與結論" value="ΔT 比值 1.02">開不開 tracer，ΔT 幾乎相同。<br>NUMA 錯置是例外。</Tile>
 <Tile label="限制" value="收益大小仍不夠準" wide>誤差與 counter 做法相當。<br>下一版改用就地校準。</Tile>
 
@@ -28,8 +28,6 @@ next: 回報上游、公開資料集、做成一個指令的工具
 - `ΔT`
 - `critical path`
 - `registration`
-- `page fault`
-- `MAP_POPULATE`
 
 <!--
 下一步依時間由短到長：

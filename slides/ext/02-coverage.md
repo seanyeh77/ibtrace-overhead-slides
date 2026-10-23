@@ -1,19 +1,19 @@
 ---
 layout: section
-number: 8
-chapter: Part 8 · Coverage
+number: 2
+chapter: Part 2 · Coverage
 question: 六個動作之外，還有哪些優化？
 ---
 
 # 還沒涵蓋的優化
 
-- **8.1** 目前會評估的六個動作
-- **8.2** 每一層還有哪些優化
-- **8.3** 下一個要加哪一個
+- **2.1** 目前會評估的六個動作
+- **2.2** 每一層還有哪些優化
+- **2.3** 下一個要加哪一個
 
 ---
 layout: textbook
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 ---
 
 # 目前會評估的六個動作
@@ -41,7 +41,7 @@ NUMA 錯置：有 rank 的程式 CPU 或 --membind 在網卡之外的 NUMA node�
 
 ---
 layout: textbook
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 ---
 
 # NUMA 錯置：只在一種寫法下偵測得到
@@ -59,7 +59,7 @@ chapter: Part 8 · Coverage
 
 ---
 layout: textbook
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 ---
 
 # NUMA 錯置在 4 MiB allreduce 上只慢 0.2 %
@@ -70,19 +70,15 @@ chapter: Part 8 · Coverage
 | CPU 與記憶體都在另一側 | +0.44 ms [+0.19, +1.18] ms | +0.55 ms |
 | 只有一個 rank 在另一側 | +0.50 ms [+0.28, +1.15] ms | 沒有建議（算 0 ms） |
 
-基準是放在網卡那一側：232.4 ms。每種放法各跑 10 次（job 601387）。
+基準是放在網卡那一側：232.4 ms，每種放法各跑 10 次（job 601387）。
 
-只有一個 rank 放錯時，模型認出錯置，卻預測收益為 0 ms。
+只有一個 rank 放錯時，第二版預測為 0 ms。
 
-模型只把懲罰加在放錯的 rank 上。
-
-每次呼叫只看最慢的 rank，而放錯的 rank 從來不是最慢的。
-
-實際的代價，主要是另一個 rank 在等它（job 601431）。
+第三版已修正，見第 3 部分。
 
 ---
 layout: textbook
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 clicks: 2
 ---
 
@@ -106,7 +102,7 @@ clicks: 2
 
 ---
 layout: textbook
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 ---
 
 # 應用程式層：要改程式的優化
@@ -127,7 +123,7 @@ chapter: Part 8 · Coverage
 
 ---
 layout: textbook
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 ---
 
 # MPI 與 UCX 層：改參數就能試的優化
@@ -152,7 +148,7 @@ collective 元件：Open MPI 5 可以用 --mca coll_ucc_enable 1 改走 UCC；�
 
 ---
 layout: textbook
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 ---
 
 # 需要管理員、或目前看不到的優化
@@ -179,7 +175,7 @@ GPU：NCCL 有自己的網路傳輸，不經過 UCX，目前的 tracer 攔截不
 layout: rows
 numbered: true
 reveal: true
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 clicks: 2
 items:
   - title: 一般使用者能改
@@ -207,7 +203,7 @@ items:
 
 ---
 layout: textbook
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 ---
 
 # 在途請求數與切塊大小：預設值下沒有瓶頸
@@ -226,7 +222,7 @@ tracer 已補上兩項：記下排隊，記下 UCX 實際設定。
 
 ---
 layout: textbook
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 ---
 
 # 把設定調小時會變慢：三項加入，一項排除
@@ -247,7 +243,7 @@ chapter: Part 8 · Coverage
 
 ---
 layout: rows
-chapter: Part 8 · Coverage
+chapter: Part 2 · Coverage
 reveal: true
 clicks: 2
 items:

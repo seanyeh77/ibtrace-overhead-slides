@@ -224,7 +224,7 @@ chapter: Part 8 · Coverage
 
 tracer 已補上兩項：記下排隊（pending_add），記下 UCX 實際設定。
 
-下一個 job 會一併驗證。
+計算節點上驗證過（job 602628）：正常的 run 沒有排隊，網卡上限是 16 個 RDMA read。
 
 <!--
 資料：2rails 4 MiB allreduce（job 517932）與 holdout 1 MiB alltoall（job 519817），各 4 個 rank。

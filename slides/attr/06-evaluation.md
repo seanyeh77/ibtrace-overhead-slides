@@ -267,6 +267,29 @@ chapter: Part 6 · Evaluation · 6.5 方向
 
 ---
 layout: textbook
+chapter: Part 6 · Evaluation · 6.5 方向
+---
+
+# 多開 rail 錯的那組：重跑後方向相反
+
+| alltoall 1 MiB，2 條 → 8 條 rail | 2 條 rail | 8 條 rail | 實測 ΔT |
+| --- | ---: | ---: | ---: |
+| 定版評估時（job 519817） | 268.7 ms | 317.7 ms | 慢 49.0 ms |
+| 重跑（job 603203） | 266.6 ms | 244.2 ms | 快 22.4 ms |
+
+評估時，從 hgpn050 節點讀的訊息特別慢。
+
+每則訊息：hgpn050 25.8 µs / 其他節點 16.7 µs。
+
+分到 8 條 rail 時，每則訊息都要等最慢的那條。
+
+其他 alltoall 的組都沒有這個現象。
+
+評估已經定版，所以這一組的計分不改。
+
+
+---
+layout: textbook
 chapter: Part 6 · Evaluation · 6.6 誤差
 clicks: 1
 ---

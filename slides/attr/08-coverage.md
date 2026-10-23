@@ -210,29 +210,40 @@ layout: textbook
 chapter: Part 8 · Coverage
 ---
 
-# 在途請求數與切塊大小：查過，目前不加
+# 在途請求數與切塊大小：預設值下沒有瓶頸
 
-| 條件 | 判定 | 證據 |
-| --- | --- | --- |
-| 一般使用者能改 | 符合 | 全部是 UCX_* 環境變數 |
-| trace 看得到徵兆 | 不確定 | 「資源不足」回傳 0 次（共 1,366,150 筆記錄） |
-| 能製造並實測 | 不確定 | 已有設計（4 個節點），還沒跑 |
+| 項目 | 實際用量 | 上限 |
+| --- | ---: | ---: |
+| 每條連線同時在途的 RDMA read | 最多 2 個 | 16 個（網卡上限） |
+| 送出佇列 | 最多 2 個 | 256 個 |
+| 「資源不足、稍後再送」的回傳 | 0 次 | — |
 
-每條連線最多 2 個 RDMA read 在途，每個 512 KiB。
+資料是 4 MiB allreduce 與 1 MiB alltoall，共 1,366,150 筆記錄。
 
-送出佇列的上限是 256 個，離上限很遠。
+正常的執行離上限很遠，所以不會卡在這裡。
 
-tracer 已補上兩項：記下排隊（pending_add），記下 UCX 實際設定。
+tracer 已補上兩項：記下排隊，記下 UCX 實際設定。
 
-計算節點上驗證過（job 602628）：正常的 run 沒有排隊，網卡上限是 16 個 RDMA read。
+---
+layout: textbook
+chapter: Part 8 · Coverage
+---
 
-<!--
-資料：2rails 4 MiB allreduce（job 517932）與 holdout 1 MiB alltoall（job 519817），各 4 個 rank。
-UCS_ERR_NO_RESOURCE（−2）表示「現在沒有資源，稍後再送」；tracer 記下每個 UCT 送出函式的回傳值，所以發生的話會被記到。
-allreduce 每條連線最多 2 個在途，alltoall 最多 1 個。
-參數清單在 login node 上用 ucx_info 查；login node 只有 RoCE 網卡，計算節點的 auto 實際值要等下一個 job 才有記錄。
-詳細內容：docs/model/CANDIDATE_INFLIGHT.md（ibtrace commit 6aa207d、2c2b37d、cf5f940）。
--->
+# 把設定調小時會變慢：三項加入，一項排除
+
+| UCX 設定（預設 → 調小） | alltoall 1 MiB | allreduce 4 MiB | 判定 |
+| --- | ---: | ---: | --- |
+| 同時讀取的位元組：無上限 → 512 KiB | +90.8 ms（+27 %） | +29.6 ms | 加入 |
+| 同時讀取的次數：硬體上限 → 1 次 | +45.6 ms（+14 %） | +9.5 ms | 加入 |
+| 每次讀取的大小：自動 → 64 KiB | +13.8 ms（+4 %） | 區間含 0 ms | 加入 |
+| 送出佇列：256 個 → 16 個 | 區間含 0 ms | 程式卡死 | 排除 |
+
+每種設定跑 10 次，與預設值比較（job 603440）。
+
+新動作：發現這三項被調小時，建議改回預設。
+
+送出佇列調到 16 個會卡死，不能當建議。
+
 
 ---
 layout: rows

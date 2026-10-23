@@ -7,93 +7,13 @@ question: 要知道預測準不準，需要什麼資料？
 
 # 可信的資料
 
-- **5.1** trace 完整，也不拖慢程式
-- **5.2** 用一般使用者的權限製造瓶頸
-- **5.3** 每一筆答案怎麼從實際執行產生
-- **5.4** 開 tracer 不改變答案
+- **5.1** 用一般使用者的權限製造瓶頸
+- **5.2** 每一筆答案怎麼從實際執行產生
+- **5.3** 開 tracer 不改變答案
 
 ---
 layout: textbook
-chapter: Part 5 · Data · 5.1 trace 完整
-clicks: 2
----
-
-# Ring 被繞圈時不再卡住
-
-<AtRing />
-
-::note::
-
-<Note :notes="[
-  ['評估要用上千份 trace。', 'tracer 把記錄寫進環形的 ring。', '寫到尾端就繞回開頭。', 'ibmon 跟在後面依序讀出。'],
-  ['tracer 寫得太快，繞了一圈。', '兩筆還沒讀的記錄被蓋掉。', '舊版 ibmon 一直等第 3 號。', '它因此卡死。'],
-  ['修正後，ibmon 跳到最舊的記錄。', '它會記下遺失了 2 筆。', 'ring 加大到約 100 萬格。', '之後遺失為 0。'],
-]" />
-
-<!--
-評估要用上千次執行的 trace，每一份都必須完整，tracer 也不能改變結果。接下來三頁是為此做的修正。
-ring 是環形的緩衝區；格子裡的數字是記錄的序號。MPI 程式產生記錄的速度很快，所以會被繞圈。
-舊版的 ibmon 只會等「序號剛好相等」的那一筆。修正時另外發現，舊版在被繞圈時還可能讀到寫到一半的記錄；新的回歸測試會故意製造繞圈，確認這兩個問題都不再發生。
-另一項修正：MPI 每次檢查「請求完成了沒」都會記一筆。現在把連續的「還沒完成」合併成一筆，記錄量減少約三分之二。
--->
-
----
-layout: definition
-chapter: Part 5 · Data · 5.1 trace 完整
-term: page fault
-kind: 作業系統的記憶體機制
-clicks: 1
----
-
-<AtFault />
-
-第一次寫到某一頁記憶體時，作業系統才配置它。
-
-這一次寫入會慢上數微秒。
-
-<!--
-記憶體以「頁」為單位管理，一頁 4 KiB。向系統要一大塊記憶體時，作業系統只先記帳，等程式第一次寫到某一頁才真正配置，這個過程就是 page fault。
-ring 很大，所以 tracer 寫記錄時，每寫到新的一頁就觸發一次 page fault，而這發生在被追蹤的呼叫裡面，直接算進程式的時間。
-MAP_POPULATE 是建立 ring 時的一個選項，讓作業系統一次把所有頁配置好。
--->
-
----
-layout: textbook
-chapter: Part 5 · Data · 5.1 trace 完整
-clicks: 2
----
-
-# 預先配置 ring 後，overhead 再降一半
-
-<GroupedBars
-  :cats="[['allreduce', '8 B'], ['allreduce', '64 KiB'], ['ucx_ib_test', '1 MiB']]"
-  :series="[
-    { name: 'Old ring', fill: '#e7e7e7', values: [1.61, 4.47, 3.11] },
-    { name: 'Larger ring', fill: '#aeacac', values: [1.58, 5.25, 3.15] },
-    { name: 'Larger, pre-faulted', fill: '#6eea9e', values: [0.81, 2.32, 1.26] },
-  ]"
-  :max="6" :step="1" unit="Tracer overhead, µs" :digits="2" :width="1300" :height="660" :bar-w="110"
-  reveal
-/>
-
-::note::
-
-<Note :notes="[
-  ['柱子是每次操作多花的時間。', '灰色是舊的 ring，約 6.5 萬格。'],
-  ['ring 加大到約 100 萬格。', '第一次寫到的頁變多。', '64 KiB 的 overhead 反而變大。'],
-  ['建立 ring 時一次配置所有頁。', 'overhead 降到原本的一半左右。', '更新後的範圍是 0.84–2.91 µs。'],
-]" />
-
-<!--
-allreduce 這兩組是 2 個節點各 1 個 rank 的 osu_allreduce，ucx_ib_test 是一對一的 ping-pong 測試。每格開 tracer 跑 10 次、不開跑 20 次。
-上次報告的 0.7–4.5 µs 也含有 page fault，所以更新為 0.84–2.91 µs。
-代價是每個被追蹤的行程多用 128 MiB 記憶體，啟動多約 50 ms。每節點 8 個 rank 時多用約 1 GiB，實測沒有記憶體不足。
-上次簡報的「三項優化使 overhead 降至原本的 18–43 %」，以新的結果為終點則是 14–24 %。
--->
-
----
-layout: textbook
-chapter: Part 5 · Data · 5.2 製造瓶頸
+chapter: Part 5 · Data · 5.1 製造瓶頸
 ---
 
 # 用一般使用者的權限製造與移除瓶頸
@@ -115,7 +35,7 @@ NUMA：伺服器有兩顆 CPU，每張網卡接在其中一顆旁邊；程式跑
 
 ---
 layout: textbook
-chapter: Part 5 · Data · 5.2 製造瓶頸
+chapter: Part 5 · Data · 5.1 製造瓶頸
 ltag: Terminal
 clicks: 3
 ---
@@ -154,7 +74,7 @@ ib_write_bw 是 perftest 套件的頻寬測試程式。它需要兩端：另一�
 layout: rows
 numbered: true
 reveal: true
-chapter: Part 5 · Data · 5.3 產生答案
+chapter: Part 5 · Data · 5.2 產生答案
 clicks: 3
 items:
   - title: 製造瓶頸
@@ -177,7 +97,7 @@ job 是向叢集排程系統 Slurm 申請的一次執行，期間使用同一批
 
 ---
 layout: textbook
-chapter: Part 5 · Data · 5.3 產生答案
+chapter: Part 5 · Data · 5.2 產生答案
 clicks: 2
 ---
 
@@ -195,7 +115,7 @@ clicks: 2
 
 ---
 layout: textbook
-chapter: Part 5 · Data · 5.3 產生答案
+chapter: Part 5 · Data · 5.2 產生答案
 ltag: Terminal
 clicks: 2
 ---
@@ -229,7 +149,7 @@ matrix.sbatch 會把這一批的所有條件以固定的隨機種子打亂順序
 
 ---
 layout: textbook
-chapter: Part 5 · Data · 5.3 產生答案
+chapter: Part 5 · Data · 5.2 產生答案
 clicks: 2
 ---
 
@@ -247,7 +167,7 @@ clicks: 2
 
 ---
 layout: textbook
-chapter: Part 5 · Data · 5.4 tracer 不改變答案
+chapter: Part 5 · Data · 5.3 tracer 不改變答案
 clicks: 1
 ---
 

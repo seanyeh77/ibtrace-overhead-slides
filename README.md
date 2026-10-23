@@ -5,7 +5,7 @@ ibtrace 的兩份報告簡報，都採 Textbook 版型，放在同一個 Slidev 
 | 簡報 | 入口檔 | 內容 | 線上版 |
 | --- | --- | --- | --- |
 | Tracer Overhead | `slides.md` | tracer 對量測的擾動、三項優化、量測方法與正確性檢查，共 26 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/ |
-| Counterfactual Attribution | `attribution.md` | 零基礎版：用重新登記記憶體的案例串起全場，依序是反直覺的現象、用 trace 找原因、研究問題、預測模型、驗證與使用方式；每一部分的開頭寫出它要回答的問題，最後整理 suggest 目前評估的六個動作與還沒涵蓋的優化；以實際的 bash 指令與 ibtrace 輸出舉例，共 77 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/attribution/ |
+| Counterfactual Attribution | `attribution.md` | 零基礎版：用重新登記記憶體的案例串起全場，依序是反直覺的現象、用 trace 找原因、研究問題、預測模型、驗證與使用方式；每一部分的開頭寫出它要回答的問題，最後整理 suggest 目前評估的六個動作與還沒涵蓋的優化；以實際的 bash 指令與 ibtrace 輸出舉例，共 74 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/attribution/ |
 
 Tracer Overhead 簡報中的 overhead 數字（0.7–4.5 µs、降至 18–43 %）含有 ring 的 page fault；預先配置 ring 之後的數字見 Counterfactual Attribution 第 36 張。
 

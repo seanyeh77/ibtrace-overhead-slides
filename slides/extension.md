@@ -27,7 +27,7 @@ chapter: Overview
 3. 第三版用就地校準取代外部常數。
 4. 第三版用排隊時間分辨計算與被搶。
 5. 單 rank 時誤差從 14.7 降到 9.2 百分點。
-6. 先定版、再收資料，評估規則事先寫死。
+6. 在新程式上，第三版沒有明顯比第二版好。
 
 ---
 src: ./ext/01-recap.md
@@ -46,5 +46,9 @@ src: ./ext/04-protocol.md
 ---
 
 ---
-src: ./ext/05-summary.md
+src: ./ext/05-evaluation.md
+---
+
+---
+src: ./ext/06-summary.md
 ---

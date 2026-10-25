@@ -55,11 +55,16 @@ chapter: Part 2 · Coverage
 | srun 的 `--cpu-bind` 綁到另一側 | 偵測得到 |
 | 遮罩、env、巢狀、`--interleave` 等寫法 | 解析得到 |
 
-位置是從命令列與綁定解析的，不是量測程式實際跑在哪裡。
+::note::
+
+<Note :notes="[
+  ['位置是從命令列與綁定解析的，不是量測程式實際跑在哪裡。'],
+]" />
 
 ---
 layout: textbook
 chapter: Part 2 · Coverage
+clicks: 1
 ---
 
 # NUMA 錯置在 4 MiB allreduce 上只慢 0.2 %
@@ -70,11 +75,12 @@ chapter: Part 2 · Coverage
 | CPU 與記憶體都在另一側 | +0.44 ms [+0.19, +1.18] ms | +0.55 ms |
 | 只有一個 rank 在另一側 | +0.50 ms [+0.28, +1.15] ms | 沒有建議（算 0 ms） |
 
-基準是放在網卡那一側：232.4 ms，每種放法各跑 10 次（job 601387）。
+::note::
 
-只有一個 rank 放錯時，第二版預測為 0 ms。
-
-第三版已修正，見第 3 部分。
+<Note :notes="[
+  ['基準是放在網卡那一側：232.4 ms，每種放法各跑 10 次（job 601387）。', '只有一個 rank 放錯時，第二版預測為 0 ms。'],
+  ['第三版已修正，見第 3 部分。'],
+]" />
 
 ---
 layout: textbook
@@ -204,6 +210,7 @@ items:
 ---
 layout: textbook
 chapter: Part 2 · Coverage
+clicks: 1
 ---
 
 # 在途請求數與切塊大小：預設值下沒有瓶頸
@@ -214,32 +221,35 @@ chapter: Part 2 · Coverage
 | 送出佇列 | 最多 2 個 | 256 個 |
 | 「資源不足、稍後再送」的回傳 | 0 次 | — |
 
-資料是 4 MiB allreduce 與 1 MiB alltoall，共 1,366,150 筆記錄。
+::note::
 
-正常的執行離上限很遠，所以不會卡在這裡。
-
-tracer 已補上兩項：記下排隊，記下 UCX 實際設定。
+<Note :notes="[
+  ['資料是 4 MiB allreduce 與 1 MiB alltoall，共 1,366,150 筆記錄。', '正常的執行離上限很遠，所以不會卡在這裡。'],
+  ['tracer 已補上兩項：記下排隊，記下 UCX 實際設定。'],
+]" />
 
 ---
 layout: textbook
 chapter: Part 2 · Coverage
+clicks: 2
 ---
 
 # 把設定調小時會變慢：三項加入，一項排除
 
-| UCX 設定（預設 → 調小） | alltoall 1 MiB | allreduce 4 MiB | 判定 |
+| UCX 設定（預設 → 調小） | alltoall | allreduce | 判定 |
 | --- | ---: | ---: | --- |
-| 同時讀取的位元組：無上限 → 512 KiB | +90.8 ms（+27 %） | +29.6 ms | 加入 |
-| 同時讀取的次數：硬體上限 → 1 次 | +45.6 ms（+14 %） | +9.5 ms | 加入 |
-| 每次讀取的大小：自動 → 64 KiB | +13.8 ms（+4 %） | 區間含 0 ms | 加入 |
+| 同時讀取的位元組：無上限 → 512 KiB | +90.8 ms | +29.6 ms | 加入 |
+| 同時讀取的次數：硬體上限 → 1 次 | +45.6 ms | +9.5 ms | 加入 |
+| 每次讀取的大小：自動 → 64 KiB | +13.8 ms | 區間含 0 ms | 加入 |
 | 送出佇列：256 個 → 16 個 | 區間含 0 ms | 程式卡死 | 排除 |
 
-每種設定跑 10 次，與預設值比較（job 603440）。
+::note::
 
-新動作：發現這三項被調小時，建議改回預設。
-
-送出佇列調到 16 個會卡死，不能當建議。
-
+<Note :notes="[
+  ['每種設定跑 10 次，與預設值比較（job 603440）。', '新動作：發現這三項被調小時，建議改回預設。'],
+  ['送出佇列調到 16 個會卡死，不能當建議。'],
+  ['alltoall 1 MiB 慢 4–27 %。', 'allreduce 是 4 MiB。'],
+]" />
 
 ---
 layout: rows

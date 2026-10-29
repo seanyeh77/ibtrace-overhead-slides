@@ -13,7 +13,6 @@ question: 怎麼確定預測是準的？
 ---
 layout: textbook
 chapter: Part 4 · Evaluation · 4.1 製造瓶頸
-clicks: 1
 ---
 
 # 用一般使用者的權限製造瓶頸
@@ -29,8 +28,7 @@ clicks: 1
 ::note::
 
 <Note :notes="[
-  ['每個狀態不開 tracer 跑 10 次。', '兩邊的中位數相減，就是實測 ΔT。'],
-  ['模型讀開 tracer 的執行。', '答案用不開 tracer 的執行。'],
+  ['每個狀態不開 tracer 跑 10 次。', '兩邊中位數相減，就是實測 ΔT。', '模型讀開 tracer 的執行。'],
 ]" />
 
 ---

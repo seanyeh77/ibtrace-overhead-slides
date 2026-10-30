@@ -1,4 +1,5 @@
 ---
+hide: true
 layout: section
 number: 4
 chapter: Part 4 · Results
@@ -12,6 +13,7 @@ question: 預測準不準？
 - **4.3** 發現與限制
 
 ---
+hide: true
 layout: figure
 chapter: Part 4 · Results · 4.1 驗證流程
 ---
@@ -21,6 +23,7 @@ chapter: Part 4 · Results · 4.1 驗證流程
 <FinDg name="valid" />
 
 ---
+hide: true
 layout: textbook
 chapter: Part 4 · Results · 4.2 與傳統做法比較
 ---
@@ -36,6 +39,7 @@ chapter: Part 4 · Results · 4.2 與傳統做法比較
 本研究的數字來自評估流程（就地校準），不是 suggest 目前的常數。
 
 ---
+hide: true
 layout: textbook
 chapter: Part 4 · Results · 4.2 與傳統做法比較
 ---
@@ -48,6 +52,7 @@ chapter: Part 4 · Results · 4.2 與傳統做法比較
 | 同側 2 張 | +760.9 ms | +615.8 ms | 0 ms | 0 ms |
 
 ---
+hide: true
 layout: textbook
 chapter: Part 4 · Results · 4.3 發現與限制
 ---
@@ -60,6 +65,7 @@ chapter: Part 4 · Results · 4.3 發現與限制
 | alltoall 1 MiB | 581.4 µs | **515.9 µs** | 720.9 µs | 725.8 µs |
 
 ---
+hide: true
 layout: textbook
 chapter: Part 4 · Results · 4.3 發現與限制
 ---
@@ -75,6 +81,7 @@ chapter: Part 4 · Results · 4.3 發現與限制
 | 每次執行只有 1–2 s | 固定成本的比例被放大 |
 
 ---
+hide: true
 layout: end
 chapter: Summary
 next: 修正點對點的重播校準，換一個叢集驗證

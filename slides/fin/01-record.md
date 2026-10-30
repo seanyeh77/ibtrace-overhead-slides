@@ -21,6 +21,7 @@ chapter: Part 1 · Record · 1.1 跨節點
 <FinDg name="record" />
 
 ---
+hide: true
 layout: figure
 chapter: Part 1 · Record · 1.2 一個行程裡
 ---
@@ -30,6 +31,7 @@ chapter: Part 1 · Record · 1.2 一個行程裡
 <FinDg name="process" />
 
 ---
+hide: true
 layout: figure
 chapter: Part 1 · Record · 1.3 一筆記錄
 ---

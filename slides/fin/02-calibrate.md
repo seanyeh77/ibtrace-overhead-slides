@@ -1,5 +1,4 @@
 ---
-hide: true
 layout: section
 number: 2
 chapter: Part 2 · Calibrate
@@ -14,7 +13,6 @@ question: 程式結束後，量什麼？
 - **2.4** 固定成本與每圈怎麼分開
 
 ---
-hide: true
 layout: figure
 chapter: Part 2 · Calibrate · 2.1 流程
 ---
@@ -24,7 +22,6 @@ chapter: Part 2 · Calibrate · 2.1 流程
 <FinDg name="calib" />
 
 ---
-hide: true
 layout: textbook
 chapter: Part 2 · Calibrate · 2.1 流程
 ---
@@ -41,7 +38,6 @@ chapter: Part 2 · Calibrate · 2.1 流程
 rank 1：mlx5_3 上多出 259 Gb/s；對照是同側沒人用的 mlx5_5。沒量到的 39,600 B 內插約 14.9 µs。
 
 ---
-hide: true
 layout: figure
 chapter: Part 2 · Calibrate · 2.2 兩條路徑
 ---
@@ -51,7 +47,6 @@ chapter: Part 2 · Calibrate · 2.2 兩條路徑
 <FinDg name="topo" />
 
 ---
-hide: true
 layout: figure
 chapter: Part 2 · Calibrate · 2.3 網卡設定
 ---
@@ -61,7 +56,6 @@ chapter: Part 2 · Calibrate · 2.3 網卡設定
 <FinDg name="nicCal" />
 
 ---
-hide: true
 layout: figure
 chapter: Part 2 · Calibrate · 2.4 固定成本與每圈
 ---
@@ -71,7 +65,6 @@ chapter: Part 2 · Calibrate · 2.4 固定成本與每圈
 <FinFit />
 
 ---
-hide: true
 layout: textbook
 chapter: Part 2 · Calibrate · 2.4 固定成本與每圈
 ---

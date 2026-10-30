@@ -1,5 +1,4 @@
 ---
-hide: true
 layout: section
 number: 3
 chapter: Part 3 · Suggest
@@ -14,7 +13,6 @@ question: ibtrace suggest 怎麼算出 ΔT？
 - **3.4** 輸出
 
 ---
-hide: true
 layout: figure
 chapter: Part 3 · Suggest · 3.1 流程
 ---
@@ -24,7 +22,6 @@ chapter: Part 3 · Suggest · 3.1 流程
 <FinDg name="sug" />
 
 ---
-hide: true
 layout: figure
 chapter: Part 3 · Suggest · 3.1 主迴圈
 ---
@@ -34,7 +31,6 @@ chapter: Part 3 · Suggest · 3.1 主迴圈
 <FinDg name="loop" />
 
 ---
-hide: true
 layout: figure
 chapter: Part 3 · Suggest · 3.2 取最慢的 rank
 ---
@@ -44,7 +40,6 @@ chapter: Part 3 · Suggest · 3.2 取最慢的 rank
 <FinDg name="perCall" />
 
 ---
-hide: true
 layout: figure
 chapter: Part 3 · Suggest · 3.3 ΔT 的三個部分
 ---
@@ -54,7 +49,6 @@ chapter: Part 3 · Suggest · 3.3 ΔT 的三個部分
 <FinDg name="dtParts" />
 
 ---
-hide: true
 layout: textbook
 chapter: Part 3 · Suggest · 3.4 輸出
 ---

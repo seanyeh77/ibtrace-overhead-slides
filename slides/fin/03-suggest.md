@@ -56,9 +56,3 @@ chapter: Part 3 · Suggest · 3.4 輸出
 | NUMA 錯置 | 綁回網卡那一側 | numactl 綁 CPU 與記憶體 |
 | 網路被佔用 | 移除競爭流量 | 要停掉外來流量 |
 | 網卡設定 | 選最快的候選 | 每個 rank 的 UCX_NET_DEVICES |
-
-::note::
-
-<Note :notes="[
-  ['依 ΔT 由大到小排序。', '負的 ΔT 代表會變慢。', 'UCX 在途數設定只給方向。'],
-]" />

@@ -34,12 +34,6 @@ chapter: Part 4 · Results · 4.2 與傳統做法比較
 | 方向正確 | **5 / 8 組** | 0 / 10 組 | 1 / 10 組 |
 | 實測最佳的動作排第一 | **12 / 15 次** | 0 / 18 次 | 1 / 18 次 |
 
-::note::
-
-<Note :notes="[
-  ['NPB MG、LU、BT，4 節點 × 4 rank。', 'LU 少 2 組；記 0 ms 時約 8.7 百分點。'],
-]" />
-
 ---
 layout: textbook
 chapter: Part 4 · Results · 4.2 與傳統做法比較
@@ -52,12 +46,6 @@ chapter: Part 4 · Results · 4.2 與傳統做法比較
 | 同側 4 張 | +626.4 ms | +501.5 ms | 0 ms | 0 ms |
 | 同側 2 張 | +760.9 ms | +615.8 ms | 0 ms | 0 ms |
 
-::note::
-
-<Note :notes="[
-  ['預測約為實測的 80 %。', 'MG、LU 的重播校準沒成功。'],
-]" />
-
 ---
 layout: textbook
 chapter: Part 4 · Results · 4.3 發現與限制
@@ -69,12 +57,6 @@ chapter: Part 4 · Results · 4.3 發現與限制
 | --- | ---: | ---: | ---: | ---: |
 | allgather 256 KiB | 147.8 µs | **112.6 µs** | 181.0 µs | 177.0 µs |
 | alltoall 1 MiB | 581.4 µs | **515.9 µs** | 720.9 µs | 725.8 µs |
-
-::note::
-
-<Note :notes="[
-  ['多個 rank 同時跨 NUMA 會互相拖慢。', '每節點 1 個 rank 時影響很小。'],
-]" />
 
 ---
 layout: textbook

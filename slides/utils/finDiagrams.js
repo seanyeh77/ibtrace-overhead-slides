@@ -8,10 +8,9 @@ const chain = (xs, w, y) => xs.slice(0, -1).map((x, i) => [x + w + 2, y, xs[i + 
 // L0: two commands
 const X0 = [20, 345, 670, 995, 1318]
 const overview = {
-  w: 1600, h: 500,
+  w: 1600, h: 400,
   nodes: [
     { x: 4, y: 70, w: 638, h: 300, f: 'w', dash: true },
-    { x: 345, y: 400, w: 1253, h: 90, f: 'y', dash: true, t: '網卡設定的校準與建議：評估腳本 rail5 做的，尚未整合進 ibtrace' },
     ...row(X0, 140, 280, 160, [
       { t: '你的 MPI 程式', s: '不改、不重編', f: 'g' },
       { t: 'ibtrace record', s: '1 錄製', s2: '2 就地校準', f: 'a' },

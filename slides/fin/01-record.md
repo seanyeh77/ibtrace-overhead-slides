@@ -37,17 +37,3 @@ chapter: Part 1 · Record · 1.3 一筆記錄
 # 一個 span：一次被攔截的呼叫
 
 <FinDg name="span" />
-
----
-layout: textbook
-chapter: Part 1 · Record · 1.3 一筆記錄
----
-
-# 錄製的代價
-
-| 項目 | 數值 |
-| --- | ---: |
-| 每次被攔截的呼叫多花 | 0.84–2.91 µs |
-| 每個行程多用的記憶體（ring） | 128 MiB |
-| ΔT 的比值（開 ÷ 不開 tracer），32 組中位數 | 1.02 倍 |
-| 需要的權限 | 一般使用者 |

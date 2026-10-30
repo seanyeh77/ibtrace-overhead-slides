@@ -51,3 +51,5 @@
 .dg .zs { font-family: var(--tb-sans); font-size: 23px; }
 .dg .zc { font-family: var(--tb-mono); font-size: 22px; }
 .dg .zg { font-family: var(--tb-sans); font-size: 24px; font-weight: 600; fill: #0f766e; }
+/* strokes on the viewBox edge must not be clipped */
+svg.dg, svg.chart { overflow: visible; }

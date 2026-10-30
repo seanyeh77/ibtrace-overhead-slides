@@ -24,7 +24,7 @@ const cls = (n, i) => (i === 0 ? (n.mono ? 'zc' : 'zt') : n.mono || n.L ? (n.mon
 </script>
 
 <template>
-  <svg class="dg" :viewBox="`0 0 ${w} ${h}`" :width="w" :height="h">
+  <svg class="dg" :viewBox="`-8 -8 ${w + 16} ${h + 16}`" :width="w + 16" :height="h + 16" overflow="visible">
     <defs>
       <marker :id="mid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
         <path d="M0,0 L10,5 L0,10 z" fill="#333333" />

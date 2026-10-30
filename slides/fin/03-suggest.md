@@ -7,7 +7,7 @@ question: ibtrace suggest 怎麼算出 ΔT？
 
 # 分析
 
-- **3.1** 流程
+- **3.1** 流程與主迴圈
 - **3.2** 每次呼叫取最慢的 rank
 - **3.3** ΔT 的三個部分
 - **3.4** 輸出
@@ -20,6 +20,15 @@ chapter: Part 3 · Suggest · 3.1 流程
 # 從 trace 到 ΔT
 
 <FinDg name="sug" />
+
+---
+layout: figure
+chapter: Part 3 · Suggest · 3.1 主迴圈
+---
+
+# 主迴圈長什麼樣子
+
+<FinDg name="loop" />
 
 ---
 layout: figure

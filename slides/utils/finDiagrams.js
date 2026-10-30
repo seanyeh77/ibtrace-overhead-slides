@@ -289,4 +289,42 @@ const valid = {
   texts: [],
 }
 
-export default { overview, record, process, span, calib, topo, nicCal, sug, perCall, dtParts, valid }
+// Suggest L2: what the main loop looks like in one rank's trace
+const ops = ['isend', 'irecv', 'wait']
+const loopRow = (y, x0, initW, endX, name) => {
+  const ps = x0 + initW + 20
+  return {
+    nodes: [
+      { x: x0, y, w: initW, h: 64, t: 'connect', s: 'reg_mr', f: 'g', mono: true },
+      ...[0, 1, 2, 3].flatMap((k) => ops.map((o, j) => ({ x: ps + k * 250 + j * 76, y, w: 70, h: 64, t: o, f: k % 2 ? 'b' : 'a', mono: true }))),
+      { x: endX, y, w: 1580 - endX, h: 64, t: 'finalize', f: 'g', mono: true },
+    ],
+    texts: [
+      { x: x0 - 20, y: y + 40, t: name, a: 'end', c: 'zc' },
+      { x: ps + 4 * 250 + 20, y: y + 40, t: '…', c: 'zt' },
+    ],
+    ps,
+  }
+}
+const L0 = loopRow(100, 130, 170, 1400, 'rank 0'), L1 = loopRow(290, 130, 230, 1440, 'rank 1')
+const loop = {
+  w: 1600, h: 600,
+  nodes: [...L0.nodes, ...L1.nodes],
+  edges: [
+    ...[0, 1, 2, 3].map((k) => ['both', L0.ps + k * 250 + 110, 168, L1.ps + k * 250 + 110, 286]),
+    [130, 420, 130, 400, 300, 400, 300, 420].length ? [] : [],
+  ].filter((e) => e.length),
+  texts: [
+    ...L0.texts, ...L1.texts,
+    ...[0, 1, 2, 3].map((k) => ({ x: L0.ps + k * 250 + 110, y: 80, t: `第 ${k + 1} 圈`, c: 'zs' })),
+    { x: 230, y: 420, t: '開頭與結尾', c: 'zg' },
+    { x: 230, y: 452, t: '只做一次', c: 'zs' },
+    { x: 230, y: 484, t: '→ 迴圈外、固定成本', c: 'zs' },
+    { x: 860, y: 420, t: '主迴圈：同一段呼叫序列一直重複', c: 'zg' },
+    { x: 860, y: 452, t: '每圈的差 × 圈數', c: 'zs' },
+    { x: 860, y: 484, t: '第 k 圈對第 k 圈，不用時鐘對齊', c: 'zs' },
+    { x: 860, y: 560, t: 'T ≈ 固定成本 + 迴圈外 + 圈數 × 每次迭代', c: 'zt' },
+  ],
+}
+
+export default { overview, record, process, span, calib, topo, nicCal, sug, loop, perCall, dtParts, valid }

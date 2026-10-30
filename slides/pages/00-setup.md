@@ -33,9 +33,7 @@ clicks: 2
 ::note::
 
 <Note :notes="[
-  ['程式經 UCP、UCT 兩層送出資料。', 'rc_verbs 再經過 verbs。', 'rc_mlx5 直接寫入網卡。'],
-  ['tracer 以 LD_PRELOAD 載入。', '每次被攔截的呼叫是一個 span。', 'span 記下進入與離開的時間。'],
-  ['每個 span 寫成一筆 128 B 的記錄。', '記錄放進共享記憶體的 ring。', 'ibmon 讀出記錄並取樣 counter。'],
+  ['程式經 UCP、UCT 兩層送出資料。', 'rc_verbs 再經過 verbs。', 'rc_mlx5 直接寫入網卡。', 'tracer 以 LD_PRELOAD 載入。', '每次被攔截的呼叫是一個 span。', 'span 記下進入與離開的時間。', '每個 span 寫成一筆 128 B 的記錄。', '記錄放進共享記憶體的 ring。', 'ibmon 讀出記錄並取樣 counter。'],
 ]" />
 
 <!--

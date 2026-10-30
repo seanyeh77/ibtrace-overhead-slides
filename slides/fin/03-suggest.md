@@ -61,4 +61,5 @@ chapter: Part 3 · Suggest · 3.4 輸出
 | 搶 CPU | 移走同核心的工作 | 要自己找出那個工作 |
 | NUMA 錯置 | 綁回網卡那一側 | numactl 綁 CPU 與記憶體 |
 | 網路被佔用 | 移除競爭流量 | 要停掉外來流量 |
-| 網卡設定 | 選最快的候選 | 每個 rank 的 UCX_NET_DEVICES |
+
+網卡設定（UCX_NET_DEVICES）由評估腳本 rail5 預測，尚未整合進 ibtrace suggest。

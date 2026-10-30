@@ -20,7 +20,7 @@ layout: figure
 chapter: Overview · 整體
 ---
 
-# 整體：使用者只打兩個指令
+# 整體：使用者的工具與評估流程
 
 <FinDg name="overview" />
 

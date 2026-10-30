@@ -21,12 +21,6 @@ clicks: 2
 
 <AtTraceCounter />
 
-::note::
-
-<Note :notes="[
-  ['程式透過 UCX 與 verbs 送資料。', 'verbs 是操作網卡的最底層 API。', 'counter 記錄送出的位元組數。', '一般使用者就能讀。', '但它看不到程式呼叫了什麼。', 'tracer 在程式啟動時載入。', '它記下每一次呼叫的名稱與耗時。', '這份紀錄就是 trace。'],
-]" />
-
 <!--
 上一部分「8 條只用了 2 條」的觀察，來自 counter。傳統的網路監控只看 counter；trace 則是 ibtrace 提供的。這一部分改看 trace。
 ibtrace 的 tracer 叫 libibtrace，用 LD_PRELOAD 的方式載入：程式不需要重新編譯，也不需要任何特權。
@@ -51,12 +45,6 @@ ibtrace: 4 ranks, 374891 records, 0 lost
 ibtrace: program output in runs/2rails-traced/rank0.out
 ibtrace: saved in runs/2rails-traced/
 ```
-
-::note::
-
-<Note :notes="[
-  ['在程式前面加上 ibtrace record。', '每個 rank 的資料存進同一個目錄。', '最後印出記錄筆數與遺失筆數。', '遺失必須是 0，trace 才完整。', '程式自己的輸出存在 rank0.out。'],
-]" />
 
 <!--
 這是實際的輸出（job 557154，4 個節點，9 秒）。程式自己的輸出不印在終端機，存在 rank0.out；加 --show-output 才會照常印出。結束後節點的 /dev/shm 沒有留下任何 ibtrace 的檔案。
@@ -87,12 +75,6 @@ rank   total    wait  register   stall   other
 rank 0: 1846 registrations; 9 buffers repeat (top 878x, 878x)
 same buffer registered again per call: 4.0 on every rank
 ```
-
-::note::
-
-<Note :notes="[
-  ['breakdown 只要給剛才的目錄。', '每個 rank 的時間拆成四類。', 'rank 0 有 201 ms 花在登記。', '比等待通訊的 134 ms 還多。', '登記是什麼，下一頁說明。', '同兩塊記憶體被一再登記。', '每次呼叫都重新登記 4 次。'],
-]" />
 
 <!--
 四類：wait 是等網路與其他 rank，RDMA 傳輸進行中的時間也在這裡；register 是向網卡登記與取消登記記憶體；stall 是比同類情況的中位數多出 1 ms 以上的停頓；other 是程式自己的計算與送收呼叫本身。total = wait + register + stall + other。
@@ -132,12 +114,6 @@ clicks: 3
 
 <AtChurn />
 
-::note::
-
-<Note :notes="[
-  ['每次呼叫都 malloc 兩塊 1 MiB。', 'UCX 在每張網卡上登記它們。', '接著執行 allreduce 本身。', '估算真正傳資料只占約 10 %。', '呼叫結束時 free 掉暫存空間。', 'glibc 把它還給作業系統。', 'UCX 只好作廢這塊記憶體的登記。', '下一次呼叫又得重新登記。', '登記占總時間的 45 %。'],
-]" />
-
 <!--
 malloc 拿到的兩塊 1 MiB 是 Open MPI 的 allreduce 用的暫存空間。glibc 是 Linux 的記憶體管理函式庫。
 UCX 發現記憶體被還回去，為了安全只好作廢登記；下一次呼叫拿到同一個位址也得重新登記。
@@ -168,12 +144,6 @@ $ awk -F, '/ibv_reg_mr/ {printf "0x%x %d\n", $11, $12}' \
     878 0x3671060 1048576
     878 0x3571050 1048576
 ```
-
-::note::
-
-<Note :notes="[
-  ['trace 是 CSV 檔，用 grep 就能數。', '2 條 rail：登記 1,846 次。', '8 條 rail：7,126 次。', '約 4 倍，正好對應網卡數 2 → 8。', '被登記的只有兩個 1 MiB 的位址。', '兩個各出現 878 次。', '每次呼叫都在重新登記它們。'],
-]" />
 
 <!--
 指令與輸出都是實際的。runs/ 底下是把 job 517932 的執行整理成的目錄（只有符號連結）：2rails-traced 是預設 2 條 rail、開 tracer 的一次，8rails-traced 是改用 8 條 rail、開 tracer 的一次。兩份都是 rank 0 的 trace。
@@ -230,12 +200,6 @@ keep-buffers    10        304.2
 keep-buffers is 244.6 ms faster (-44.6 %)
 95 % interval of the difference: -248.3 to -242.6 ms
 ```
-
-::note::
-
-<Note :notes="[
-  ['只要兩個 glibc 環境變數，不必改程式。', 'mmap 門檻提高到 32 MiB。', 'trim 門檻提高到 1 GiB。', '兩個必須一起設。', '不開 tracer，前後各跑 10 次。', '中位數 549 → 304 ms。'],
-]" />
 
 <!--
 記憶體池指的是 heap，也就是程式自己管理的記憶體。trim 門檻是 heap 頂端空出超過這個值，才還給系統。mmap 門檻以上的記憶體單獨向系統要、free 時直接歸還。空間留在程式裡，UCX 的登記就一直有效。

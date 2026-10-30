@@ -29,12 +29,6 @@ clicks: 2
   reveal
 />
 
-::note::
-
-<Note :notes="[
-  ['不開 tracer：兩者只差 0.68 µs。', '開優化前的 tracer：差距變成 5.8 µs。', 'rc_verbs 多經過一層 verbs 攔截。', '先前的「45 %」主要來自這個效應。', '不開 tracer 時，兩者只差 2–14 %。'],
-]" />
-
 <!--
 這裡比的是 64 KiB 的 RTT。「45 %」指先前的結論：rc_mlx5 處理時間僅為 rc_verbs 的 45 %。
 先講結論：tracer 的 overhead 在兩種 transport 上不同，所以在啟用 tracer 的情況下比較 transport，差距會被放大。
@@ -110,12 +104,6 @@ void ibt_span_end_args(struct ibt_span *sp, ...) {
 }
 ```
 
-::note::
-
-<Note :notes="[
-  ['進入呼叫時執行 ibt_span_begin。', '離開時執行 ibt_span_end_args。', '進入時讀一次 CLOCK_MONOTONIC。', '離開時再讀一次。', '兩次合計約 31 ns，是主要成本。', '同一層的巢狀呼叫不記錄。', '關閉記錄時也在這裡返回。', '其餘的呼叫交給 emit 寫成記錄。', '這是下一頁的寫入成本。'],
-]" />
-
 <!--
 ibt_mono_ns 就是 clock_gettime(CLOCK_MONOTONIC)。
 「只攔截」條件付的就是這一頁上面到 return 為止的成本；完整 tracer 再加上 emit。
@@ -148,12 +136,6 @@ clicks: 1
   reveal
 />
 
-::note::
-
-<Note :notes="[
-  ['寫一筆記錄約 296 ns。', '兩個 syscall 與 snprintf 占九成以上。', '一個 span 約 41 ns。', '兩次讀時鐘就占了 31 ns。'],
-]" />
-
 <!--
 做法是在程式副本中一次移除一項，與原版交錯執行，量出每一項各自的成本。
 寫入記錄：getpid、gettid 各約 130 ns，snprintf 約 61 ns。atomic 取號只有 7 ns，而且多執行緒共用 ring 時不可缺少，所以保留。
@@ -185,12 +167,6 @@ clicks: 2
   ['', '}'],
 ]" />
 
-::note::
-
-<Note :notes="[
-  ['這是寫入一筆記錄的函式。', '每筆都做兩個 syscall 和一次 snprintf。', '這三行合計約 318 ns。', '改為讀快取的 pid 與 tid。', '名稱改用直接複製。', '每筆記錄：296 ns → 約 20 ns。', '寫出的位元組完全不變。'],
-]" />
-
 <!--
 三行的成本：getpid、gettid 各約 130 ns，snprintf 約 61 ns。
 ring 取號（ibt_ring_claim）只有約 7 ns，而且多執行緒共用 ring 時不可缺少，所以保留。
@@ -220,12 +196,6 @@ static void ids(int32_t *pid, int32_t *tid) {
 }
 ```
 
-::note::
-
-<Note :notes="[
-  ['pid 每個行程只需取得一次。', 'tid 每條執行緒只需取得一次。', '所以把兩者快取起來。', 'fork 後，kernel 會把快取頁清零。', '讀到 0 就重新呼叫 getpid。', '每條執行緒記下當時的 pid。', 'pid 一變，tid 也要重讀。', '平常只做一次記憶體讀取。', '不必進入 kernel。'],
-]" />
-
 <!--
 簡化版：實際程式碼以 __atomic_load_n／__atomic_store_n 存取這一頁，並在 g_fork_page 為 NULL（madvise 失敗）時，退回每次都呼叫兩個 syscall。
 為什麼需要清零：fork 會複製整個記憶體，包含快取，子行程若直接沿用就會拿到父行程的 pid。
@@ -251,12 +221,6 @@ uint64_t ibt_clock_ns(void) {
     return c->last = ns;
 }
 ```
-
-::note::
-
-<Note :notes="[
-  ['TSC 是 CPU 內建的時間計數器。', '用 rdtsc 讀取，只要幾 ns。', '先算出距離錨點經過幾個 tick。', '1 ms 以內：用斜率從錨點內插。', '超過 1 ms：讀一次真的時鐘，重量斜率。', '讀值不會倒退，span 不會是負的。', '每個 span：41.5 → 23.8 ns。'],
-]" />
 
 <!--
 rdtsc 不需進入 kernel。超過 1 ms 時讀的是 CLOCK_MONOTONIC。讀值不倒退是以每條執行緒為單位。
@@ -284,12 +248,6 @@ clicks: 2
   reveal
 />
 
-::note::
-
-<Note :notes="[
-  ['優化前：每次來回多 3.9–12.7 µs。', '相當於 RTT 的 21–139 %。', '快取 pid、tid，並直接複製名稱。', '每筆記錄：296 ns → 約 20 ns。', 'span 改用 TSC：41.5 → 23.8 ns。', '最終 overhead 為 0.7–4.5 µs。', '占 RTT 的 8–28 %。'],
-]" />
-
 <!--
 三種柱子代表三次量測，每次都在同一個 job 內以不開 tracer 的執行作為錨點，所以比較的是同一次量測內的差值，而不是絕對 RTT。
 六格從優化前到最後的變化，信賴區間全部不包含 0。
@@ -314,12 +272,6 @@ clicks: 1
   :predicted="[0.56, 1.04, 1.28, 0.74, 1.41, 1.83]"
   :max="2" :step="0.5" :width="1320" :height="700"
 />
-
-::note::
-
-<Note :notes="[
-  ['關鍵路徑是決定 RTT 的那串操作。', '每次迭代被攔截 150–380 次。', '其中 92–97 % 是空轉輪詢。', '只用非空轉的呼叫數來預測。', '六格中有五格落在實測區間內。', '連空轉也算，會多估 5–60 µs。'],
-]" />
 
 <!--
 實測值是只攔截、不寫記錄時的 overhead。預測是非空轉呼叫數乘上 span 成本。

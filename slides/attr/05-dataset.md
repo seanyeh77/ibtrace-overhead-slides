@@ -54,12 +54,6 @@ $ ib_write_bw -d mlx5_0 --rate_limit=100 \
 $ UCX_MAX_RNDV_RAILS=8 ./program
 ```
 
-::note::
-
-<Note :notes="[
-  ['taskset：忙迴圈和程式搶同一個核心。', 'numactl：程式綁到網卡另一側。', 'ib_write_bw：灌入競爭流量。', '對照組：流量灌到沒用的網卡。', 'UCX 環境變數只影響這一次執行。'],
-]" />
-
 <!--
 忙迴圈和程式搶同一個核心時，程式會被作業系統週期性地暫停。
 ib_write_bw 是 perftest 套件的頻寬測試程式。它需要兩端：另一個節點先以相同參數、不帶主機名稱啟動 server，這一端再連過去。
@@ -102,12 +96,6 @@ clicks: 2
 
 <AtPipeline />
 
-::note::
-
-<Note :notes="[
-  ['先寫下每個情境的狀態與動作。', '再寫下預期，之後不能改。', '每一批申請一個 job，用同一組節點。', '所有執行以固定種子打亂順序。', '每次執行在 manifest 記一列。', '結束碼不是 0 的執行判為無效。', 'trace 遺失不是 0 也判為無效。'],
-]" />
-
 ---
 layout: textbook
 chapter: Part 5 · Data · 5.2 產生答案
@@ -127,12 +115,6 @@ Submitted batch job 517932
 $ squeue -w "$SLURM_JOB_NODELIST"   # 執行中確認只有自己的 job
 ```
 
-::note::
-
-<Note :notes="[
-  ['想獨占節點，避免別人干擾。', '但這個叢集不允許獨占。', '所以把整台的資源都申請下來。', 'sbatch 向 Slurm 申請 4 個節點。', '環境變數決定這一批跑哪些情境。', '執行中查三次 squeue。', '確認節點上只有自己的工作。'],
-]" />
-
 <!--
 517932 是最終資料集中重新登記那一批：4 個節點，跑了 6 分 21 秒。提交時另外設了 GROUP=i7 與 MX=W2 兩個環境變數，選出這一批的情境；sacct 記錄的提交指令不含環境變數。一對一傳輸那一批是 517929，2 個節點。
 標頭的完整內容：--account、--partition=dev、--nodes=2（被命令列的 -N 4 覆蓋）、--ntasks-per-node=1、--gres=gpu:8、--cpus-per-task=96、--mem=0、--time=02:00:00。
@@ -150,12 +132,6 @@ clicks: 2
 
 <AtPair />
 
-::note::
-
-<Note :notes="[
-  ['一組有兩個狀態。', '有瓶頸，與做了優化之後。', '每個狀態開與不開 tracer 各 10 次。', '答案只用不開 tracer 的執行。', '兩邊各取中位數相減，就是 ΔT。', '模型讀有瓶頸時的 10 份 trace。', '10 個預測取中位數。', '再和答案比較。'],
-]" />
-
 ---
 layout: textbook
 chapter: Part 5 · Data · 5.3 tracer 不改變答案
@@ -171,12 +147,6 @@ clicks: 1
   { label: 'Rail count', med: 1.00, lo: 0.91, hi: 1.40 },
   { label: 'Re-registration', med: 1.04, lo: 1.02, hi: 1.37 },
   { label: 'All 32 pairs', med: 1.02, hot: true },
-]" />
-
-::note::
-
-<Note :notes="[
-  ['每一列是 ΔT 的比值。', '比值 = 開 tracer ÷ 不開。', '1 代表 tracer 不影響結論。', '全部 32 組的中位數是 1.02。', '例外是 NUMA 錯置。', '開 tracer 時，效果變小。', '這一類改從設定資訊判斷。'],
 ]" />
 
 <!--
@@ -203,9 +173,3 @@ chapter: Part 5 · Data · 5.3 tracer 不改變答案
 少掉的 1.73 ms 中，1.05 ms 出現在開始寫 ring 之後。
 
 所以 NUMA 錯置改從設定判斷，不從 trace 量。
-
-::note::
-
-<Note :notes="[
-  ['每種模式各跑 10 次。', '程式是 64 KiB allreduce。', '資料來自 job 603195。', '推論：其他 rank 本來就在等。', '寫 ring 的時間落在等待裡。'],
-]" />

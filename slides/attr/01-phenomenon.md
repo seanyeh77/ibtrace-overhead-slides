@@ -42,12 +42,6 @@ clicks: 1
 
 <AtCluster />
 
-::note::
-
-<Note :notes="[
-  ['程式把資料交給 UCX。', 'UCX 透過 8 張 HCA 送出。', '兩邊的 HCA 一對一相連。', '這樣就形成 8 條 rail。', 'UCX 預設只用 2 條 rail。', '其餘 6 條閒置。', '後面的案例就從這裡開始。'],
-]" />
-
 <!--
 圖中的 HCA 0 到 HCA 7 對應叢集上實際的 8 張網卡。
 UCX 的參數 UCX_MAX_RNDV_RAILS 預設為 2，用 ucx_info -c 可以看到。
@@ -74,12 +68,6 @@ mlx5_3 400 Gb/sec (4X NDR)
 $ ucx_info -c | grep MAX_RNDV_RAILS
 UCX_MAX_RNDV_RAILS=2
 ```
-
-::note::
-
-<Note :notes="[
-  ['/sys 底下的檔案記錄硬體資訊。', '一般使用者也能讀。', '這個迴圈讀出 8 張網卡的速度。', '每張都是 400 Gb/s。', '8 張網卡就是 8 條 rail。', 'ucx_info -c 列出 UCX 的參數。', '大訊息最多只用 2 條 rail。', '其餘 6 條閒置。'],
-]" />
 
 <!--
 Linux 把硬體資訊放在 /sys 底下，變成一般使用者也能讀的檔案。
@@ -147,12 +135,6 @@ clicks: 1
   :max="150" :step="25" unit="Time relative to 2 rails, %" :digits="1" :width="1300" :height="660" :bar-w="170"
   reveal
 />
-
-::note::
-
-<Note :notes="[
-  ['以預設的 2 條 rail 為 100 %。', '比較改用 8 條之後的時間。', '一對一傳輸快了 40 %。', 'allreduce 反而慢了 38 %。', '下一部分用 trace 找原因。'],
-]" />
 
 <!--
 兩組來自不同的程式。一對一傳輸是 ucx_ib_test 在 2 個節點上的 4 MiB ping-pong：62.9 ms 降到 37.5 ms，單向頻寬從 67 GB/s 升到 110 GB/s。

@@ -30,12 +30,6 @@ chapter: Part 4 · Protocol · 4.1 測試資料
 | 4×4 | 4 個節點 × 4 個 rank |
 | 2×16 | 2 個節點 × 16 個 rank |
 
-::note::
-
-<Note :notes="[
-  ['每個狀態不開 tracer 跑 10 次，開 tracer 跑 3 次。', '每次執行結束，立刻壓縮 trace。'],
-]" />
-
 ---
 layout: textbook
 chapter: Part 4 · Protocol · 4.2 節點健康檢查
@@ -50,12 +44,6 @@ chapter: Part 4 · Protocol · 4.2 節點健康檢查
 | hgpn083 | 分析時卡住 | 605882、605971 |
 | hgpn171 | 一張網卡只有約 1/10 的速度 | 605722、606537 |
 | hgpn173 | 一張網卡的 port 斷線 | 606537 |
-
-::note::
-
-<Note :notes="[
-  ['第二版有一組錯的方向，就是 hgpn050 造成的。', '所以每個評估 job 開始前，都先檢查節點。'],
-]" />
 
 ---
 layout: textbook
@@ -73,12 +61,6 @@ chapter: Part 4 · Protocol · 4.2 節點健康檢查
 | 四節點 alltoall | 同上，加上 4×4 配置 | 超過參考值 1.25 或 1.5 倍 |
 | 每對節點的傳輸 | 1 MiB，8 條 rail | 超過其他節點的 1.2 倍 |
 
-::note::
-
-<Note :notes="[
-  ['參考值來自 12 個正常節點（3 個 job），門檻先寫死再量。', '不合格的節點排除，整個 job 作廢重送。'],
-]" />
-
 ---
 layout: textbook
 chapter: Part 4 · Protocol · 4.2 節點健康檢查
@@ -91,12 +73,6 @@ chapter: Part 4 · Protocol · 4.2 節點健康檢查
 | hgpn171 | 65.03 µs | 一張網卡 37.3 Gb/s（下限 329.7 Gb/s） |
 | hgpn173 | 6.17 µs | 一張網卡的 port 斷線 |
 | 12 個正常節點 | 6.02–6.08 µs | 沒有 |
-
-::note::
-
-<Note :notes="[
-  ['正常的節點都通過，沒有誤判。', 'hgpn050 被別人佔用，這次沒測到，直接排除。'],
-]" />
 
 ---
 layout: textbook
@@ -113,9 +89,3 @@ chapter: Part 4 · Protocol · 4.3 計分規則
 | 在途數的三項設定 | 只給方向，不計分 |
 | 程式的時間 | 只用 ibtrace 記錄的時間，不讀程式的輸出 |
 | 模型檔案 | 評估前比對定版時的檢查碼 |
-
-::note::
-
-<Note :notes="[
-  ['已知的雜訊：正常節點在 8 條 rail 時偶爾慢 32–130 µs。', '所以 rail 數這一類的實測 ΔT 雜訊較大。'],
-]" />

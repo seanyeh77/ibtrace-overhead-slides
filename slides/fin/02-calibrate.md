@@ -35,7 +35,7 @@ layout: figure
 chapter: Part 2 · Calibrate · 2.3 網卡設定
 ---
 
-# 網卡設定：4 個候選各量一次（評估腳本）
+# 網卡設定：4 個候選各量一次
 
 <FinDg name="nicCal" />
 

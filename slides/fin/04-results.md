@@ -14,7 +14,6 @@ question: 預測準不準？
 ---
 layout: figure
 chapter: Part 4 · Results · 4.1 驗證流程
-takeaway: 測試程式在定版前不執行；每狀態另跑 3 次開 tracer 給模型讀
 ---
 
 # 驗證：實際做那個動作，量真正的 ΔT

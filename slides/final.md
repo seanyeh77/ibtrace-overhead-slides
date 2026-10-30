@@ -18,7 +18,6 @@ subtitle: 從一次執行的 trace，預測每個優化動作能讓程式快多�
 ---
 layout: figure
 chapter: Overview · 整體
-takeaway: 接下來一層一層放大：錄製 → 校準 → 分析 → 驗證
 ---
 
 # 整體：使用者只打兩個指令

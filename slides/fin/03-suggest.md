@@ -15,7 +15,6 @@ question: ibtrace suggest 怎麼算出 ΔT？
 ---
 layout: figure
 chapter: Part 3 · Suggest · 3.1 流程
-takeaway: 只讀執行目錄，不需要再跑程式
 ---
 
 # 從 trace 到 ΔT
@@ -25,7 +24,6 @@ takeaway: 只讀執行目錄，不需要再跑程式
 ---
 layout: figure
 chapter: Part 3 · Suggest · 3.2 取最慢的 rank
-takeaway: 同一次呼叫的小訊息同時在途，延遲重疊，所以取最大值
 ---
 
 # 每次呼叫，只看最慢的 rank
@@ -35,7 +33,6 @@ takeaway: 同一次呼叫的小訊息同時在途，延遲重疊，所以取最�
 ---
 layout: figure
 chapter: Part 3 · Suggest · 3.3 ΔT 的三個部分
-takeaway: 長執行時固定成本被攤薄，預測只差 3 %
 ---
 
 # ΔT 的三個部分

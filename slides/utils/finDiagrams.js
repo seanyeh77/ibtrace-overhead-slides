@@ -6,11 +6,11 @@ const row = (xs, y, w, h, items, f = 'a') =>
 const chain = (xs, w, y) => xs.slice(0, -1).map((x, i) => [x + w + 2, y, xs[i + 1] - 4, y])
 
 // L0: two commands
-const X0 = [0, 330, 660, 990, 1320]
+const X0 = [20, 345, 670, 995, 1318]
 const overview = {
   w: 1600, h: 400,
   nodes: [
-    { x: -10, y: 70, w: 620, h: 300, f: 'w', dash: true },
+    { x: 4, y: 70, w: 638, h: 300, f: 'w', dash: true },
     ...row(X0, 140, 280, 160, [
       { t: '你的 MPI 程式', s: '不改、不重編', f: 'g' },
       { t: 'ibtrace record', s: '1 錄製', s2: '2 就地校準', f: 'a' },
@@ -21,8 +21,8 @@ const overview = {
   ],
   edges: [...chain(X0, 280, 220)],
   texts: [
-    { x: 300, y: 50, t: '同一個 Slurm job、同一組節點', c: 'zg' },
-    { x: 1150, y: 360, t: '只讀執行目錄', c: 'zs' },
+    { x: 323, y: 50, t: '同一個 Slurm job、同一組節點', c: 'zg' },
+    { x: 1135, y: 360, t: '只讀執行目錄', c: 'zs' },
   ],
 }
 

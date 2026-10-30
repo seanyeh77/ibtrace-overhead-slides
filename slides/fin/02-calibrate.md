@@ -22,6 +22,22 @@ chapter: Part 2 · Calibrate · 2.1 流程
 <FinDg name="calib" />
 
 ---
+layout: textbook
+chapter: Part 2 · Calibrate · 2.1 流程
+---
+
+# 實例：NPB SP，網卡上有別人的流量
+
+| 訊息大小 | 走有流量的卡 | 走同側乾淨的卡 | 每則多花（懲罰） |
+| ---: | ---: | ---: | ---: |
+| 8 B | 0.34 µs | 0.18 µs | **0.16 µs** |
+| 19,200 B | 26.2 µs | 11.7 µs | **14.6 µs** |
+| 42,240 B | 27.6 µs | 12.7 µs | **14.9 µs** |
+| 61,440 B | 28.8 µs | 13.4 µs | **15.4 µs** |
+
+rank 1：mlx5_3 上多出 259 Gb/s；對照是同側沒人用的 mlx5_5。沒量到的 39,600 B 內插約 14.9 µs。
+
+---
 layout: figure
 chapter: Part 2 · Calibrate · 2.2 兩條路徑
 ---

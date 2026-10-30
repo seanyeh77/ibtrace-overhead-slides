@@ -46,3 +46,8 @@
 .rows-title { font-family: var(--tb-serif); font-size: 40px; font-weight: 600; line-height: 1.25; }
 .rows-text { color: #3b434c; font-size: 32px; line-height: 1.55; }
 .rows-text code { font-family: var(--tb-mono); background: var(--tb-code); padding: 0 6px; font-size: 28px; }
+/* FlowDg: Chinese diagram text */
+.dg .zt { font-family: var(--tb-sans); font-size: 28px; font-weight: 600; }
+.dg .zs { font-family: var(--tb-sans); font-size: 23px; }
+.dg .zc { font-family: var(--tb-mono); font-size: 22px; }
+.dg .zg { font-family: var(--tb-sans); font-size: 24px; font-weight: 600; fill: #0f766e; }

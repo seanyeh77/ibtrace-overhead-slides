@@ -6,6 +6,7 @@ on:
     paths:
       - 'slides/**'
       - '.github/workflows/pages.yml'
+      - '.github/scripts/**'
   workflow_dispatch:
 
 permissions:
@@ -35,6 +36,7 @@ jobs:
       - run: npx slidev build attribution.md --base /ibtrace-overhead-slides/attribution/ --out dist/attribution
       - run: npx slidev build extension.md --base /ibtrace-overhead-slides/extension/ --out dist/extension
       - run: npx slidev build final.md --base /ibtrace-overhead-slides/final/ --out dist/final
+      - run: node ../.github/scripts/slides-manifest.mjs dist
       - uses: actions/upload-pages-artifact@v3
         with:
           path: slides/dist
@@ -42,9 +44,16 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    env:
+      SLIDES_PAT: ${{ secrets.SLIDES_PAT }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Rebuild slides index
+        if: env.SLIDES_PAT != ''
+        env:
+          GH_TOKEN: ${{ env.SLIDES_PAT }}
+        run: gh api repos/seanyeh77/seanyeh77.github.io/dispatches -f event_type=slides-updated

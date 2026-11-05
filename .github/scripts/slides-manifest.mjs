@@ -12,7 +12,7 @@ const decks = [];
     if (entry.isDirectory()) {
       if (entry.name !== "assets") walk(p);
     } else if (entry.name === "index.html") {
-      const title = readFileSync(p, "utf8").match(/<title>([^<]*)<\/title>/i)?.[1]?.trim() ?? "";
+      const title = readFileSync(p, "utf8").match(/<title>([^<]*)<\/title>/i)?.[1]?.trim().replace(/ - Slidev$/, "") ?? "";
       const rel = relative(dist, dirname(p)).split("\\").join("/");
       decks.push({ title, path: rel ? `./${rel}/` : "./" });
     }

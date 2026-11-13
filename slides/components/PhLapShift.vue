@@ -13,8 +13,8 @@ const part = computed(() => ($clicks.value < 6 ? 0 : $clicks.value < 11 ? 1 : $c
 const st = (k) => ({
   opacity: part.value === k ? 1 : 0,
   pointerEvents: part.value === k ? 'auto' : 'none',
-  // the part being left fades slowly while the next one grows out of it
-  transition: `opacity ${part.value > k ? 0.3 : 0.15}s ease`,
+  // switch instantly: each part starts from the exact picture the previous one ended on
+  transition: 'none',
 })
 </script>
 

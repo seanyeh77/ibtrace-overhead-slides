@@ -54,8 +54,15 @@ const caps = [
     <line x1="200" x2="1700" :y1="R3 + 18" :y2="R3 + 18" stroke="#aeacac" stroke-width="2" :style="{ opacity: z }" />
 
     <g :style="{ opacity: 1 - z }">
-      <rect v-for="i in 12" :key="'g2' + i" :x="230 + (i - 1) * 104" y="50" width="94" height="56" fill="#e7e7e7" stroke="#1a1a1a" stroke-width="2" />
-      <rect v-for="i in 12" :key="'g3' + i" :x="268 + (i - 1) * 104" y="180" width="94" height="56" fill="#e7e7e7" stroke="#1a1a1a" stroke-width="2" />
+      <g v-for="i in 12" :key="'g2' + i">
+        <rect :x="230 + (i - 1) * 104" y="50" width="94" height="56" :fill="['#6eea9e', '#adf0c7', '#e7e7e7'][(i - 1) % 3]" stroke="#1a1a1a" stroke-width="2" />
+        <text :x="277 + (i - 1) * 104" y="86" text-anchor="middle" class="t">{{ 'ABC'[(i - 1) % 3] }}</text>
+      </g>
+      <g v-for="i in 12" :key="'g3' + i">
+        <rect :x="268 + (i - 1) * 104" y="180" width="94" height="56" :fill="['#adf0c7', '#6eea9e', '#e7e7e7'][(i - 1) % 3]" stroke="#1a1a1a" stroke-width="2" />
+        <text :x="315 + (i - 1) * 104" y="216" text-anchor="middle" class="t">{{ 'EDF'[(i - 1) % 3] }}</text>
+      </g>
+      <text x="372" y="276" class="s m">D 是 rank 3 一圈裡送最多的呼叫</text>
     </g>
     <g v-for="(x0, i) in a2" :key="'a2' + i" :style="{ opacity: i < 4 ? 1 : z }">
       <path :d="`M ${x0 + 53 - 14} ${R2 - 44} L ${x0 + 53 + 14} ${R2 - 44} L ${x0 + 53} ${R2 - 22} Z`" fill="#0f766e" />

@@ -6,8 +6,12 @@ import { useProgress, seg } from '../utils/tween.js'
 // The IndexError. A pointer on each rank slides to unit k; at k = 3 rank 0 has no unit 3.
 // The fix: each rank's units slide together into one box per pass, then the passes are compared.
 const { $clicks } = useSlideContext()
-const c = computed(() => $clicks.value)
-const p = useProgress(c, 1000)
+const props = defineProps({ offset: { type: Number, default: 0 } })
+const c = computed(() => Math.min(Math.max($clicks.value - props.offset, 0), 5))
+const p = useProgress(() => $clicks.value, 1000)
+// entering (step 0): rank 1's first pass grows out of the previous picture (3 calls = 3 units)
+const z = computed(() => (c.value === 0 ? seg(p.value, 0, 1) : 1))
+const Lz = (a, b) => a + (b - a) * z.value
 const ranks = [
   { name: 'rank 0', note: '角落，2 個鄰居', u: 2 },
   { name: 'rank 1', note: '邊上，3 個鄰居', u: 3 },
@@ -19,7 +23,9 @@ const k = computed(() => (c.value >= 1 && c.value <= 3 ? c.value : 0))
 const m = computed(() => (c.value >= 5 ? 1 : c.value === 4 ? seg(p.value, 0, 1) : 0))
 const box = (r, i) => {
   const w0 = W / r.u, x0 = X0 + w0 * i
-  return { x: x0 + (X0 - x0) * m.value, w: w0 + (W - w0) * m.value }
+  const x = x0 + (X0 - x0) * m.value, w = w0 + (W - w0) * m.value
+  if (r.u !== 3) return { x, w, y: 0, h: 70 }
+  return { x: Lz(186 + 150 * i, x), w: Lz(138, w), y: Lz(96 - 140, 0), h: Lz(60, 70) }
 }
 // pointer: slides from the previous unit to unit k
 const ptr = (r) => {
@@ -48,15 +54,15 @@ const caps = [
 </script>
 
 <template>
-  <svg class="dg" viewBox="-8 -8 1556 560" width="1556" height="560" style="overflow: visible">
-    <text :x="X0" y="0" class="s m">第 1 圈</text>
-    <g v-for="(r, ri) in ranks" :key="ri">
-      <text x="0" :y="ri * 110 + 64" class="l">{{ r.name }}</text>
-      <text x="0" :y="ri * 110 + 96" class="s m">{{ r.note }}</text>
+  <svg class="dg" viewBox="-8 -8 1576 600" width="1576" height="600" style="overflow: visible">
+    <text :x="X0" y="0" class="s m" :style="{ opacity: z }">第 1 圈</text>
+    <g v-for="(r, ri) in ranks" :key="ri" :style="{ opacity: r.u === 3 ? 1 : z }">
+      <text x="0" :y="r.u === 3 ? Lz(132, ri * 110 + 64) : ri * 110 + 64" class="l">{{ r.name }}</text>
+      <text x="0" :y="ri * 110 + 96" class="s m" :style="{ opacity: z }">{{ r.note }}</text>
       <g v-for="i in r.u" :key="i">
-        <rect :x="box(r, i - 1).x" :y="ri * 110 + 30" :width="box(r, i - 1).w" height="70" :fill="fill(r, i - 1)"
+        <rect :x="box(r, i - 1).x" :y="ri * 110 + 30 + box(r, i - 1).y" :width="box(r, i - 1).w" :height="box(r, i - 1).h" :fill="fill(r, i - 1)"
           stroke="#1a1a1a" stroke-width="2" />
-        <text :x="box(r, i - 1).x + box(r, i - 1).w / 2" :y="ri * 110 + 74" text-anchor="middle" class="t"
+        <text :x="box(r, i - 1).x + box(r, i - 1).w / 2" :y="ri * 110 + 74 + box(r, i - 1).y" text-anchor="middle" class="t"
           :style="{ opacity: 1 - m }">單位 {{ i }}</text>
       </g>
       <text :x="X0 + W / 2" :y="ri * 110 + 74" text-anchor="middle" class="t" :style="{ opacity: m }">第 1 圈合計（{{ r.u }} 個單位加起來）</text>
@@ -72,7 +78,7 @@ const caps = [
       <text :x="GX + 26" y="160" class="t" style="fill: #0f766e">三個 rank</text>
       <text :x="GX + 26" y="196" class="t" style="fill: #0f766e">比第 1 圈</text>
     </g>
-    <text x="0" y="440" class="l" :style="{ fill: c === 3 ? '#c0392b' : '#1a1a1a' }">{{ caps[Math.min(c, 5)] }}</text>
-    <text x="0" y="490" class="s m">Step {{ Math.min(c, 5) + 1 }} / 6　示意：LU 實際有 16 個 rank</text>
+    <text x="0" y="520" class="l" :style="{ fill: c === 3 ? '#c0392b' : '#1a1a1a' }">{{ caps[Math.min(c, 5)] }}</text>
+    <text x="0" y="566" class="s m">Step {{ Math.min(c, 5) + 6 }} / 11　示意：LU 實際有 16 個 rank</text>
   </svg>
 </template>

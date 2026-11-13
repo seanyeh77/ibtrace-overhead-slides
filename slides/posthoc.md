@@ -93,23 +93,13 @@ clicks: 5
 
 ---
 layout: figure
-chapter: v6 的事後分析 · 1.1 切單位
-clicks: 4
+chapter: v6 的事後分析 · 1.1 切單位 · 1.2 IndexError
+clicks: 10
 ---
 
-# 模型怎麼從 trace 找出單位
+# 單位怎麼找，以及第一個錯
 
-<PhUnits />
-
----
-layout: figure
-chapter: v6 的事後分析 · 1.2 IndexError
-clicks: 5
----
-
-# 第一個錯：拿不到的單位
-
-<PhIndex />
+<PhUnitsIndex />
 
 ---
 layout: textbook

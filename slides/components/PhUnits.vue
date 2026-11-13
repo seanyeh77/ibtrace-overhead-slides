@@ -7,7 +7,8 @@ import { useSlideContext } from '@slidev/client'
 // Click 3: a unit runs from one call to the next.
 // Click 4: periods found = the program's iteration count -> accepted.
 const { $clicks } = useSlideContext()
-const on = (k) => ({ opacity: $clicks.value >= k ? 1 : 0 })
+const c = () => Math.min($clicks.value, 4)
+const on = (k) => ({ opacity: c() >= k ? 1 : 0 })
 const seq = ['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']
 const per = [3, 2, 2]
 const col = { A: '#6eea9e', B: '#adf0c7', C: '#e7e7e7' }
@@ -17,8 +18,8 @@ const ticks = (i) => Array.from({ length: per[i % 3] }, (_, j) => cx(i) + 20 + j
 </script>
 
 <template>
-  <svg class="dg" viewBox="-8 -8 1576 530" width="1576" height="530" style="overflow: visible">
-    <text x="0" y="132" class="l">rank 0</text>
+  <svg class="dg" viewBox="-8 -8 1576 600" width="1576" height="600" style="overflow: visible">
+    <text x="0" y="132" class="l">rank 1</text>
     <line :x1="X0 - 10" :x2="cx(9) + 10" y1="126" y2="126" stroke="#aeacac" stroke-width="2" />
     <g v-for="(t, i) in seq" :key="i">
       <rect v-for="(x, j) in ticks(i)" :key="j" :x="x" y="108" width="22" height="36" :fill="col[t]" stroke="#1a1a1a" stroke-width="2" />
@@ -45,8 +46,9 @@ const ticks = (i) => Array.from({ length: per[i % 3] }, (_, j) => cx(i) + 20 + j
       <text :x="cx(0)" y="392" class="s" style="fill: #c0392b">1 個單位 = 一次呼叫開始，到下一次呼叫開始</text>
     </g>
     <g class="step" :style="on(4)">
-      <text x="0" y="460" class="l">找到 3 圈，程式實際迭代 3 次：對得上，切法成立</text>
-      <text x="0" y="502" class="s m">示意：真正的程式一圈最多找 8 次呼叫，差距 2 % 以內算對得上</text>
+      <text x="0" y="520" class="l">找到 3 圈，程式實際迭代 3 次：對得上，切法成立</text>
+      <text x="0" y="566" class="s m">示意：真正的程式一圈最多找 8 次呼叫，差距 2 % 以內算對得上</text>
     </g>
+    <text x="1100" y="566" class="s m">Step {{ c() + 1 }} / 11</text>
   </svg>
 </template>

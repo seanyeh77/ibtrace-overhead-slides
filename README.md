@@ -9,7 +9,7 @@ ibtrace 的四份報告簡報，都採 Textbook 版型，放在同一個 Slidev 
 | 擴充與後續版本 | `extension.md` | 接續上一份：回顧第二版的結果與兩個誤差來源、還沒涵蓋的優化與在途數的新動作、第三版的三個改動與開發資料上的結果、定版與已知限制、評估協定與節點健康檢查、新程式上的評估結果與事後分析、第四版的改動與評估結果、跨 NUMA 的發現、第五版的改動與評估結果，共 62 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/extension/ |
 | 成果總整 | `final.md` | 只講最後的方法與成果，不提版本演進：問題與案例、方法（量測、模型、校準）、五類優化動作、評估方法、與傳統做法的比較、網卡設定的新動作、跨 NUMA 等發現、限制與未來工作，共 31 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/final/ |
 | 驗證細節 | `validation.md` | 最終評估怎麼做：一組的組成、三個 NPB 程式與五種情境、時間 T 的定義、實測 ΔT 與對照組、本研究與 counter、profiler 做法各自怎麼預測、四個指標的算法、18 組的完整結果，另含網格與 NPB 三個程式的概念及 class 的選擇理由，共 39 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/validation/ |
-| 事後分析 | `posthoc.md` | 第 9 階段：事後分析的規則、第五版的實例，以及 v6 的 LU 網卡組為什麼沒有預測（模型的 IndexError、重播校準的截斷、修法），先說明模型怎麼切單位與網卡校準在做什麼，含 7 張動畫圖，共 16 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/posthoc/ |
+| 事後分析 | `posthoc.md` | 第 9 階段：事後分析的規則、第五版的實例，以及 v6 的 LU 網卡組為什麼沒有預測（模型的 IndexError、重播校準的截斷、修法），用逐步動畫解釋為什麼切單位、模型怎麼找單位、兩個錯誤，以及為什麼要演練通訊來量網卡，共 15 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/posthoc/ |
 
 Tracer Overhead 簡報中的 overhead 數字（0.7–4.5 µs、降至 18–43 %）含有 ring 的 page fault；預先配置 ring 之後的數字見 Counterfactual Attribution 第 36 張。
 

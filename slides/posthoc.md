@@ -84,22 +84,22 @@ chapter: v6 的事後分析 · 概觀
 ---
 layout: figure
 chapter: v6 的事後分析 · 1.1 切單位
-clicks: 4
+clicks: 5
 ---
 
-# 模型從通訊找出主迴圈
+# 為什麼要把一圈切成單位
 
-<PhUnits />
+<PhWhy />
 
 ---
 layout: figure
 chapter: v6 的事後分析 · 1.1 切單位
-clicks: 3
+clicks: 4
 ---
 
-# LU：圈數相同，單位數不同
+# 模型怎麼從 trace 找出單位
 
-<PhNeighbors />
+<PhUnits />
 
 ---
 layout: figure
@@ -107,7 +107,7 @@ chapter: v6 的事後分析 · 1.2 IndexError
 clicks: 4
 ---
 
-# 網卡計算按單位逐個讀
+# 第一個錯：拿不到的單位
 
 <PhIndex />
 
@@ -130,22 +130,12 @@ chapter: v6 的事後分析 · 1.2 IndexError
 ---
 layout: figure
 chapter: v6 的事後分析 · 1.3 截斷
-clicks: 3
+clicks: 4
 ---
 
-# 網卡校準：重播一圈的通訊
+# 為什麼要演練通訊來量網卡
 
-<PhCalib />
-
----
-layout: figure
-chapter: v6 的事後分析 · 1.3 截斷
-clicks: 3
----
-
-# 重播照順序配對
-
-<PhPair />
+<PhRehearse />
 
 ---
 layout: figure
@@ -153,9 +143,9 @@ chapter: v6 的事後分析 · 1.3 截斷
 clicks: 4
 ---
 
-# 收方提前開好接收
+# 第二個錯：兩邊的順序差一格
 
-<PhWindow />
+<PhShift />
 
 ---
 layout: textbook

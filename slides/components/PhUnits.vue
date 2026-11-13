@@ -49,6 +49,6 @@ const ticks = (i) => Array.from({ length: per[i % 3] }, (_, j) => cx(i) + 20 + j
       <text x="0" y="520" class="l">找到 3 圈，程式實際迭代 3 次：對得上，切法成立</text>
       <text x="0" y="566" class="s m">示意：真正的程式一圈最多找 8 次呼叫，差距 2 % 以內算對得上</text>
     </g>
-    <text x="1100" y="566" class="s m">Step {{ c() + 1 }} / 11</text>
+    <text x="1100" y="566" class="s m">Step {{ c() + 1 }} / 5</text>
   </svg>
 </template>

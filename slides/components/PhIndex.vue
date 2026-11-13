@@ -5,11 +5,12 @@ import { useProgress, seg } from '../utils/tween.js'
 
 // The IndexError. A pointer on each rank slides to unit k; at k = 3 rank 0 has no unit 3.
 // The fix: each rank's units slide together into one box per pass, then the passes are compared.
-const { $clicks } = useSlideContext()
+const { $clicks, $page, $nav } = useSlideContext()
 const props = defineProps({ offset: { type: Number, default: 0 } })
 const c = computed(() => Math.min(Math.max($clicks.value - props.offset, 0), 5))
-const p = useProgress(() => $clicks.value, 1000)
-// entering (step 0): rank 1's first pass grows out of the previous picture (3 calls = 3 units)
+// restart on every click and whenever this slide becomes the current one
+const p = useProgress(() => `${$nav.value.currentSlideNo === $page.value}-${$clicks.value}`, 1000)
+// entering the slide (step 0): rank 1's first pass grows out of the previous slide's picture
 const z = computed(() => (c.value === 0 ? seg(p.value, 0, 1) : 1))
 const Lz = (a, b) => a + (b - a) * z.value
 const ranks = [
@@ -79,6 +80,6 @@ const caps = [
       <text :x="GX + 26" y="196" class="t" style="fill: #0f766e">比第 1 圈</text>
     </g>
     <text x="0" y="520" class="l" :style="{ fill: c === 3 ? '#c0392b' : '#1a1a1a' }">{{ caps[Math.min(c, 5)] }}</text>
-    <text x="0" y="566" class="s m">Step {{ Math.min(c, 5) + 6 }} / 11　示意：LU 實際有 16 個 rank</text>
+    <text x="0" y="566" class="s m">Step {{ Math.min(c, 5) + 1 }} / 6　示意：LU 實際有 16 個 rank</text>
   </svg>
 </template>

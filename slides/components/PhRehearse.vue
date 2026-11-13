@@ -1,13 +1,15 @@
 <script setup>
 import { computed } from 'vue'
 import { useSlideContext } from '@slidev/client'
+import { useProgress, seg } from '../utils/tween.js'
 
 // Why the network calibration replays one pass of the communication.
 const { $clicks } = useSlideContext()
 const c = computed(() => $clicks.value)
+const p = useProgress(c, 1600)
 const on = (k) => ({ opacity: c.value >= k ? 1 : 0 })
 const bars = [
-  { t: '目前：8 張', v: 100 },
+  { t: '目前設定', v: 100 },
   { t: '同側 4 張', v: 82 },
   { t: '同側 2 張', v: 76 },
   { t: '全部 8 張', v: 95 },
@@ -41,7 +43,7 @@ const caps = [
     <g class="step" :style="on(3)">
       <g v-for="(b, i) in bars" :key="i">
         <text x="660" :y="i * 70 + 40" class="s">{{ b.t }}</text>
-        <rect x="860" :y="i * 70 + 12" :width="b.v * 6" height="40" :fill="i === 0 ? '#e7e7e7' : '#6eea9e'" stroke="#1a1a1a" stroke-width="2" />
+        <rect x="860" :y="i * 70 + 12" :width="b.v * 6 * (c > 3 ? 1 : c === 3 ? seg(p, i * 0.15, 0.5 + i * 0.15) : 0)" height="40" :fill="i === 0 ? '#e7e7e7' : '#6eea9e'" stroke="#1a1a1a" stroke-width="2" />
         <text :x="870 + b.v * 6" :y="i * 70 + 40" class="s">{{ b.v }}</text>
       </g>
       <text x="660" y="300" class="s m">每圈的通訊時間（示意，µs）</text>

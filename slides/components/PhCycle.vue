@@ -38,6 +38,10 @@ const fill = (i) => {
       <polyline :points="`${pos(8).x + W / 2},${330 + H + 2} ${pos(8).x + W / 2},500 -30,500 -30,82 ${pos(0).x - 4},82`"
         fill="none" stroke="#0f766e" stroke-width="3" marker-end="url(#ph-cy)" />
       <text :x="pos(8).x + W / 2 + 20" y="490" class="l" style="fill: #0f766e">結論成為下一版的設計</text>
+      <circle r="10" fill="#0f766e">
+        <animateMotion dur="2.4s" repeatCount="indefinite"
+          :path="`M ${pos(8).x + W / 2},${330 + H + 2} L ${pos(8).x + W / 2},500 L -30,500 L -30,82 L ${pos(0).x - 4},82`" />
+      </circle>
     </g>
     </g>
   </svg>

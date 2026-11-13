@@ -24,15 +24,15 @@ const fills = { idle: '#e7e7e7', hit: '#adf0c7', miss: '#ffffff', none: '#ffffff
           :stroke-width="state(r, u - 1) === 'miss' ? 3 : 2" :stroke-dasharray="u > n ? '8 6' : ''"
           style="transition: fill 0.35s" />
         <text :x="X0 + (u - 1) * (SW + 20) + SW / 2" :y="r * 100 + 44" text-anchor="middle"
-          :class="['t', u > n ? 'm' : '']">{{ u > n ? '沒有' : `第 ${u} 段` }}</text>
+          :class="['t', u > n ? 'm' : '']">{{ u > n ? '沒有' : `第 ${u} 個單位` }}</text>
       </g>
     </g>
     <g class="step" :style="{ opacity: $clicks >= 1 && $clicks < 4 ? 1 : 0 }">
-      <text x="0" y="370" class="l">同一個位置，依序讀每個 rank 的那一段</text>
+      <text x="0" y="370" class="l">網卡計算：第 k 個單位，每個 rank 都去讀</text>
     </g>
     <g class="step" :style="{ opacity: $clicks >= 4 ? 1 : 0 }">
-      <text x="0" y="370" class="l" style="fill: #c0392b">rank 1 沒有第 4 段：IndexError</text>
-      <text x="0" y="410" class="s m">示意：實際是 16 個 rank，段數各不相同</text>
+      <text x="0" y="370" class="l" style="fill: #c0392b">rank 1 沒有第 4 個單位：IndexError</text>
+      <text x="0" y="410" class="s m">示意：實際是 16 個 rank，單位數各不相同</text>
     </g>
   </svg>
 </template>

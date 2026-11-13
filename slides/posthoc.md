@@ -62,9 +62,10 @@ question: LU 的網卡設定為什麼沒有預測？
 
 # LU 網卡組
 
-- **1.1** 模型的 IndexError
-- **1.2** 重播校準的截斷
-- **1.3** 修法
+- **1.1** 模型怎麼切單位
+- **1.2** 模型的 IndexError
+- **1.3** 重播校準的截斷
+- **1.4** 修法
 
 ---
 layout: textbook
@@ -82,17 +83,37 @@ chapter: v6 的事後分析 · 概觀
 
 ---
 layout: figure
-chapter: v6 的事後分析 · 1.1 IndexError
+chapter: v6 的事後分析 · 1.1 切單位
 clicks: 4
 ---
 
-# 每個 rank 的段數不同
+# 模型從通訊找出主迴圈
+
+<PhUnits />
+
+---
+layout: figure
+chapter: v6 的事後分析 · 1.1 切單位
+clicks: 3
+---
+
+# LU：圈數相同，單位數不同
+
+<PhNeighbors />
+
+---
+layout: figure
+chapter: v6 的事後分析 · 1.2 IndexError
+clicks: 4
+---
+
+# 網卡計算按單位逐個讀
 
 <PhIndex />
 
 ---
 layout: textbook
-chapter: v6 的事後分析 · 1.1 IndexError
+chapter: v6 的事後分析 · 1.2 IndexError
 ---
 
 # 修正後：不再出錯，預測是 0 ms
@@ -108,7 +129,17 @@ chapter: v6 的事後分析 · 1.1 IndexError
 
 ---
 layout: figure
-chapter: v6 的事後分析 · 1.2 截斷
+chapter: v6 的事後分析 · 1.3 截斷
+clicks: 3
+---
+
+# 網卡校準：重播一圈的通訊
+
+<PhCalib />
+
+---
+layout: figure
+chapter: v6 的事後分析 · 1.3 截斷
 clicks: 3
 ---
 
@@ -118,7 +149,7 @@ clicks: 3
 
 ---
 layout: figure
-chapter: v6 的事後分析 · 1.2 截斷
+chapter: v6 的事後分析 · 1.3 截斷
 clicks: 4
 ---
 
@@ -128,7 +159,7 @@ clicks: 4
 
 ---
 layout: textbook
-chapter: v6 的事後分析 · 1.2 截斷
+chapter: v6 的事後分析 · 1.3 截斷
 ---
 
 # 這是重播工具的限制
@@ -146,7 +177,7 @@ chapter: v6 的事後分析 · 1.2 截斷
 
 ---
 layout: textbook
-chapter: v6 的事後分析 · 1.3 修法
+chapter: v6 的事後分析 · 1.4 修法
 ---
 
 # 修法：送與收取同一批訊息

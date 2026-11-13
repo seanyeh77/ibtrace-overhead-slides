@@ -8,7 +8,8 @@ import { useProgress, useClock, seg, clamp } from '../utils/tween.js'
 // step 3 each pass's messages fly down into two lists, step 4 the big message drops
 // into the first small buffer and bounces off.
 const { $clicks } = useSlideContext()
-const c = computed(() => $clicks.value)
+const props = defineProps({ offset: { type: Number, default: 0 } })
+const c = computed(() => Math.max($clicks.value - props.offset, 0))
 const p = useProgress(c, 2200)
 const t = useClock()
 const SY = 60, RY = 250, LY1 = 400, LY2 = 470
@@ -86,6 +87,6 @@ const caps = [
     </g>
     <text x="760" y="470" class="l" style="fill: #c0392b" :style="{ opacity: hit ? 1 : 0 }">大訊息放不進小緩衝</text>
     <text x="0" y="600" class="l" :style="{ fill: c >= 4 ? '#c0392b' : '#1a1a1a' }">{{ caps[Math.min(c, 4)] }}</text>
-    <text x="0" y="650" class="s m">Step {{ Math.min(c, 4) + 1 }} / 5　綠點是訊息在傳；時間是示意，實際提前 348.3 µs</text>
+    <text x="0" y="650" class="s m">Step {{ Math.min(c, 4) + 6 }} / 10　綠點是訊息在傳；時間是示意，實際提前 348.3 µs</text>
   </svg>
 </template>

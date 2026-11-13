@@ -153,6 +153,16 @@ chapter: v6 的事後分析 · 1.3 截斷
 clicks: 4
 ---
 
+# 第 95 圈怎麼來的
+
+<PhLap />
+
+---
+layout: figure
+chapter: v6 的事後分析 · 1.3 截斷
+clicks: 4
+---
+
 # 第二個錯：兩邊的順序差一格
 
 <PhShift />

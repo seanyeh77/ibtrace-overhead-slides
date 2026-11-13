@@ -104,7 +104,7 @@ clicks: 4
 ---
 layout: figure
 chapter: v6 的事後分析 · 1.2 IndexError
-clicks: 4
+clicks: 5
 ---
 
 # 第一個錯：拿不到的單位

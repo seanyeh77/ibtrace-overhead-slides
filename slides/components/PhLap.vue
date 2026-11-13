@@ -93,7 +93,7 @@ const caps = [
         <line :x1="bx(mid) + 13" :x2="bx(mid) + 13" y1="300" :y2="452 - vals[mid]" stroke="#0f766e" stroke-width="2" />
       </g>
     </g>
-    <text x="0" y="560" class="l" :style="{ fill: c >= 4 ? '#c0392b' : '#1a1a1a' }">{{ caps[Math.min(c, 4)] }}</text>
-    <text x="0" y="606" class="s m">Step {{ Math.min(c, 4) + 7 }} / 16　柱子 30 根代表 254 圈，高度與時間是示意</text>
+    <text x="0" y="610" class="l" :style="{ fill: c >= 4 ? '#c0392b' : '#1a1a1a' }">{{ caps[Math.min(c, 4)] }}</text>
+    <text x="0" y="656" class="s m">Step {{ Math.min(c, 4) + 7 }} / 16　柱子 30 根代表 254 圈，高度與時間是示意</text>
   </svg>
 </template>

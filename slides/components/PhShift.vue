@@ -95,6 +95,6 @@ const caps = [
     </g>
     <text x="760" y="470" class="l" style="fill: #c0392b" :style="{ opacity: hit ? 1 : 0 }">大訊息放不進小緩衝</text>
     <text x="0" y="610" class="l" :style="{ fill: c >= 4 ? '#c0392b' : '#1a1a1a' }">{{ caps[Math.min(c, 4)] }}</text>
-    <text x="0" y="656" class="s m">Step {{ Math.min(c, 4) + 12 }} / 16　綠點是訊息在傳；時間是示意，實際提前 348.3 µs</text>
+    <text x="0" y="656" class="s m">Step {{ Math.min(c, 4) + 12 }} / 24　綠點是訊息在傳；時間是示意，實際提前 348.3 µs</text>
   </svg>
 </template>

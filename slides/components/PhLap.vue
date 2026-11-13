@@ -94,6 +94,6 @@ const caps = [
       </g>
     </g>
     <text x="0" y="610" class="l" :style="{ fill: c >= 4 ? '#c0392b' : '#1a1a1a' }">{{ caps[Math.min(c, 4)] }}</text>
-    <text x="0" y="656" class="s m">Step {{ Math.min(c, 4) + 7 }} / 16　柱子 30 根代表 254 圈，高度與時間是示意</text>
+    <text x="0" y="656" class="s m">Step {{ Math.min(c, 4) + 7 }} / 24　柱子 30 根代表 254 圈，高度與時間是示意</text>
   </svg>
 </template>

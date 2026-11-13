@@ -81,6 +81,6 @@ const caps = [
       <text :x="x3(1)" :y="Y3 + 96" class="s m">D 是 rank 3 一圈裡送最多的呼叫</text>
     </g>
     <text x="0" y="610" class="l">{{ caps[Math.min(c, 5)] }}</text>
-    <text x="0" y="656" class="s m">Step {{ Math.min(c, 5) + 1 }} / 16　呼叫與位元組是示意；真正的程式試長度 1 到 8</text>
+    <text x="0" y="656" class="s m">Step {{ Math.min(c, 5) + 1 }} / 24　呼叫與位元組是示意；真正的程式試長度 1 到 8</text>
   </svg>
 </template>

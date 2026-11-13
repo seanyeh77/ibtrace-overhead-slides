@@ -150,6 +150,16 @@ clicks: 4
 ---
 layout: figure
 chapter: v6 的事後分析 · 1.3 截斷
+clicks: 5
+---
+
+# 錨點怎麼設定
+
+<PhAnchor />
+
+---
+layout: figure
+chapter: v6 的事後分析 · 1.3 截斷
 clicks: 9
 ---
 

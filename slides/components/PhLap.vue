@@ -9,7 +9,11 @@ import { useProgress, seg } from '../utils/tween.js'
 const { $clicks } = useSlideContext()
 const props = defineProps({ offset: { type: Number, default: 0 } })
 const c = computed(() => Math.min(Math.max($clicks.value - props.offset, 0), 4))
-const p = useProgress(c, 1000)
+const p = useProgress(() => $clicks.value, 1000)
+// entering (step 0): the anchors slide from where the previous part drew them
+const z = computed(() => (c.value === 0 ? seg(p.value, 0, 1) : 1))
+const L = (a, b) => a + (b - a) * z.value
+const from2 = [277, 589, 901, 1213, 1525], from3 = [419, 731, 1043, 1355, 1667]
 const R2 = 60, R3 = 190, LW = 300, A0 = 260
 const a2 = [0, 1, 2, 3, 4].map((i) => A0 + i * LW)
 const a3 = a2.map((x) => x + 26)
@@ -35,7 +39,7 @@ const bx = (i) => {
 }
 const cut = computed(() => (c.value >= 2 ? 1 : c.value === 1 ? seg(p.value, 0, 0.7) : 0))
 const caps = [
-  '每個 rank 的 trace 裡，找出每一圈送最多位元組的那次呼叫：錨點（▼）',
+  '只留下錨點：兩個 rank 的時間軸上，每個 ▼ 是一圈的開始',
   '每個 rank 從自己的錨點切到下一個錨點，就是一圈；rank 3 的錨點晚一點',
   '要挑一圈來演練：每一圈記下最慢 rank 的時間（每根柱子一圈）；頭尾各 10 % 不用',
   '把剩下的圈按時間排序，取正中間那一圈：這份 LU 是第 95 圈',
@@ -44,19 +48,23 @@ const caps = [
 </script>
 
 <template>
-  <svg class="dg" viewBox="-8 -8 1576 640" width="1576" height="640" style="overflow: visible">
+  <svg class="dg" viewBox="-8 -8 1576 700" width="1576" height="700" style="overflow: visible">
     <text x="0" :y="R2 + 26" class="l">rank 2</text>
     <text x="0" :y="R3 + 26" class="l">rank 3</text>
     <line x1="200" x2="1520" :y1="R2 + 18" :y2="R2 + 18" stroke="#aeacac" stroke-width="2" />
     <line x1="200" x2="1520" :y1="R3 + 18" :y2="R3 + 18" stroke="#aeacac" stroke-width="2" />
 
-    <g v-for="(x, i) in a2" :key="'a2' + i">
-      <path :d="`M ${x - 11} ${R2 - 14} L ${x + 11} ${R2 - 14} L ${x} ${R2 + 4} Z`" fill="#0f766e" />
-      <line :x1="x" :x2="x" :y1="R2 + 4" :y2="R2 + 4 + 50 * cut" stroke="#0f766e" stroke-width="2" />
+    <g v-for="(x0, i) in a2" :key="'a2' + i">
+      <path :d="`M ${L(from2[i], x0) - 11} ${R2 - 14} L ${L(from2[i], x0) + 11} ${R2 - 14} L ${L(from2[i], x0)} ${R2 + 4} Z`" fill="#0f766e" />
+      <line :x1="x0" :x2="x0" :y1="R2 + 4" :y2="R2 + 4 + 50 * cut" stroke="#0f766e" stroke-width="2" />
     </g>
-    <g v-for="(x, i) in a3" :key="'a3' + i">
-      <path :d="`M ${x - 11} ${R3 - 14} L ${x + 11} ${R3 - 14} L ${x} ${R3 + 4} Z`" fill="#0f766e" />
-      <line :x1="x" :x2="x" :y1="R3 + 4" :y2="R3 + 4 + 50 * cut" stroke="#0f766e" stroke-width="2" />
+    <g v-for="(x0, i) in a3" :key="'a3' + i">
+      <path :d="`M ${L(from3[i], x0) - 11} ${R3 - 14} L ${L(from3[i], x0) + 11} ${R3 - 14} L ${L(from3[i], x0)} ${R3 + 4} Z`" fill="#0f766e" />
+      <line :x1="x0" :x2="x0" :y1="R3 + 4" :y2="R3 + 4 + 50 * cut" stroke="#0f766e" stroke-width="2" />
+    </g>
+    <g :style="{ opacity: 1 - z }">
+      <rect v-for="i in 12" :key="'g2' + i" :x="230 + (i - 1) * 104" y="50" width="94" height="56" fill="#e7e7e7" stroke="#bbbbbb" stroke-width="2" />
+      <rect v-for="i in 12" :key="'g3' + i" :x="268 + (i - 1) * 104" y="180" width="94" height="56" fill="#e7e7e7" stroke="#bbbbbb" stroke-width="2" />
     </g>
     <g :style="{ opacity: cut }">
       <text v-for="i in 4" :key="'n2' + i" :x="a2[i - 1] + LW / 2" :y="R2 + 50" text-anchor="middle" class="s">第 {{ passNo(i - 1) }} 圈</text>

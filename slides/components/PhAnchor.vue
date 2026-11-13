@@ -10,7 +10,7 @@ const p = useProgress(c, 1000)
 const seq = ['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']
 const bytes = { A: 81920, B: 600, C: 640 }
 const col = { A: '#6eea9e', B: '#adf0c7', C: '#e7e7e7' }
-const CW = 104, X0 = 230, Y2 = 90, Y3 = 400
+const CW = 104, X0 = 230, Y2 = 50, Y3 = 180
 const x = (i) => X0 + i * CW
 // step 1: a window of length L slides; L = 1, 2, then 3 (matches)
 const win = computed(() => {
@@ -65,16 +65,16 @@ const caps = [
     <g v-for="k in 4" :key="'a' + k" :style="{ opacity: anchorsShown >= k ? 1 : 0, transition: 'opacity 0.3s' }">
       <path :d="`M ${x((k - 1) * 3) + 47 - 14} ${Y2 - 34} L ${x((k - 1) * 3) + 47 + 14} ${Y2 - 34} L ${x((k - 1) * 3) + 47} ${Y2 - 12} Z`" fill="#0f766e" />
       <line v-if="c >= 4" :x1="x((k - 1) * 3) - 6" :x2="x((k - 1) * 3) - 6" :y1="Y2 - 12" :y2="Y2 + 70" stroke="#0f766e" stroke-width="3" />
-      <text v-if="c >= 4 && k < 4" :x="x((k - 1) * 3) + 1.5 * CW - 6" :y="Y2 + 96" text-anchor="middle" class="s" style="fill: #0f766e">第 {{ 93 + k }} 圈</text>
+      <text v-if="c >= 4 && k < 4" :x="x((k - 1) * 3) + 1.5 * CW - 6" :y="Y2 + 82" text-anchor="middle" class="s" style="fill: #0f766e">第 {{ 93 + k }} 圈</text>
     </g>
 
-    <g :style="{ opacity: c >= 5 ? seg(p, 0, 0.4) : 0 }">
+    <g :style="{ opacity: c >= 5 ? seg(p, 0, 0.5) : 0 }" :transform="`translate(0,${c >= 5 ? (1 - seg(p, 0, 0.5)) * 80 : 80})`">
       <text x="0" :y="Y3 + 36" class="l">rank 3</text>
       <g v-for="(t, i) in seq3" :key="'r' + i">
         <rect :x="x3(i)" :y="Y3" :width="CW - 10" height="56" :fill="col3[t]" stroke="#1a1a1a" stroke-width="2" />
         <text :x="x3(i) + (CW - 10) / 2" :y="Y3 + 36" text-anchor="middle" class="t">{{ t }}</text>
       </g>
-      <g v-for="k in 4" :key="'a3' + k" :style="{ opacity: c >= 5 && p > 0.3 + k * 0.12 ? 1 : 0 }">
+      <g v-for="k in 4" :key="'a3' + k" :style="{ opacity: c >= 5 && p > 0.4 + k * 0.12 ? 1 : 0 }">
         <path :d="`M ${x3((k - 1) * 3 + 1) + 47 - 14} ${Y3 - 34} L ${x3((k - 1) * 3 + 1) + 47 + 14} ${Y3 - 34} L ${x3((k - 1) * 3 + 1) + 47} ${Y3 - 12} Z`" fill="#0f766e" />
         <line :x1="x3((k - 1) * 3 + 1) - 6" :x2="x3((k - 1) * 3 + 1) - 6" :y1="Y3 - 12" :y2="Y3 + 70" stroke="#0f766e" stroke-width="3" />
       </g>

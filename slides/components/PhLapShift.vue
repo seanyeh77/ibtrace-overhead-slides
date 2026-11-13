@@ -25,5 +25,5 @@ const st = (k) => ({
 
 <style scoped>
 .ph-stack { display: grid; }
-.ph-layer { grid-area: 1 / 1; transition: opacity 0.25s ease; }
+.ph-layer { grid-area: 1 / 1; transition: opacity 0.15s ease; }
 </style>

@@ -51,7 +51,7 @@ const caps = [
 </script>
 
 <template>
-  <svg class="dg" viewBox="-8 -8 1556 700" width="1556" height="700" style="overflow: visible">
+  <svg class="dg" viewBox="-8 -8 1576 700" width="1576" height="700" style="overflow: visible">
     <text x="0" :y="SY + 26" class="l">rank 2 送</text>
     <text x="0" :y="ry + 26" class="l">rank 3 收</text>
     <line x1="200" x2="1500" :y1="SY + 18" :y2="SY + 18" stroke="#aeacac" stroke-width="2" />

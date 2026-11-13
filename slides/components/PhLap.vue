@@ -10,14 +10,13 @@ const { $clicks } = useSlideContext()
 const props = defineProps({ offset: { type: Number, default: 0 } })
 const c = computed(() => Math.min(Math.max($clicks.value - props.offset, 0), 4))
 const p = useProgress(() => $clicks.value, 1000)
-// entering (step 0): the anchors slide from where the previous part drew them
+// entering (step 0): same geometry as the previous part; only the call boxes fade out
 const z = computed(() => (c.value === 0 ? seg(p.value, 0, 1) : 1))
-const L = (a, b) => a + (b - a) * z.value
-const from2 = [277, 589, 901, 1213, 1525], from3 = [419, 731, 1043, 1355, 1667]
-const R2 = 60, R3 = 190, LW = 300, A0 = 260
-const a2 = [0, 1, 2, 3, 4].map((i) => A0 + i * LW)
-const a3 = a2.map((x) => x + 26)
-const passNo = (i) => 93 + i
+const R2 = 60, R3 = 190, LW = 312
+const a2 = [0, 1, 2, 3, 4].map((i) => 224 + i * LW)
+const a3 = [0, 1, 2, 3, 4].map((i) => 366 + i * LW)
+const passNo = (i) => 94 + i
+const P = 1
 // 30 bars stand for the 254 passes; values are illustrative
 const N = 30
 const vals = Array.from({ length: N }, (_, i) => 40 + ((i * 37 + 11) % 23) * 3 + (i < 3 || i > 26 ? 30 : 0))
@@ -51,32 +50,32 @@ const caps = [
   <svg class="dg" viewBox="-8 -8 1576 700" width="1576" height="700" style="overflow: visible">
     <text x="0" :y="R2 + 26" class="l">rank 2</text>
     <text x="0" :y="R3 + 26" class="l">rank 3</text>
-    <line x1="200" x2="1520" :y1="R2 + 18" :y2="R2 + 18" stroke="#aeacac" stroke-width="2" />
-    <line x1="200" x2="1520" :y1="R3 + 18" :y2="R3 + 18" stroke="#aeacac" stroke-width="2" />
+    <line x1="200" x2="1700" :y1="R2 + 18" :y2="R2 + 18" stroke="#aeacac" stroke-width="2" :style="{ opacity: z }" />
+    <line x1="200" x2="1700" :y1="R3 + 18" :y2="R3 + 18" stroke="#aeacac" stroke-width="2" :style="{ opacity: z }" />
 
-    <g v-for="(x0, i) in a2" :key="'a2' + i">
-      <path :d="`M ${L(from2[i], x0) - 11} ${R2 - 14} L ${L(from2[i], x0) + 11} ${R2 - 14} L ${L(from2[i], x0)} ${R2 + 4} Z`" fill="#0f766e" />
-      <line :x1="x0" :x2="x0" :y1="R2 + 4" :y2="R2 + 4 + 50 * cut" stroke="#0f766e" stroke-width="2" />
-    </g>
-    <g v-for="(x0, i) in a3" :key="'a3' + i">
-      <path :d="`M ${L(from3[i], x0) - 11} ${R3 - 14} L ${L(from3[i], x0) + 11} ${R3 - 14} L ${L(from3[i], x0)} ${R3 + 4} Z`" fill="#0f766e" />
-      <line :x1="x0" :x2="x0" :y1="R3 + 4" :y2="R3 + 4 + 50 * cut" stroke="#0f766e" stroke-width="2" />
-    </g>
     <g :style="{ opacity: 1 - z }">
-      <rect v-for="i in 12" :key="'g2' + i" :x="230 + (i - 1) * 104" y="50" width="94" height="56" fill="#e7e7e7" stroke="#bbbbbb" stroke-width="2" />
-      <rect v-for="i in 12" :key="'g3' + i" :x="268 + (i - 1) * 104" y="180" width="94" height="56" fill="#e7e7e7" stroke="#bbbbbb" stroke-width="2" />
+      <rect v-for="i in 12" :key="'g2' + i" :x="230 + (i - 1) * 104" y="50" width="94" height="56" fill="#e7e7e7" stroke="#1a1a1a" stroke-width="2" />
+      <rect v-for="i in 12" :key="'g3' + i" :x="268 + (i - 1) * 104" y="180" width="94" height="56" fill="#e7e7e7" stroke="#1a1a1a" stroke-width="2" />
     </g>
-    <g :style="{ opacity: cut }">
-      <text v-for="i in 4" :key="'n2' + i" :x="a2[i - 1] + LW / 2" :y="R2 + 50" text-anchor="middle" class="s">第 {{ passNo(i - 1) }} 圈</text>
-      <text v-for="i in 4" :key="'n3' + i" :x="a3[i - 1] + LW / 2" :y="R3 + 50" text-anchor="middle" class="s">第 {{ passNo(i - 1) }} 圈</text>
+    <g v-for="(x0, i) in a2" :key="'a2' + i" :style="{ opacity: i < 4 ? 1 : z }">
+      <path :d="`M ${x0 + 53 - 14} ${R2 - 44} L ${x0 + 53 + 14} ${R2 - 44} L ${x0 + 53} ${R2 - 22} Z`" fill="#0f766e" />
+      <line :x1="x0" :x2="x0" :y1="R2 - 22" :y2="R2 + 60" stroke="#0f766e" stroke-width="3" />
     </g>
+    <g v-for="(x0, i) in a3" :key="'a3' + i" :style="{ opacity: i < 4 ? 1 : z }">
+      <path :d="`M ${x0 + 53 - 14} ${R3 - 44} L ${x0 + 53 + 14} ${R3 - 44} L ${x0 + 53} ${R3 - 22} Z`" fill="#0f766e" />
+      <line :x1="x0" :x2="x0" :y1="R3 - 22" :y2="R3 + 60" stroke="#0f766e" stroke-width="3" />
+    </g>
+    <text v-for="i in 4" :key="'n2' + i" :x="a2[i - 1] + LW / 2" :y="R2 + 72" text-anchor="middle" class="s" style="fill: #0f766e"
+      :style="{ opacity: i < 4 ? 1 : (c === 0 ? 0 : cut) }">第 {{ passNo(i - 1) }} 圈</text>
+    <text v-for="i in 4" :key="'n3' + i" :x="a3[i - 1] + LW / 2" :y="R3 + 72" text-anchor="middle" class="s" style="fill: #0f766e"
+      :style="{ opacity: c === 0 ? 0 : cut }">第 {{ passNo(i - 1) }} 圈</text>
 
     <g :style="{ opacity: c >= 4 ? 1 : 0 }">
-      <rect :x="a2[2]" :y="R2 - 24" :width="LW" height="86" fill="#6eea9e" fill-opacity="0.35" stroke="#0f766e" stroke-width="3" />
-      <rect :x="a3[2]" :y="R3 - 24" :width="LW" height="86" fill="#6eea9e" fill-opacity="0.35" stroke="#0f766e" stroke-width="3" />
-      <rect :x="a3[2] - 34" :y="R3" width="22" height="36" fill="#6eea9e" stroke="#c0392b" stroke-width="3" />
-      <text :x="a3[2] - 150" :y="R3 + 84" class="s" style="fill: #c0392b">提前開的接收</text>
-      <text :x="a3[2] + 12" :y="R3 + 84" class="s" style="fill: #0f766e">比 rank 2 晚 48.9 µs 開始</text>
+      <rect :x="a2[P]" :y="R2 - 30" :width="LW" height="120" fill="#6eea9e" fill-opacity="0.35" stroke="#0f766e" stroke-width="3" />
+      <rect :x="a3[P]" :y="R3 - 30" :width="LW" height="120" fill="#6eea9e" fill-opacity="0.35" stroke="#0f766e" stroke-width="3" />
+      <rect :x="a3[P] - 34" :y="R3" width="22" height="36" fill="#6eea9e" stroke="#c0392b" stroke-width="3" />
+      <text :x="a3[P] - 150" :y="R3 + 100" class="s" style="fill: #c0392b">提前開的接收</text>
+      <text :x="a3[P] + 12" :y="R3 + 100" class="s" style="fill: #0f766e">比 rank 2 晚 48.9 µs 開始</text>
     </g>
 
     <g :style="{ opacity: c >= 2 && c <= 3 ? 1 : 0 }">

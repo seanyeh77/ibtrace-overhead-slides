@@ -57,10 +57,10 @@ const caps = [
     <line x1="200" x2="1500" :y1="SY + 18" :y2="SY + 18" stroke="#aeacac" stroke-width="2" />
     <line x1="200" x2="1500" :y1="ry + 18" :y2="ry + 18" stroke="#aeacac" stroke-width="2" />
 
-    <rect :x="L(860, 420)" :y="L(36, 30)" :width="L(300, 800)" :height="L(86, 96)" fill="#adf0c7" :fill-opacity="c >= 3 ? 0.5 : 0" stroke="#0f766e" stroke-width="2" stroke-dasharray="8 6" />
-    <text :x="L(860, 420) + 10" :y="SY - 40" class="s" style="fill: #0f766e" :style="{ opacity: z }">rank 2 的第 95 圈</text>
-    <rect :x="L(886, 440)" :y="ry - L(24, 30)" :width="L(300, 800)" :height="L(86, 96)" fill="#adf0c7" :fill-opacity="c >= 3 ? 0.5 : 0" stroke="#0f766e" stroke-width="2" stroke-dasharray="8 6" />
-    <text :x="L(886, 440) + 10" :y="ry + 88" class="s" style="fill: #0f766e" :style="{ opacity: z }">rank 3 的第 95 圈</text>
+    <rect :x="L(536, 420)" :y="L(30, 30)" :width="L(312, 800)" :height="L(120, 96)" fill="#adf0c7" :fill-opacity="c >= 3 ? 0.5 : 0" stroke="#0f766e" stroke-width="2" stroke-dasharray="8 6" />
+    <text :x="L(536, 420) + 10" :y="SY - 40" class="s" style="fill: #0f766e" :style="{ opacity: z }">rank 2 的第 95 圈</text>
+    <rect :x="L(678, 440)" :y="ry - L(30, 30)" :width="L(312, 800)" :height="L(120, 96)" fill="#adf0c7" :fill-opacity="c >= 3 ? 0.5 : 0" stroke="#0f766e" stroke-width="2" stroke-dasharray="8 6" />
+    <text :x="L(678, 440) + 10" :y="ry + 88" class="s" style="fill: #0f766e" :style="{ opacity: z }">rank 3 的第 95 圈</text>
 
     <g v-for="(s, i) in sends" :key="'s' + i" :style="{ opacity: shown(s.x, 1) }">
       <rect :x="s.x" :y="SY" :width="bw(s.big)" height="36" :fill="s.big ? '#6eea9e' : '#e7e7e7'" stroke="#1a1a1a" stroke-width="2" />
@@ -75,8 +75,8 @@ const caps = [
       <circle v-if="c >= 2" :cx="pk(r).x" :cy="pk(r).y" :r="r.big ? 9 : 6" fill="#0f766e" />
     </g>
     <g v-if="c < 2">
-      <rect :x="L(852, 330)" :y="ry" :width="L(22, 70)" height="36" fill="#6eea9e" stroke="#c0392b" stroke-width="3" />
-      <text :x="L(852, 330) + L(11, 35)" :y="ry - 14" text-anchor="middle" class="s" style="fill: #c0392b">提前開的接收</text>
+      <rect :x="L(644, 330)" :y="ry" :width="L(22, 70)" height="36" fill="#6eea9e" stroke="#c0392b" stroke-width="3" />
+      <text :x="L(644, 330) + L(11, 35)" :y="ry - 14" text-anchor="middle" class="s" style="fill: #c0392b">提前開的接收</text>
     </g>
     <text x="230" :y="RY + 88" class="s" style="fill: #c0392b" :style="{ opacity: c >= 2 ? 1 : 0 }">第 94 圈</text>
 

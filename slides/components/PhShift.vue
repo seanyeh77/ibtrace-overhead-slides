@@ -10,7 +10,11 @@ import { useProgress, useClock, seg, clamp } from '../utils/tween.js'
 const { $clicks } = useSlideContext()
 const props = defineProps({ offset: { type: Number, default: 0 } })
 const c = computed(() => Math.max($clicks.value - props.offset, 0))
-const p = useProgress(c, 1000)
+const p = useProgress(() => $clicks.value, 1000)
+// entering (step 0): the two pass-95 boxes grow from where the previous part left them
+const z = computed(() => (c.value === 0 ? seg(p.value, 0, 1) : 1))
+const L = (a, b) => a + (b - a) * z.value
+const ry = computed(() => L(190, 250))
 const t = useClock()
 const SY = 60, RY = 250, LY1 = 400, LY2 = 470
 const sends = [{ x: 470, big: true }, { x: 640, big: false }, { x: 800, big: false }, { x: 960, big: false }, { x: 1290, big: true }]
@@ -49,14 +53,14 @@ const caps = [
 <template>
   <svg class="dg" viewBox="-8 -8 1556 700" width="1556" height="700" style="overflow: visible">
     <text x="0" :y="SY + 26" class="l">rank 2 送</text>
-    <text x="0" :y="RY + 26" class="l">rank 3 收</text>
+    <text x="0" :y="ry + 26" class="l">rank 3 收</text>
     <line x1="200" x2="1500" :y1="SY + 18" :y2="SY + 18" stroke="#aeacac" stroke-width="2" />
-    <line x1="200" x2="1500" :y1="RY + 18" :y2="RY + 18" stroke="#aeacac" stroke-width="2" />
+    <line x1="200" x2="1500" :y1="ry + 18" :y2="ry + 18" stroke="#aeacac" stroke-width="2" />
 
-    <rect x="420" :y="SY - 30" width="800" height="96" fill="#adf0c7" :fill-opacity="c >= 3 ? 0.5 : 0" stroke="#0f766e" stroke-width="2" stroke-dasharray="8 6" />
-    <text x="430" :y="SY - 40" class="s" style="fill: #0f766e">rank 2 的第 95 圈</text>
-    <rect x="440" :y="RY - 30" width="800" height="96" fill="#adf0c7" :fill-opacity="c >= 3 ? 0.5 : 0" stroke="#0f766e" stroke-width="2" stroke-dasharray="8 6" />
-    <text x="450" :y="RY + 88" class="s" style="fill: #0f766e">rank 3 的第 95 圈</text>
+    <rect :x="L(860, 420)" :y="L(36, 30)" :width="L(300, 800)" :height="L(86, 96)" fill="#adf0c7" :fill-opacity="c >= 3 ? 0.5 : 0" stroke="#0f766e" stroke-width="2" stroke-dasharray="8 6" />
+    <text :x="L(860, 420) + 10" :y="SY - 40" class="s" style="fill: #0f766e" :style="{ opacity: z }">rank 2 的第 95 圈</text>
+    <rect :x="L(886, 440)" :y="ry - L(24, 30)" :width="L(300, 800)" :height="L(86, 96)" fill="#adf0c7" :fill-opacity="c >= 3 ? 0.5 : 0" stroke="#0f766e" stroke-width="2" stroke-dasharray="8 6" />
+    <text :x="L(886, 440) + 10" :y="ry + 88" class="s" style="fill: #0f766e" :style="{ opacity: z }">rank 3 的第 95 圈</text>
 
     <g v-for="(s, i) in sends" :key="'s' + i" :style="{ opacity: shown(s.x, 1) }">
       <rect :x="s.x" :y="SY" :width="bw(s.big)" height="36" :fill="s.big ? '#6eea9e' : '#e7e7e7'" stroke="#1a1a1a" stroke-width="2" />
@@ -69,6 +73,10 @@ const caps = [
       <line :x1="sends[r.to].x + bw(sends[r.to].big) / 2" :y1="SY + 40" :x2="r.x + bw(r.big) / 2" :y2="RY - 4"
         stroke="#bbbbbb" stroke-width="2" stroke-dasharray="5 5" />
       <circle v-if="c >= 2" :cx="pk(r).x" :cy="pk(r).y" :r="r.big ? 9 : 6" fill="#0f766e" />
+    </g>
+    <g v-if="c < 2">
+      <rect :x="L(852, 330)" :y="ry" :width="L(22, 70)" height="36" fill="#6eea9e" stroke="#c0392b" stroke-width="3" />
+      <text :x="L(852, 330) + L(11, 35)" :y="ry - 14" text-anchor="middle" class="s" style="fill: #c0392b">提前開的接收</text>
     </g>
     <text x="230" :y="RY + 88" class="s" style="fill: #c0392b" :style="{ opacity: c >= 2 ? 1 : 0 }">第 94 圈</text>
 

@@ -11,7 +11,6 @@ const { $clicks } = useSlideContext()
 const part = computed(() => ($clicks.value < 6 ? 0 : $clicks.value < 11 ? 1 : 2))
 const st = (k) => ({
   opacity: part.value === k ? 1 : 0,
-  transform: part.value === k ? 'none' : part.value > k ? 'translateY(-40px)' : 'translateY(40px)',
   pointerEvents: part.value === k ? 'auto' : 'none',
 })
 </script>
@@ -26,5 +25,5 @@ const st = (k) => ({
 
 <style scoped>
 .ph-stack { display: grid; }
-.ph-layer { grid-area: 1 / 1; transition: opacity 0.7s ease, transform 0.7s ease; }
+.ph-layer { grid-area: 1 / 1; transition: opacity 0.25s ease; }
 </style>

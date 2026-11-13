@@ -10,7 +10,7 @@ import { useProgress, useClock, seg, clamp } from '../utils/tween.js'
 const { $clicks } = useSlideContext()
 const props = defineProps({ offset: { type: Number, default: 0 } })
 const c = computed(() => Math.max($clicks.value - props.offset, 0))
-const p = useProgress(c, 2200)
+const p = useProgress(c, 1000)
 const t = useClock()
 const SY = 60, RY = 250, LY1 = 400, LY2 = 470
 const sends = [{ x: 470, big: true }, { x: 640, big: false }, { x: 800, big: false }, { x: 960, big: false }, { x: 1290, big: true }]
@@ -20,7 +20,7 @@ const bw = (b) => (b ? 70 : 34)
 const shown = (x, k) => (c.value > k ? 1 : c.value === k ? clamp((p.value * 1500 + 200 - x) / 80, 0, 1) : 0)
 // a packet travelling from a send to its receive, looping
 const pk = (r) => {
-  const s = sends[r.to], u = ((t.value + r.to * 300) % 1600) / 1600
+  const s = sends[r.to], u = ((t.value + r.to * 200) % 1000) / 1000
   const x1 = s.x + bw(s.big) / 2, y1 = SY + 36, x2 = r.x + bw(r.big) / 2, y2 = RY
   return { x: x1 + (x2 - x1) * u, y: y1 + (y2 - y1) * u }
 }

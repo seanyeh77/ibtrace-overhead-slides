@@ -7,7 +7,7 @@ import { useProgress, useClock, seg } from '../utils/tween.js'
 // and the messages slide together; on step 4 the short pass loops and a counter runs.
 const { $clicks } = useSlideContext()
 const c = computed(() => $clicks.value)
-const p = useProgress(c, 1800)
+const p = useProgress(c, 1000)
 const t = useClock()
 const on = (k) => ({ opacity: c.value >= k ? (c.value === k ? seg(p.value, 0, 0.4) : 1) : 0 })
 const lu = [

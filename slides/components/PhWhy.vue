@@ -7,7 +7,7 @@ import { useProgress, clamp } from '../utils/tween.js'
 // each rank computes, then waits at each exchange until the slowest rank arrives.
 const { $clicks } = useSlideContext()
 const c = computed(() => $clicks.value)
-const p = useProgress(c, 3200)
+const p = useProgress(c, 1000)
 const work = computed(() => [
   [300, 250, 300],
   [c.value >= 4 ? 250 : 380, 200, 250],

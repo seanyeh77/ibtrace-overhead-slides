@@ -6,7 +6,7 @@ import { useProgress, seg, clamp } from '../utils/tween.js'
 // How a rank's anchors are set, from its own trace only.
 const { $clicks } = useSlideContext()
 const c = computed(() => Math.min($clicks.value, 5))
-const p = useProgress(c, 2400)
+const p = useProgress(c, 1000)
 const seq = ['A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C', 'A', 'B', 'C']
 const bytes = { A: 81920, B: 600, C: 640 }
 const col = { A: '#6eea9e', B: '#adf0c7', C: '#e7e7e7' }

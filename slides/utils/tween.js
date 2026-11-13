@@ -1,7 +1,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 // Progress 0 -> 1 over `dur` ms, restarted every time `src` changes (a click).
-export function useProgress(src, dur = 1500) {
+export function useProgress(src, dur = 1000) {
   const p = ref(1)
   let raf = 0
   const run = () => {

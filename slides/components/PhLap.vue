@@ -9,7 +9,7 @@ import { useProgress, seg } from '../utils/tween.js'
 const { $clicks } = useSlideContext()
 const props = defineProps({ offset: { type: Number, default: 0 } })
 const c = computed(() => Math.min(Math.max($clicks.value - props.offset, 0), 4))
-const p = useProgress(c, 2200)
+const p = useProgress(c, 1000)
 const R2 = 60, R3 = 190, LW = 300, A0 = 260
 const a2 = [0, 1, 2, 3, 4].map((i) => A0 + i * LW)
 const a3 = a2.map((x) => x + 26)

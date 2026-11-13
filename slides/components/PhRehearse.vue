@@ -6,7 +6,7 @@ import { useProgress, seg } from '../utils/tween.js'
 // Why the network calibration replays one pass of the communication.
 const { $clicks } = useSlideContext()
 const c = computed(() => $clicks.value)
-const p = useProgress(c, 1600)
+const p = useProgress(c, 1000)
 const on = (k) => ({ opacity: c.value >= k ? 1 : 0 })
 const bars = [
   { t: '目前設定', v: 100 },

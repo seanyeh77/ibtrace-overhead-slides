@@ -7,7 +7,7 @@ import { useProgress, seg } from '../utils/tween.js'
 // The fix: each rank's units slide together into one box per pass, then the passes are compared.
 const { $clicks } = useSlideContext()
 const c = computed(() => $clicks.value)
-const p = useProgress(c, 1400)
+const p = useProgress(c, 1000)
 const ranks = [
   { name: 'rank 0', note: '角落，2 個鄰居', u: 2 },
   { name: 'rank 1', note: '邊上，3 個鄰居', u: 3 },

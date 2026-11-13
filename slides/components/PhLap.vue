@@ -8,7 +8,7 @@ import { useProgress, seg } from '../utils/tween.js'
 // the slowest rank's time, take the median. Finally each rank uses ITS OWN range for that pass.
 const { $clicks } = useSlideContext()
 const props = defineProps({ offset: { type: Number, default: 0 } })
-const c = computed(() => Math.max($clicks.value - props.offset, 0))
+const c = computed(() => Math.min(Math.max($clicks.value - props.offset, 0), 4))
 const p = useProgress(c, 2200)
 const R2 = 60, R3 = 190, LW = 300, A0 = 260
 const a2 = [0, 1, 2, 3, 4].map((i) => A0 + i * LW)
@@ -87,6 +87,6 @@ const caps = [
       </g>
     </g>
     <text x="0" y="560" class="l" :style="{ fill: c >= 4 ? '#c0392b' : '#1a1a1a' }">{{ caps[Math.min(c, 4)] }}</text>
-    <text x="0" y="606" class="s m">Step {{ Math.min(c, 4) + 1 }} / 10　柱子 30 根代表 254 圈，高度與時間是示意</text>
+    <text x="0" y="606" class="s m">Step {{ Math.min(c, 4) + 7 }} / 16　柱子 30 根代表 254 圈，高度與時間是示意</text>
   </svg>
 </template>

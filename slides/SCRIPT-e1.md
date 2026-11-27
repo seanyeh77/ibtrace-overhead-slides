@@ -82,11 +82,32 @@ NUMA 的意思是：讀自己旁邊的記憶體快，讀遠處的慢。
 
 ---
 
-## 第 5 張：比較的綁法與落點
+## 第 5 張：第一段 - 8 種設定只有綁核有效
 
 **講稿**
 
-我們比較了好幾種綁法。這張表列出每種綁法用的 srun 參數，以及 rank 實際落在哪裡。參數都接在 srun 的 --cpu-bind= 後面。
+先看第一段的結果。
+
+我們在預設下試了 8 種設定：前三種改變 rank 放在哪裡，後五種是記憶體和通訊的參數。
+
+結果只有「綁在原地」有空間，5 個程式裡有 4 個明顯變快。擠到網卡旁全部變慢；cyclic 分配沒有空間；關閉同機共享記憶體、把 rendezvous 門檻調到 2 MB 都有害；兩個 glibc 記憶體門檻和 rendezvous 門檻 1 KB 都沒有差別。
+
+所以第二段把重點放在綁核上。
+
+**被問到時**
+
+- cyclic 不是綁核，是把 rank 輪流分到不同機器（`--distribution=cyclic`），CPU 一樣不綁。
+- 後五種是環境變數：`UCX_TLS=^sm`、`MALLOC_MMAP_THRESHOLD_=32 MiB`、`MALLOC_TRIM_THRESHOLD_=1 GiB`、`UCX_RNDV_THRESH=1kb`、`UCX_RNDV_THRESH=2mb`。
+- 後五種的基準是「綁在同一組位置、其他照預設」，前後配對比較；因為綁核本身的差異太大，不綁的話參數的小效果會被蓋過。這是設計上的限制。
+- 數字：關閉同機共享記憶體 allreduce −166 %、alltoall −5.9 %、BT −2.6 %；rendezvous 2 MB allreduce −57.7 %、alltoall −49.6 %；cyclic MG −16.1 %。出處：Project 的 `plan/2026-11-27_e1_job1_results.md`。
+
+---
+
+## 第 6 張：比較的綁法與落點
+
+**講稿**
+
+第二段比較了好幾種綁法。這張表列出每種綁法用的 srun 參數，以及 rank 實際落在哪裡。參數都接在 srun 的 --cpu-bind= 後面。
 
 依序綁核，是 Slurm 最常見的綁核寫法：每個 rank 依序綁到一顆核心，結果 16 個 rank 擠在每顆 CPU 的前 8 顆核。
 
@@ -119,27 +140,6 @@ NUMA 的意思是：讀自己旁邊的記憶體快，讀遠處的慢。
 - 「清單用完從頭再用」寫在 man page 的 `map_cpu` 段落，`map_ldom` 段落沒寫，所以每種綁法都在煙霧測試實際取樣確認落點，正式實驗每次執行也都檢查。
 - 綁在原地與擠到網卡旁只綁程式本身；srun 的綁法連 ibtrace 的包裝程式也一起綁。
 - 這幾種設計的目的是把「靠近網卡」和「擠在一起」兩個因素分開，第一段把它們混在一起了。
-
----
-
-## 第 6 張：第一段 - 8 種設定只有綁核有效
-
-**講稿**
-
-先看第一段的結果。
-
-我們在預設下試了 8 種設定：前三種改變 rank 放在哪裡，後五種是記憶體和通訊的參數。
-
-結果只有「綁在原地」有空間，5 個程式裡有 4 個明顯變快。擠到網卡旁全部變慢；cyclic 分配沒有空間；關閉同機共享記憶體、把 rendezvous 門檻調到 2 MB 都有害；兩個 glibc 記憶體門檻和 rendezvous 門檻 1 KB 都沒有差別。
-
-所以接下來的結果，都圍繞著綁核。
-
-**被問到時**
-
-- cyclic 不是綁核，是把 rank 輪流分到不同機器（`--distribution=cyclic`），CPU 一樣不綁。
-- 後五種是環境變數：`UCX_TLS=^sm`、`MALLOC_MMAP_THRESHOLD_=32 MiB`、`MALLOC_TRIM_THRESHOLD_=1 GiB`、`UCX_RNDV_THRESH=1kb`、`UCX_RNDV_THRESH=2mb`。
-- 後五種的基準是「綁在同一組位置、其他照預設」，前後配對比較；因為綁核本身的差異太大，不綁的話參數的小效果會被蓋過。這是設計上的限制。
-- 數字：關閉同機共享記憶體 allreduce −166 %、alltoall −5.9 %、BT −2.6 %；rendezvous 2 MB allreduce −57.7 %、alltoall −49.6 %；cyclic MG −16.1 %。出處：Project 的 `plan/2026-11-27_e1_job1_results.md`。
 
 ---
 

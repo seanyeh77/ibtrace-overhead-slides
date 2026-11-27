@@ -2,7 +2,7 @@
 layout: section
 number: 3
 chapter: Part 3 · 第二段
-question: 簡單的綁核規則能不能拿到同樣的收益？
+question: 第二段要比較哪些做法？
 ---
 
 # 第二段的設計
@@ -58,7 +58,7 @@ layout: textbook
 chapter: Part 3 · 第二段 · 3.2 收益估計
 ---
 
-# 估計只有實測的千分之一
+# 用第一段資料重算：估計只有千分之一
 
 | 程式 | 估計收益 | 實測收益 | 判定 |
 | --- | ---: | ---: | --- |

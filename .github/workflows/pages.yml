@@ -38,6 +38,7 @@ jobs:
       - run: npx slidev build final.md --base /ibtrace-overhead-slides/final/ --out dist/final
       - run: npx slidev build validation.md --base /ibtrace-overhead-slides/validation/ --out dist/validation
       - run: npx slidev build posthoc.md --base /ibtrace-overhead-slides/posthoc/ --out dist/posthoc
+      - run: npx slidev build e1.md --base /ibtrace-overhead-slides/e1/ --out dist/e1
       - run: node ../.github/scripts/slides-manifest.mjs dist
       - uses: actions/upload-pages-artifact@v3
         with:

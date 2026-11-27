@@ -1,6 +1,6 @@
 # ibtrace 報告簡報
 
-ibtrace 的四份報告簡報，都採 Textbook 版型，放在同一個 Slidev 專案 [slides/](slides/) 裡，共用版型與元件。
+ibtrace 的報告簡報，都採 Textbook 版型，放在同一個 Slidev 專案 [slides/](slides/) 裡，共用版型與元件。
 
 | 簡報 | 入口檔 | 內容 | 線上版 |
 | --- | --- | --- | --- |
@@ -10,6 +10,7 @@ ibtrace 的四份報告簡報，都採 Textbook 版型，放在同一個 Slidev 
 | 成果總整 | `final.md` | 只講最後的方法與成果，不提版本演進：問題與案例、方法（量測、模型、校準）、五類優化動作、評估方法、與傳統做法的比較、網卡設定的新動作、跨 NUMA 等發現、限制與未來工作，共 31 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/final/ |
 | 驗證細節 | `validation.md` | 最終評估怎麼做：一組的組成、三個 NPB 程式與五種情境、時間 T 的定義、實測 ΔT 與對照組、本研究與 counter、profiler 做法各自怎麼預測、四個指標的算法、18 組的完整結果，另含網格與 NPB 三個程式的概念及 class 的選擇理由，共 39 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/validation/ |
 | 事後分析 | `posthoc.md` | 第 9 階段在九個階段中的位置，以及 v6 的 LU 網卡組為什麼沒有預測（模型的 IndexError、重播校準的截斷、修法），用逐步動畫解釋為什麼切單位、模型怎麼找單位、兩個錯誤，以及為什麼要演練通訊來量網卡、演練實際怎麼做、錨點怎麼設定、第 95 圈怎麼選、順序差一格與四種修法（同一頁 24 步連續動畫），共 12 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/posthoc/ |
+| E1 實驗 | `e1.md` | 真實預設下的瓶頸：方向與判準、NUMA 與綁核、第一段的結果與缺口、第二段的設計（偵測器修正、收益估計、七種綁法）、現況與下一步；講稿在 `SCRIPT-e1.md`，共 30 張 | https://seanyeh77.github.io/ibtrace-overhead-slides/e1/ |
 
 Tracer Overhead 簡報中的 overhead 數字（0.7–4.5 µs、降至 18–43 %）含有 ring 的 page fault；預先配置 ring 之後的數字見 Counterfactual Attribution 第 36 張。
 
@@ -24,6 +25,7 @@ npx slidev extension.md          # 本機預覽 擴充與後續版本
 npx slidev final.md              # 本機預覽 成果總整
 npx slidev validation.md         # 本機預覽 驗證細節
 npx slidev posthoc.md            # 本機預覽 事後分析
+npx slidev e1.md                 # 本機預覽 E1 實驗
 npm run build                    # 輸出靜態網頁到 slides/dist
 ```
 
